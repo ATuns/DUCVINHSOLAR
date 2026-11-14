@@ -1,0 +1,8 @@
+{
+  "name": "Đức Vinh Solar - Năng Lượng Mặt Trời & Tiết Kiệm Điện",
+  "description": "Website giới thiệu sản phẩm năng lượng mặt trời, biến tần, pin lưu trữ và thiết bị tiết kiệm điện chính hãng Đức Vinh Solar TP.HCM.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
