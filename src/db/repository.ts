@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { eq } from 'drizzle-orm';
 import { db } from './index.ts';
 import {
@@ -27,6 +29,71 @@ import type {
   CompanyInfo,
 } from '../types/index.ts';
 
+interface LocalDiskStore {
+  categories: CategoryItem[];
+  brands: BrandItem[];
+  products: Product[];
+  projects: ProjectItem[];
+  blogPosts: BlogPost[];
+  inquiries: CustomerInquiry[];
+  companyInfo: CompanyInfo;
+}
+
+const isPostgresConfigured = (): boolean => Boolean(process.env.SQL_HOST);
+
+const getLocalStorePath = (): string => {
+  const dir = path.join(process.cwd(), 'data');
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  return path.join(dir, 'ducvinhsolar_db.json');
+};
+
+const readLocalDiskStore = (): LocalDiskStore => {
+  const filePath = getLocalStorePath();
+  if (!fs.existsSync(filePath)) {
+    const initial: LocalDiskStore = {
+      categories: INITIAL_CATEGORIES,
+      brands: INITIAL_BRANDS,
+      products: INITIAL_PRODUCTS,
+      projects: INITIAL_PROJECTS,
+      blogPosts: INITIAL_BLOG_POSTS,
+      inquiries: [],
+      companyInfo: INITIAL_COMPANY_INFO,
+    };
+    fs.writeFileSync(filePath, JSON.stringify(initial, null, 2), 'utf-8');
+    return initial;
+  }
+  try {
+    const raw = fs.readFileSync(filePath, 'utf-8');
+    const parsed = JSON.parse(raw);
+    return {
+      categories: Array.isArray(parsed.categories) && parsed.categories.length > 0 ? parsed.categories : INITIAL_CATEGORIES,
+      brands: Array.isArray(parsed.brands) && parsed.brands.length > 0 ? parsed.brands : INITIAL_BRANDS,
+      products: Array.isArray(parsed.products) && parsed.products.length > 0 ? parsed.products : INITIAL_PRODUCTS,
+      projects: Array.isArray(parsed.projects) && parsed.projects.length > 0 ? parsed.projects : INITIAL_PROJECTS,
+      blogPosts: Array.isArray(parsed.blogPosts) && parsed.blogPosts.length > 0 ? parsed.blogPosts : INITIAL_BLOG_POSTS,
+      inquiries: Array.isArray(parsed.inquiries) ? parsed.inquiries : [],
+      companyInfo: parsed.companyInfo ? { ...INITIAL_COMPANY_INFO, ...parsed.companyInfo } : INITIAL_COMPANY_INFO,
+    };
+  } catch {
+    return {
+      categories: INITIAL_CATEGORIES,
+      brands: INITIAL_BRANDS,
+      products: INITIAL_PRODUCTS,
+      projects: INITIAL_PROJECTS,
+      blogPosts: INITIAL_BLOG_POSTS,
+      inquiries: [],
+      companyInfo: INITIAL_COMPANY_INFO,
+    };
+  }
+};
+
+const writeLocalDiskStore = (store: LocalDiskStore): void => {
+  const filePath = getLocalStorePath();
+  fs.writeFileSync(filePath, JSON.stringify(store, null, 2), 'utf-8');
+};
+
 const safeParseJsonArray = <T>(raw: string | null | undefined, fallback: T[] = []): T[] => {
   if (!raw) return fallback;
   try {
@@ -38,6 +105,9 @@ const safeParseJsonArray = <T>(raw: string | null | undefined, fallback: T[] = [
 };
 
 export async function getAllCatalogState() {
+  if (!isPostgresConfigured()) {
+    return readLocalDiskStore();
+  }
   try {
     let catRows = await db.select().from(categories);
     if (catRows.length === 0) {
@@ -172,6 +242,10 @@ export async function getAllCatalogState() {
 }
 
 export async function seedInitialPostgresData() {
+  if (!isPostgresConfigured()) {
+    readLocalDiskStore();
+    return;
+  }
   try {
     for (const c of INITIAL_CATEGORIES) {
       await db
@@ -292,6 +366,14 @@ export async function seedInitialPostgresData() {
 }
 
 export async function upsertCategoryInPostgres(item: CategoryItem) {
+  if (!isPostgresConfigured()) {
+    const store = readLocalDiskStore();
+    const idx = store.categories.findIndex((c) => c.id === item.id);
+    if (idx >= 0) store.categories[idx] = item;
+    else store.categories.push(item);
+    writeLocalDiskStore(store);
+    return;
+  }
   try {
     await db
       .insert(categories)
@@ -318,6 +400,12 @@ export async function upsertCategoryInPostgres(item: CategoryItem) {
 }
 
 export async function deleteCategoryFromPostgres(id: string) {
+  if (!isPostgresConfigured()) {
+    const store = readLocalDiskStore();
+    store.categories = store.categories.filter((c) => c.id !== id);
+    writeLocalDiskStore(store);
+    return;
+  }
   try {
     await db.delete(categories).where(eq(categories.id, id));
   } catch (error) {
@@ -327,6 +415,14 @@ export async function deleteCategoryFromPostgres(id: string) {
 }
 
 export async function upsertBrandInPostgres(item: BrandItem) {
+  if (!isPostgresConfigured()) {
+    const store = readLocalDiskStore();
+    const idx = store.brands.findIndex((b) => b.id === item.id);
+    if (idx >= 0) store.brands[idx] = item;
+    else store.brands.push(item);
+    writeLocalDiskStore(store);
+    return;
+  }
   try {
     await db
       .insert(brands)
@@ -351,6 +447,12 @@ export async function upsertBrandInPostgres(item: BrandItem) {
 }
 
 export async function deleteBrandFromPostgres(id: string) {
+  if (!isPostgresConfigured()) {
+    const store = readLocalDiskStore();
+    store.brands = store.brands.filter((b) => b.id !== id);
+    writeLocalDiskStore(store);
+    return;
+  }
   try {
     await db.delete(brands).where(eq(brands.id, id));
   } catch (error) {
@@ -360,6 +462,14 @@ export async function deleteBrandFromPostgres(id: string) {
 }
 
 export async function upsertProductInPostgres(item: Product) {
+  if (!isPostgresConfigured()) {
+    const store = readLocalDiskStore();
+    const idx = store.products.findIndex((p) => p.id === item.id);
+    if (idx >= 0) store.products[idx] = item;
+    else store.products.unshift(item);
+    writeLocalDiskStore(store);
+    return;
+  }
   try {
     const imgs = Array.isArray(item.images) && item.images.length > 0
       ? item.images
@@ -421,6 +531,12 @@ export async function upsertProductInPostgres(item: Product) {
 }
 
 export async function deleteProductFromPostgres(id: string) {
+  if (!isPostgresConfigured()) {
+    const store = readLocalDiskStore();
+    store.products = store.products.filter((p) => p.id !== id);
+    writeLocalDiskStore(store);
+    return;
+  }
   try {
     await db.delete(products).where(eq(products.id, id));
   } catch (error) {
@@ -430,6 +546,14 @@ export async function deleteProductFromPostgres(id: string) {
 }
 
 export async function upsertProjectInPostgres(item: ProjectItem) {
+  if (!isPostgresConfigured()) {
+    const store = readLocalDiskStore();
+    const idx = store.projects.findIndex((p) => p.id === item.id);
+    if (idx >= 0) store.projects[idx] = item;
+    else store.projects.unshift(item);
+    writeLocalDiskStore(store);
+    return;
+  }
   try {
     const imgs = Array.isArray(item.images) && item.images.length > 0
       ? item.images
@@ -475,6 +599,12 @@ export async function upsertProjectInPostgres(item: ProjectItem) {
 }
 
 export async function deleteProjectFromPostgres(id: string) {
+  if (!isPostgresConfigured()) {
+    const store = readLocalDiskStore();
+    store.projects = store.projects.filter((p) => p.id !== id);
+    writeLocalDiskStore(store);
+    return;
+  }
   try {
     await db.delete(projects).where(eq(projects.id, id));
   } catch (error) {
@@ -484,6 +614,14 @@ export async function deleteProjectFromPostgres(id: string) {
 }
 
 export async function upsertBlogPostInPostgres(item: BlogPost) {
+  if (!isPostgresConfigured()) {
+    const store = readLocalDiskStore();
+    const idx = store.blogPosts.findIndex((b) => b.id === item.id);
+    if (idx >= 0) store.blogPosts[idx] = item;
+    else store.blogPosts.unshift(item);
+    writeLocalDiskStore(store);
+    return;
+  }
   try {
     const imgs = Array.isArray(item.images) && item.images.length > 0
       ? item.images
@@ -527,6 +665,12 @@ export async function upsertBlogPostInPostgres(item: BlogPost) {
 }
 
 export async function deleteBlogPostFromPostgres(id: string) {
+  if (!isPostgresConfigured()) {
+    const store = readLocalDiskStore();
+    store.blogPosts = store.blogPosts.filter((b) => b.id !== id);
+    writeLocalDiskStore(store);
+    return;
+  }
   try {
     await db.delete(blogPosts).where(eq(blogPosts.id, id));
   } catch (error) {
@@ -536,6 +680,14 @@ export async function deleteBlogPostFromPostgres(id: string) {
 }
 
 export async function upsertInquiryInPostgres(item: CustomerInquiry) {
+  if (!isPostgresConfigured()) {
+    const store = readLocalDiskStore();
+    const idx = store.inquiries.findIndex((i) => i.id === item.id);
+    if (idx >= 0) store.inquiries[idx] = item;
+    else store.inquiries.unshift(item);
+    writeLocalDiskStore(store);
+    return;
+  }
   try {
     await db
       .insert(inquiries)
@@ -568,6 +720,12 @@ export async function upsertInquiryInPostgres(item: CustomerInquiry) {
 }
 
 export async function deleteInquiryFromPostgres(id: string) {
+  if (!isPostgresConfigured()) {
+    const store = readLocalDiskStore();
+    store.inquiries = store.inquiries.filter((i) => i.id !== id);
+    writeLocalDiskStore(store);
+    return;
+  }
   try {
     await db.delete(inquiries).where(eq(inquiries.id, id));
   } catch (error) {
@@ -577,6 +735,12 @@ export async function deleteInquiryFromPostgres(id: string) {
 }
 
 export async function upsertCompanyInfoInPostgres(info: CompanyInfo) {
+  if (!isPostgresConfigured()) {
+    const store = readLocalDiskStore();
+    store.companyInfo = info;
+    writeLocalDiskStore(store);
+    return;
+  }
   try {
     await db
       .insert(companySettings)
@@ -632,6 +796,20 @@ export async function restoreAllStateInPostgres(payload: {
   inquiries?: CustomerInquiry[];
   companyInfo?: CompanyInfo;
 }) {
+  if (!isPostgresConfigured()) {
+    const current = readLocalDiskStore();
+    const next: LocalDiskStore = {
+      categories: Array.isArray(payload.categories) ? payload.categories : current.categories,
+      brands: Array.isArray(payload.brands) ? payload.brands : current.brands,
+      products: Array.isArray(payload.products) ? payload.products : current.products,
+      projects: Array.isArray(payload.projects) ? payload.projects : current.projects,
+      blogPosts: Array.isArray(payload.blogPosts) ? payload.blogPosts : current.blogPosts,
+      inquiries: Array.isArray(payload.inquiries) ? payload.inquiries : current.inquiries,
+      companyInfo: payload.companyInfo ? { ...current.companyInfo, ...payload.companyInfo } : current.companyInfo,
+    };
+    writeLocalDiskStore(next);
+    return;
+  }
   try {
     if (payload.mode === 'replace') {
       await db.delete(categories);
@@ -680,4 +858,3 @@ export async function restoreAllStateInPostgres(payload: {
     throw new Error('Failed to restore full state in database.', { cause: error });
   }
 }
-

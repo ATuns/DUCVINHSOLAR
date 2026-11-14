@@ -1,7 +1,7 @@
 import express from 'express';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { createServer as createViteServer } from 'vite';
 import { requireAuth, AuthRequest } from './src/middleware/auth.ts';
 import { getOrCreateUser, getUsers } from './src/db/users.ts';
 import {
@@ -62,7 +62,7 @@ async function startServer() {
     }
   });
 
-  // Public catalog state endpoint from PostgreSQL
+  // Public catalog state endpoint (PostgreSQL or local disk fallback on cPanel)
   app.get('/api/state', async (_req, res) => {
     try {
       const state = await getAllCatalogState();
@@ -74,7 +74,7 @@ async function startServer() {
     }
   });
 
-  // Public customer inquiry submission endpoint to PostgreSQL
+  // Public customer inquiry submission endpoint
   app.post('/api/inquiries', async (req, res) => {
     try {
       await upsertInquiryInPostgres(req.body);
@@ -86,7 +86,7 @@ async function startServer() {
     }
   });
 
-  // Categories CRUD in PostgreSQL
+  // Categories CRUD
   app.post('/api/categories', async (req, res) => {
     try {
       await upsertCategoryInPostgres(req.body);
@@ -107,7 +107,7 @@ async function startServer() {
     }
   });
 
-  // Brands CRUD in PostgreSQL
+  // Brands CRUD
   app.post('/api/brands', async (req, res) => {
     try {
       await upsertBrandInPostgres(req.body);
@@ -128,7 +128,7 @@ async function startServer() {
     }
   });
 
-  // Products CRUD in PostgreSQL
+  // Products CRUD
   app.post('/api/products', async (req, res) => {
     try {
       await upsertProductInPostgres(req.body);
@@ -149,7 +149,7 @@ async function startServer() {
     }
   });
 
-  // Projects CRUD in PostgreSQL
+  // Projects CRUD
   app.post('/api/projects', async (req, res) => {
     try {
       await upsertProjectInPostgres(req.body);
@@ -170,7 +170,7 @@ async function startServer() {
     }
   });
 
-  // Blog Posts CRUD in PostgreSQL
+  // Blog Posts CRUD
   app.post('/api/blog-posts', async (req, res) => {
     try {
       await upsertBlogPostInPostgres(req.body);
@@ -191,7 +191,7 @@ async function startServer() {
     }
   });
 
-  // Inquiries delete in PostgreSQL
+  // Inquiries delete
   app.delete('/api/inquiries/:id', async (req, res) => {
     try {
       await deleteInquiryFromPostgres(req.params.id);
@@ -202,7 +202,7 @@ async function startServer() {
     }
   });
 
-  // Company Info update in PostgreSQL
+  // Company Info update
   app.post('/api/company-info', async (req, res) => {
     try {
       await upsertCompanyInfoInPostgres(req.body);
@@ -213,7 +213,7 @@ async function startServer() {
     }
   });
 
-  // Bulk seed & backup restore in PostgreSQL
+  // Bulk seed & backup restore
   app.post('/api/seed', async (req, res) => {
     try {
       await restoreAllStateInPostgres({ ...req.body, mode: 'merge' });
@@ -234,14 +234,19 @@ async function startServer() {
     }
   });
 
-  if (process.env.NODE_ENV !== 'production') {
+  const distPath = path.join(__dirname, 'dist');
+  const isProd =
+    process.env.NODE_ENV === 'production' ||
+    (__filename.endsWith('.js') && fs.existsSync(path.join(distPath, 'index.html')));
+
+  if (!isProd) {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(__dirname, 'dist');
     app.use(express.static(distPath));
     app.get('*', (_req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
