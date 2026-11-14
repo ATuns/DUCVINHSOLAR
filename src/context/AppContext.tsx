@@ -482,29 +482,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAdminEditingProduct(null);
   };
 
-  // Helper functions to write to PostgreSQL (/api/*) & Firestore with structured error handling & automatic image compression
-  const postToPostgresApi = async (endpoint: string, body: unknown) => {
-    try {
-      await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-    } catch (err) {
-      console.warn(`PostgreSQL API sync warning (${endpoint}):`, err);
-    }
-  };
-
-  const deleteFromPostgresApi = async (endpoint: string) => {
-    try {
-      await fetch(endpoint, { method: 'DELETE' });
-    } catch (err) {
-      console.warn(`PostgreSQL API delete warning (${endpoint}):`, err);
-    }
-  };
-
+  // Helper functions to write to Firestore with structured error handling & automatic image compression
   const saveCategoryToCloud = async (cat: CategoryItem, orderIndex?: number) => {
-    void postToPostgresApi('/api/categories', cat);
     const path = `categories/${cat.id}`;
     try {
       const order =
@@ -518,7 +497,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const saveBrandToCloud = async (brand: BrandItem, orderIndex?: number) => {
-    void postToPostgresApi('/api/brands', brand);
     const path = `brands/${brand.id}`;
     try {
       const order =
@@ -532,7 +510,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const saveProductToCloud = async (prod: Product, orderIndex?: number) => {
-    void postToPostgresApi('/api/products', prod);
     const path = `products/${prod.id}`;
     try {
       const safeImages = await ensureFirestoreSafeImages(
@@ -561,7 +538,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const saveProjectToCloud = async (proj: ProjectItem, orderIndex?: number) => {
-    void postToPostgresApi('/api/projects', proj);
     const path = `projects/${proj.id}`;
     try {
       const safeImages = await ensureFirestoreSafeImages(
@@ -590,7 +566,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const saveBlogPostToCloud = async (post: BlogPost, orderIndex?: number) => {
-    void postToPostgresApi('/api/blog-posts', post);
     const path = `blogPosts/${post.id}`;
     try {
       const safeImages = await ensureFirestoreSafeImages(
@@ -619,7 +594,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const saveCompanyToCloud = async (info: CompanyInfo) => {
-    void postToPostgresApi('/api/company-info', info);
     const path = 'settings/companyInfo';
     try {
       await setDoc(doc(db, 'settings', 'companyInfo'), cleanForFirestore(info));
@@ -629,7 +603,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const saveInquiryToCloud = async (inq: CustomerInquiry) => {
-    void postToPostgresApi('/api/inquiries', inq);
     const path = `inquiries/${inq.id}`;
     try {
       await setDoc(doc(db, 'inquiries', inq.id), cleanForFirestore(inq));
@@ -653,52 +626,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     let cancelled = false;
 
     const initFirestoreSync = async () => {
-      // Load from Hosting Database (/api/state -> MySQL/SQLite on Linux Hosting or PostgreSQL on VPS)
-      try {
-        const pgRes = await fetch('/api/state');
-        if (pgRes.ok) {
-          const pgData = await pgRes.json();
-          const hasHostingData =
-            Array.isArray(pgData.categories) && pgData.categories.length > 0;
-          if (!hasHostingData) {
-            // Auto-seed the Linux Hosting database on very first visit
-            await postToPostgresApi('/api/seed', {
-              categories: categories.length > 0 ? categories : INITIAL_CATEGORIES,
-              brands: brands.length > 0 ? brands : INITIAL_BRANDS,
-              products: products.length > 0 ? products : INITIAL_PRODUCTS,
-              projects: projects.length > 0 ? projects : INITIAL_PROJECTS,
-              blogPosts: blogPosts.length > 0 ? blogPosts : INITIAL_BLOG_POSTS,
-              inquiries,
-              companyInfo: companyInfo || INITIAL_COMPANY_INFO,
-            });
-          } else if (!cancelled) {
-            if (Array.isArray(pgData.categories) && pgData.categories.length > 0) {
-              setCategories(pgData.categories);
-            }
-            if (Array.isArray(pgData.brands) && pgData.brands.length > 0) {
-              setBrands(pgData.brands);
-            }
-            if (Array.isArray(pgData.products) && pgData.products.length > 0) {
-              setProducts(pgData.products);
-            }
-            if (Array.isArray(pgData.projects) && pgData.projects.length > 0) {
-              setProjects(pgData.projects);
-            }
-            if (Array.isArray(pgData.blogPosts) && pgData.blogPosts.length > 0) {
-              setBlogPosts(pgData.blogPosts);
-            }
-            if (Array.isArray(pgData.inquiries) && pgData.inquiries.length > 0) {
-              setInquiries(pgData.inquiries);
-            }
-            if (pgData.companyInfo) {
-              setCompanyInfo((prev) => ({ ...prev, ...pgData.companyInfo }));
-            }
-          }
-        }
-      } catch (pgErr) {
-        console.warn('Hosting database /api/state load warning:', pgErr);
-      }
-
       try {
         const seedDocRef = doc(db, 'settings', 'seedMeta');
         const [seedSnap, catCheckSnap, brandCheckSnap, prodCheckSnap, projCheckSnap, blogCheckSnap] =
@@ -1198,10 +1125,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         if (onConfirmed) onConfirmed();
 
-        void deleteFromPostgresApi(`/api/categories/${encodeURIComponent(id)}`);
-        brandsToRemove.forEach((b) => void deleteFromPostgresApi(`/api/brands/${encodeURIComponent(b.id)}`));
-        productsToRemove.forEach((p) => void deleteFromPostgresApi(`/api/products/${encodeURIComponent(p.id)}`));
-
         try {
           await deleteDoc(doc(db, 'categories', id));
           await Promise.all([
@@ -1299,9 +1222,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           );
         }
         if (onConfirmed) onConfirmed();
-
-        void deleteFromPostgresApi(`/api/brands/${encodeURIComponent(id)}`);
-        productsToRemove.forEach((p) => void deleteFromPostgresApi(`/api/products/${encodeURIComponent(p.id)}`));
 
         try {
           await deleteDoc(doc(db, 'brands', id));
@@ -1456,7 +1376,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         if (onConfirmed) onConfirmed();
 
-        void deleteFromPostgresApi(`/api/products/${encodeURIComponent(id)}`);
         try {
           await deleteDoc(doc(db, 'products', id));
         } catch (error) {
@@ -1528,7 +1447,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setProjects((prev) => prev.filter((p) => p.id !== id));
         if (onConfirmed) onConfirmed();
 
-        void deleteFromPostgresApi(`/api/projects/${encodeURIComponent(id)}`);
         try {
           await deleteDoc(doc(db, 'projects', id));
         } catch (error) {
@@ -1592,7 +1510,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setBlogPosts((prev) => prev.filter((bp) => bp.id !== id));
         if (onConfirmed) onConfirmed();
 
-        void deleteFromPostgresApi(`/api/blog-posts/${encodeURIComponent(id)}`);
         try {
           await deleteDoc(doc(db, 'blogPosts', id));
         } catch (error) {
@@ -1694,20 +1611,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Force push all current state (categories, brands, products, projects, blogPosts, companyInfo) to Hosting Database & Cloud
+  // Force push all current state (categories, brands, products, projects, blogPosts, companyInfo) to Cloud
   const syncAllToCloud = async (): Promise<boolean> => {
     setIsSyncingCloud(true);
     try {
-      await postToPostgresApi('/api/restore', {
-        mode: 'replace',
-        categories,
-        brands,
-        products,
-        projects,
-        blogPosts,
-        inquiries,
-        companyInfo,
-      });
       await Promise.all([
         replaceCollectionInCloud('categories', categories),
         replaceCollectionInCloud('brands', brands),
@@ -1747,15 +1654,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           localStorage.removeItem(STORAGE_KEYS.BLOG_POSTS);
           localStorage.removeItem(STORAGE_KEYS.COMPANY);
 
-          await postToPostgresApi('/api/restore', {
-            mode: 'replace',
-            categories: INITIAL_CATEGORIES,
-            brands: INITIAL_BRANDS,
-            products: INITIAL_PRODUCTS,
-            projects: INITIAL_PROJECTS,
-            blogPosts: INITIAL_BLOG_POSTS,
-            companyInfo: INITIAL_COMPANY_INFO,
-          });
           await Promise.all([
             replaceCollectionInCloud('categories', INITIAL_CATEGORIES),
             replaceCollectionInCloud('brands', INITIAL_BRANDS),
@@ -2073,17 +1971,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCompanyInfo(finalCompanyInfo);
       setInquiries(finalInquiries);
 
-      // Sync all restored collections to Linux Hosting Database (/api/restore) & Cloud immediately
-      await postToPostgresApi('/api/restore', {
-        mode,
-        categories: finalCategories,
-        brands: finalBrands,
-        products: finalProducts,
-        projects: finalProjects,
-        blogPosts: finalBlogPosts,
-        inquiries: finalInquiries,
-        companyInfo: finalCompanyInfo,
-      });
+      // Sync all restored collections to Firebase Cloud so all devices update immediately
       await Promise.all([
         replaceCollectionInCloud('categories', finalCategories),
         replaceCollectionInCloud('brands', finalBrands),
