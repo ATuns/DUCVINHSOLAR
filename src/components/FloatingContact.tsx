@@ -24,7 +24,7 @@ export const FloatingContact: React.FC = () => {
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="w-10 h-10 rounded-full bg-white text-slate-700 shadow-md border border-slate-200 flex items-center justify-center hover:bg-slate-100 transition-colors"
+          className="w-10 h-10 rounded-full glass-pill text-slate-700 flex items-center justify-center hover:bg-white/95 transition-all hover:scale-105"
           title="Lên đầu trang"
           aria-label="Lên đầu trang"
         >
@@ -37,10 +37,10 @@ export const FloatingContact: React.FC = () => {
         href={companyInfo.warehouseMapUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-slate-900/95 hover:bg-slate-800 text-white border border-slate-700 shadow-lg transition-all hover:scale-105 text-xs"
+        className="flex items-center gap-2 px-3.5 py-2 rounded-full glass-bubble-dark text-white transition-all hover:scale-105 text-xs"
         title="Mở bản đồ Google Maps Kho Tổng"
       >
-        <div className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 font-extrabold text-[10px] flex items-center justify-center">
+        <div className="w-5 h-5 rounded-full bg-emerald-400 text-slate-950 font-extrabold text-[10px] flex items-center justify-center shadow-xs">
           Map
         </div>
         <div className="flex flex-col text-left">
@@ -54,7 +54,7 @@ export const FloatingContact: React.FC = () => {
         href={`https://zalo.me/${companyInfo.hotlineZalo}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="group relative flex items-center gap-2 px-4 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl shadow-emerald-900/30 transition-all hover:scale-105"
+        className="group relative flex items-center gap-2 px-4 py-2.5 rounded-full bg-emerald-600/85 hover:bg-emerald-600 backdrop-blur-xl border border-white/50 text-white shadow-[0_12px_28px_rgba(5,150,105,0.38),inset_0_1.5px_2px_rgba(255,255,255,0.65)] transition-all hover:scale-105"
         title={`Chat Zalo: ${companyInfo.hotlineZalo}`}
       >
         {/* Pulsing ring indicator */}
@@ -64,7 +64,7 @@ export const FloatingContact: React.FC = () => {
         </span>
 
         {/* Zalo icon representation */}
-        <div className="w-6 h-6 rounded-full bg-white text-emerald-700 font-extrabold text-[11px] flex items-center justify-center tracking-tighter">
+        <div className="w-6 h-6 rounded-full bg-white text-emerald-700 font-extrabold text-[11px] flex items-center justify-center tracking-tighter shadow-xs">
           Zalo
         </div>
         <div className="flex flex-col text-left">

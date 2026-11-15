@@ -141,10 +141,10 @@ export const ProductCatalog: React.FC = () => {
   };
 
   return (
-    <section id="products-section" className="pt-8 pb-16 sm:pt-10 sm:pb-20 bg-slate-50 border-b border-slate-200">
+    <section id="products-section" className="pt-6 pb-14 sm:pt-8 sm:pb-16 bg-transparent">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Top Compact Welcome & Search Header */}
-        <div className="bg-gradient-to-r from-emerald-950 via-emerald-900 to-teal-950 rounded-2xl p-6 sm:p-8 text-white shadow-lg mb-6">
+        {/* Top Compact Welcome & Search Header in Frosted Glass Bubble */}
+        <div className="glass-bubble-dark rounded-[2rem] p-6 sm:p-8 text-white mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div>
               <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-emerald-300 mb-2">
@@ -164,9 +164,9 @@ export const ProductCatalog: React.FC = () => {
 
             {/* Quick Search Box + Admin Manage Button */}
             <div className="w-full lg:w-96 shrink-0 flex flex-col gap-2.5 relative">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 <div className="relative flex-1">
-                  <Search className="w-4 h-4 text-emerald-600 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <Search className="w-4 h-4 text-emerald-700 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="text"
                     placeholder="Gõ tên SP, hãng (SolaX, Deye...), công suất..."
@@ -178,13 +178,13 @@ export const ProductCatalog: React.FC = () => {
                         scrollToResults();
                       }
                     }}
-                    className="w-full pl-10 pr-14 py-3 text-xs sm:text-sm bg-white text-slate-900 placeholder:text-slate-400 border-2 border-emerald-400 focus:border-emerald-300 rounded-xl focus:outline-hidden shadow-sm font-medium"
+                    className="w-full pl-10 pr-14 py-3 text-xs sm:text-sm bg-white/85 backdrop-blur-xl text-slate-900 placeholder:text-slate-500 border border-white/90 focus:bg-white rounded-full focus:outline-hidden shadow-[inset_0_1px_2px_rgba(255,255,255,0.9),0_8px_20px_rgba(0,0,0,0.12)] font-medium"
                   />
                   {searchQuery && (
                     <button
                       type="button"
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 px-2 py-1 text-[11px] bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-700 rounded-md font-bold transition-colors"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 text-[11px] bg-slate-100/90 hover:bg-rose-100 text-slate-600 hover:text-rose-700 rounded-full font-bold transition-colors"
                     >
                       Xóa
                     </button>
@@ -193,7 +193,7 @@ export const ProductCatalog: React.FC = () => {
                 <button
                   type="button"
                   onClick={scrollToResults}
-                  className="px-4 py-3 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-extrabold text-xs sm:text-sm rounded-xl shrink-0 shadow-sm transition-colors flex items-center gap-1.5"
+                  className="px-5 py-3 bg-emerald-400/90 hover:bg-emerald-300 text-emerald-950 font-extrabold text-xs sm:text-sm rounded-full shrink-0 border border-white/60 shadow-[0_6px_16px_rgba(16,185,129,0.3),inset_0_1px_1px_rgba(255,255,255,0.8)] transition-all flex items-center gap-1.5"
                 >
                   <Search className="w-4 h-4" />
                   <span>Tìm</span>
@@ -202,7 +202,7 @@ export const ProductCatalog: React.FC = () => {
 
               {/* Instant Live Search Results Preview Dropdown */}
               {searchQuery.trim() !== '' && (
-                <div className="bg-white text-slate-900 rounded-xl p-3 shadow-2xl border-2 border-emerald-500 max-h-80 overflow-y-auto z-30">
+                <div className="bg-white/90 backdrop-blur-2xl text-slate-900 rounded-3xl p-3.5 shadow-2xl border border-white/90 max-h-80 overflow-y-auto z-30">
                   <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 text-xs">
                     <span className="font-bold text-emerald-800">
                       Kết quả tìm kiếm cho &ldquo;{searchQuery}&rdquo;: ({filteredProducts.length} SP)
@@ -264,8 +264,8 @@ export const ProductCatalog: React.FC = () => {
 
         {/* ================= DANH SÁCH SẢN PHẨM ================= */}
         <div id="product-results-grid">
-          {/* Simple Active Filter & Count Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-5 pb-3 border-b border-slate-200">
+          {/* Simple Active Filter & Count Bar in Frosted Bubble */}
+          <div className="glass-bubble rounded-full px-5 py-3 flex flex-wrap items-center justify-between gap-3 mb-6">
             <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
               <span className="text-emerald-800 font-bold">
                 {currentCategoryLabel}
@@ -277,7 +277,7 @@ export const ProductCatalog: React.FC = () => {
               {searchQuery.trim() !== '' && (
                 <>
                   <ChevronRight className="w-4 h-4 text-slate-400" />
-                  <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md font-bold text-xs">
+                  <span className="px-2.5 py-0.5 bg-emerald-100/80 text-emerald-800 rounded-full font-bold text-xs">
                     Từ khóa: &ldquo;{searchQuery}&rdquo;
                   </span>
                 </>
@@ -292,7 +292,7 @@ export const ProductCatalog: React.FC = () => {
                     setInStockOnly(false);
                     setProductPage(1);
                   }}
-                  className="ml-1 px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 rounded-lg flex items-center gap-1 transition-colors"
+                  className="ml-1 px-3 py-1 text-xs font-semibold text-emerald-800 hover:text-emerald-950 glass-pill rounded-full flex items-center gap-1 transition-all"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>Xem tất cả</span>
@@ -301,7 +301,7 @@ export const ProductCatalog: React.FC = () => {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-600 select-none">
+              <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700 select-none">
                 <input
                   type="checkbox"
                   checked={inStockOnly}
@@ -317,7 +317,7 @@ export const ProductCatalog: React.FC = () => {
               {isAdmin && (
                 <button
                   onClick={() => openAdminTab('inventory')}
-                  className="px-3 py-1.5 text-xs font-bold text-emerald-900 bg-emerald-100 hover:bg-emerald-200 rounded-lg flex items-center gap-1 transition-colors"
+                  className="px-3.5 py-1.5 text-xs font-bold text-emerald-900 bg-emerald-100/85 hover:bg-emerald-200 rounded-full flex items-center gap-1 transition-colors border border-emerald-300/60"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Thêm / Quản Lý Sản Phẩm</span>
@@ -333,7 +333,7 @@ export const ProductCatalog: React.FC = () => {
           </div>
 
           {filteredProducts.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center max-w-lg mx-auto">
+            <div className="glass-bubble rounded-3xl p-12 text-center max-w-lg mx-auto">
               <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4">
                 <Search className="w-6 h-6" />
               </div>
@@ -352,14 +352,14 @@ export const ProductCatalog: React.FC = () => {
                     setInStockOnly(false);
                     setProductPage(1);
                   }}
-                  className="px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors"
+                  className="px-5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-full transition-colors shadow-sm"
                 >
                   Xem tất cả sản phẩm
                 </button>
                 {isAdmin && (
                   <button
                     onClick={() => openAdminTab('inventory')}
-                    className="px-4 py-2 text-xs font-semibold text-emerald-800 bg-emerald-100 hover:bg-emerald-200 rounded-lg transition-colors"
+                    className="px-5 py-2 text-xs font-semibold text-emerald-800 bg-emerald-100 hover:bg-emerald-200 rounded-full transition-colors"
                   >
                     + Thêm sản phẩm ngay
                   </button>
@@ -380,10 +380,10 @@ export const ProductCatalog: React.FC = () => {
                     <div
                       key={product.id}
                       onClick={() => setSelectedProduct(product)}
-                      className="group bg-white rounded-2xl border border-slate-200/90 overflow-hidden hover:border-emerald-500 hover:shadow-xl transition-all duration-200 flex flex-col cursor-pointer"
+                      className="group glass-bubble rounded-[1.85rem] p-3 hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer"
                     >
-                      {/* Large, High-Clarity Studio Image Showcase */}
-                      <div className="relative h-64 sm:h-72 bg-white overflow-hidden border-b border-slate-100 flex items-center justify-center p-3">
+                      {/* Large, High-Clarity Studio Image Showcase inside Bubble Frame */}
+                      <div className="relative h-64 sm:h-72 bg-white/85 backdrop-blur-md rounded-[1.35rem] overflow-hidden border border-white/95 shadow-[inset_0_1px_2px_rgba(255,255,255,0.9)] flex items-center justify-center p-3">
                         <ProductSvgThumbnail
                           type={product.svgType}
                           imageUrl={imgList[0] || product.imageUrl}
@@ -393,7 +393,7 @@ export const ProductCatalog: React.FC = () => {
                         />
 
                         {/* Stock status indicator badge */}
-                        <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-md text-[11px] font-semibold flex items-center gap-1.5 shadow-xs border border-slate-200/80">
+                        <div className="absolute top-3 left-3 glass-pill px-3 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5">
                           {product.stock > 10 ? (
                             <>
                               <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
@@ -461,9 +461,9 @@ export const ProductCatalog: React.FC = () => {
                       </div>
 
                       {/* Card Body */}
-                      <div className="p-5 flex-1 flex flex-col justify-between bg-white">
+                      <div className="px-3 pt-4 pb-2 flex-1 flex flex-col justify-between">
                         <div>
-                          {/* Unboxed clean metadata (Zero-pill discipline) */}
+                          {/* Unboxed clean metadata */}
                           <div className="flex items-center justify-between gap-2 text-xs text-slate-500 mb-1.5">
                             <div className="flex items-center gap-2 min-w-0">
                               <span className="font-bold text-emerald-700 uppercase tracking-wide truncate">
@@ -490,7 +490,7 @@ export const ProductCatalog: React.FC = () => {
                           )}
 
                           {/* Highlights Specs Summary */}
-                          <div className="mt-3.5 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-700">
+                          <div className="mt-3.5 pt-3 border-t border-emerald-900/10 space-y-1.5 text-xs text-slate-700">
                             {(Array.isArray(product.specs) ? product.specs : []).slice(0, 4).map((spec, idx) => (
                               <div key={idx} className="flex items-start justify-between gap-2">
                                 {spec?.value ? (
@@ -512,13 +512,13 @@ export const ProductCatalog: React.FC = () => {
                         </div>
 
                         {/* Bottom Action Footer */}
-                        <div className="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <div className="mt-4 pt-3 border-t border-emerald-900/10 flex items-center justify-between gap-2">
                           <span className="text-xs font-bold text-emerald-700 flex items-center gap-1 group-hover:underline">
                             <span>Xem ảnh lớn &amp; cấu hình chi tiết</span>
                             <ChevronRight className="w-4 h-4" />
                           </span>
 
-                          <span className="px-3 py-1.5 text-xs font-semibold text-emerald-900 bg-emerald-100 group-hover:bg-emerald-600 group-hover:text-white rounded-lg transition-colors flex items-center gap-1 shrink-0">
+                          <span className="px-3.5 py-1.5 text-xs font-semibold text-emerald-900 glass-pill group-hover:bg-emerald-600 group-hover:text-white rounded-full transition-all flex items-center gap-1 shrink-0">
                             <Eye className="w-3.5 h-3.5" />
                             <span>Chi Tiết</span>
                           </span>
@@ -529,10 +529,10 @@ export const ProductCatalog: React.FC = () => {
                 })}
               </div>
 
-              {/* Product Pagination Controls (shown when filteredProducts > 9) */}
+              {/* Product Pagination Controls in Frosted Bubble */}
               {filteredProducts.length > PRODUCTS_PER_PAGE && (
-                <div className="mt-8 bg-white rounded-xl border border-slate-200 p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
-                  <span className="text-xs sm:text-sm text-slate-600">
+                <div className="mt-8 glass-bubble rounded-full px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <span className="text-xs sm:text-sm text-slate-700">
                     Trang sản phẩm <strong className="text-emerald-800">{safeProductPage} / {totalProductPages}</strong> (Hiển thị {(safeProductPage - 1) * PRODUCTS_PER_PAGE + 1}–{Math.min(safeProductPage * PRODUCTS_PER_PAGE, filteredProducts.length)} / <strong>{filteredProducts.length}</strong> sản phẩm)
                   </span>
 
@@ -544,7 +544,7 @@ export const ProductCatalog: React.FC = () => {
                         setProductPage(p => Math.max(1, p - 1));
                         scrollToResults();
                       }}
-                      className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 disabled:opacity-40 disabled:pointer-events-none flex items-center gap-1 transition-colors"
+                      className="px-3.5 py-1.5 text-xs font-bold rounded-full glass-pill hover:bg-emerald-50 text-slate-700 disabled:opacity-40 disabled:pointer-events-none flex items-center gap-1 transition-all"
                     >
                       <ChevronLeft className="w-4 h-4" />
                       <span>Trang trước</span>
@@ -566,10 +566,10 @@ export const ProductCatalog: React.FC = () => {
                             setProductPage(item);
                             scrollToResults();
                           }}
-                          className={`w-8 h-8 rounded-lg text-xs font-bold transition-colors ${
+                          className={`w-8 h-8 rounded-full text-xs font-bold transition-all ${
                             safeProductPage === item
-                              ? 'bg-emerald-700 text-white shadow-xs'
-                              : 'bg-slate-100 text-slate-700 hover:bg-emerald-50 hover:text-emerald-800'
+                              ? 'bg-emerald-600 text-white shadow-sm'
+                              : 'glass-pill text-slate-700 hover:bg-emerald-50 hover:text-emerald-800'
                           }`}
                         >
                           {item}
@@ -584,7 +584,7 @@ export const ProductCatalog: React.FC = () => {
                         setProductPage(p => Math.min(totalProductPages, p + 1));
                         scrollToResults();
                       }}
-                      className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 disabled:opacity-40 disabled:pointer-events-none flex items-center gap-1 transition-colors"
+                      className="px-3.5 py-1.5 text-xs font-bold rounded-full glass-pill hover:bg-emerald-50 text-slate-700 disabled:opacity-40 disabled:pointer-events-none flex items-center gap-1 transition-all"
                     >
                       <span>Trang sau</span>
                       <ChevronRight className="w-4 h-4" />

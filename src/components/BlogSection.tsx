@@ -265,11 +265,11 @@ export const BlogSection: React.FC = () => {
   return (
     <section
       id="blog-section"
-      className="py-16 sm:py-20 bg-white border-t border-slate-200 overflow-hidden"
+      className="py-12 sm:py-16 bg-transparent overflow-hidden"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header + Slider Navigation Controls */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5 mb-8">
+        {/* Section Header + Slider Navigation Controls in Frosted Bubble */}
+        <div className="glass-bubble rounded-[2rem] p-6 sm:p-8 flex flex-col lg:flex-row lg:items-end justify-between gap-5 mb-6">
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 tracking-wider uppercase mb-2">
               <BookOpen className="w-4 h-4 text-emerald-600" />
@@ -289,7 +289,7 @@ export const BlogSection: React.FC = () => {
               <button
                 type="button"
                 onClick={handleOpenAddBlog}
-                className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition-colors"
+                className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-full shadow-xs flex items-center gap-1.5 transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 <span>Thêm Bài Viết Mới</span>
@@ -300,7 +300,7 @@ export const BlogSection: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleSlide('left')}
-                className="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs"
+                className="px-4 py-2.5 rounded-full glass-pill hover:bg-emerald-600 hover:text-white text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all"
                 title="Trượt sang trái"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -309,7 +309,7 @@ export const BlogSection: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleSlide('right')}
-                className="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs"
+                className="px-4 py-2.5 rounded-full glass-pill hover:bg-emerald-600 hover:text-white text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all"
                 title="Trượt sang phải"
               >
                 <span>Trượt phải</span>
@@ -324,10 +324,10 @@ export const BlogSection: React.FC = () => {
           <button
             type="button"
             onClick={() => setSelectedCategory('all')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
+            className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
               selectedCategory === 'all'
-                ? 'bg-emerald-700 text-white shadow-2xs'
-                : 'bg-slate-100 text-slate-700 hover:bg-emerald-50 hover:text-emerald-800'
+                ? 'bg-emerald-600 text-white shadow-sm'
+                : 'glass-pill text-slate-700 hover:text-emerald-800'
             }`}
           >
             Tất Cả Bài Viết ({(blogPosts || []).length})
@@ -343,10 +343,10 @@ export const BlogSection: React.FC = () => {
                 key={cat}
                 type="button"
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
+                className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
                   isSelected
-                    ? 'bg-emerald-700 text-white shadow-2xs'
-                    : 'bg-slate-100 text-slate-700 hover:bg-emerald-50 hover:text-emerald-800'
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'glass-pill text-slate-700 hover:text-emerald-800'
                 }`}
               >
                 {cat} ({count})
@@ -570,11 +570,11 @@ export const BlogSection: React.FC = () => {
                   <article
                     key={post.id}
                     onClick={() => handleOpenPost(post)}
-                    className="snap-start shrink-0 w-[86vw] sm:w-[360px] lg:w-[390px] bg-white rounded-2xl border border-slate-200/90 hover:border-emerald-500 hover:shadow-xl transition-all duration-200 flex flex-col justify-between overflow-hidden cursor-pointer group"
+                    className="snap-start shrink-0 w-[86vw] sm:w-[360px] lg:w-[390px] glass-bubble rounded-[1.85rem] p-3 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden cursor-pointer group"
                   >
                     <div>
                       {/* Card Cover Thumbnail */}
-                      <div className="relative aspect-16/10 bg-slate-100 overflow-hidden border-b border-slate-100">
+                      <div className="relative aspect-16/10 rounded-[1.35rem] bg-slate-100 overflow-hidden border border-white/90">
                         {coverImg ? (
                           <img
                             src={coverImg}
@@ -587,7 +587,7 @@ export const BlogSection: React.FC = () => {
 
                         {/* Multi-photo badge if more than 1 image */}
                         {postImages.length > 1 && (
-                          <div className="absolute bottom-2.5 right-2.5 bg-slate-900/80 text-white px-2 py-0.5 rounded-md text-[11px] font-semibold flex items-center gap-1">
+                          <div className="absolute bottom-2.5 right-2.5 bg-slate-900/80 text-white px-2.5 py-0.5 rounded-full text-[11px] font-semibold flex items-center gap-1">
                             <ImageIcon className="w-3 h-3 text-emerald-300" />
                             <span>{postImages.length} ảnh</span>
                           </div>
@@ -599,7 +599,7 @@ export const BlogSection: React.FC = () => {
                             <button
                               type="button"
                               onClick={(e) => handleOpenEditBlog(post, e)}
-                              className="px-2.5 py-1 rounded-md bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold shadow-sm flex items-center gap-1 transition-colors"
+                              className="px-2.5 py-1 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold shadow-sm flex items-center gap-1 transition-colors"
                               title="Chỉnh sửa bài viết này"
                             >
                               <Edit2 className="w-3 h-3" />
@@ -608,7 +608,7 @@ export const BlogSection: React.FC = () => {
                             <button
                               type="button"
                               onClick={(e) => handleDeleteBlog(post, e)}
-                              className="px-2.5 py-1 rounded-md bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold shadow-sm flex items-center gap-1 transition-colors"
+                              className="px-2.5 py-1 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold shadow-sm flex items-center gap-1 transition-colors"
                               title="Xóa bài viết này"
                             >
                               <Trash2 className="w-3 h-3" />
@@ -619,7 +619,7 @@ export const BlogSection: React.FC = () => {
 
                         {/* Hover Read Overlay */}
                         <div className="absolute inset-0 bg-emerald-950/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                          <span className="px-3.5 py-2 rounded-lg bg-white/95 text-emerald-900 text-xs font-bold shadow-md flex items-center gap-1.5">
+                          <span className="px-4 py-2 rounded-full bg-white/95 text-emerald-900 text-xs font-bold shadow-md flex items-center gap-1.5">
                             <Eye className="w-4 h-4 text-emerald-700" />
                             <span>Ấn Vào Xem Bài Viết</span>
                           </span>
@@ -627,9 +627,9 @@ export const BlogSection: React.FC = () => {
                       </div>
 
                       {/* Card Body */}
-                      <div className="p-5">
+                      <div className="px-2.5 pt-4 pb-2">
                         {/* Unboxed Metadata */}
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 mb-2.5">
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 mb-2">
                           <span className="font-bold text-emerald-700">{post.category}</span>
                           <span aria-hidden="true">·</span>
                           <span className="flex items-center gap-1">
@@ -649,20 +649,20 @@ export const BlogSection: React.FC = () => {
                         </h3>
 
                         {/* Summary */}
-                        <p className="text-xs sm:text-sm text-slate-600 mt-2.5 line-clamp-3 leading-relaxed">
+                        <p className="text-xs sm:text-sm text-slate-600 mt-2 line-clamp-3 leading-relaxed">
                           {post.summary}
                         </p>
                       </div>
                     </div>
 
                     {/* Card Footer */}
-                    <div className="px-5 pb-5 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                    <div className="px-2.5 pb-2 pt-3 border-t border-emerald-900/10 flex items-center justify-between gap-2">
                       <span className="text-xs text-slate-500 flex items-center gap-1.5 truncate">
                         <User className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                         <span className="truncate">{post.author}</span>
                       </span>
 
-                      <span className="text-xs font-bold text-emerald-700 group-hover:text-emerald-900 flex items-center gap-1 shrink-0 group-hover:underline">
+                      <span className="px-3 py-1 rounded-full glass-pill text-xs font-bold text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white flex items-center gap-1 shrink-0 transition-all">
                         <span>Đọc bài viết</span>
                         <ChevronRight className="w-4 h-4" />
                       </span>

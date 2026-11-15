@@ -6,11 +6,11 @@ export const CompanyProfile: React.FC = () => {
   const { companyInfo } = useApp();
 
   return (
-    <section id="company-section" className="py-16 sm:py-20 bg-white border-t border-slate-200">
+    <section id="company-section" className="py-10 sm:py-14 bg-transparent">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Heading */}
-        <div className="max-w-3xl mb-12">
-          <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 tracking-wider uppercase mb-2">
+        <div className="glass-bubble rounded-[2rem] p-6 sm:p-8 mb-8 max-w-4xl">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-pill text-xs font-semibold text-emerald-700 tracking-wider uppercase mb-3">
             <Building2 className="w-4 h-4 text-emerald-600" />
             <span>Pháp Lý &amp; Thông Tin Doanh Nghiệp</span>
           </div>
@@ -25,8 +25,8 @@ export const CompanyProfile: React.FC = () => {
         {/* Corporate Legal Card & Representative Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Main Legal Card */}
-          <div className="lg:col-span-7 bg-slate-50 rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs">
-            <div className="flex items-start justify-between pb-6 border-b border-slate-200 gap-4">
+          <div className="lg:col-span-7 glass-bubble rounded-[2rem] p-6 sm:p-8">
+            <div className="flex items-start justify-between pb-6 border-b border-white/60 gap-4">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">
                   Pháp nhân chính thức
@@ -40,7 +40,7 @@ export const CompanyProfile: React.FC = () => {
               </div>
 
               {/* Status Badge */}
-              <div className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-300 flex items-center gap-1.5 shrink-0">
+              <div className="px-3.5 py-1.5 rounded-full bg-emerald-100/80 backdrop-blur-md text-emerald-800 text-xs font-bold border border-emerald-300/80 shadow-xs flex items-center gap-1.5 shrink-0">
                 <span className="w-2 h-2 rounded-full bg-emerald-600" />
                 <span>{companyInfo.status}</span>
               </div>
@@ -48,7 +48,7 @@ export const CompanyProfile: React.FC = () => {
 
             {/* Grid of Legal Information */}
             <div className="mt-6 space-y-4 text-xs">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2 border-b border-slate-200/70">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2.5 border-b border-white/60">
                 <span className="font-semibold text-slate-500 flex items-center gap-1.5">
                   <FileCheck className="w-4 h-4 text-emerald-600 shrink-0" />
                   Mã số thuế:
@@ -58,7 +58,7 @@ export const CompanyProfile: React.FC = () => {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2 border-b border-slate-200/70">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2.5 border-b border-white/60">
                 <span className="font-semibold text-slate-500 flex items-center gap-1.5">
                   <UserCheck className="w-4 h-4 text-emerald-600 shrink-0" />
                   Người đại diện:
@@ -68,7 +68,7 @@ export const CompanyProfile: React.FC = () => {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2 border-b border-slate-200/70">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2.5 border-b border-white/60">
                 <span className="font-semibold text-slate-500 flex items-center gap-1.5">
                   <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
                   Địa chỉ đăng ký thuế:
@@ -78,7 +78,7 @@ export const CompanyProfile: React.FC = () => {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2 border-b border-slate-200/70">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2.5 border-b border-white/60">
                 <span className="font-semibold text-slate-500 flex items-center gap-1.5">
                   <Building2 className="w-4 h-4 text-emerald-600 shrink-0" />
                   Địa chỉ hoạt động:
@@ -88,7 +88,7 @@ export const CompanyProfile: React.FC = () => {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2 border-b border-slate-200/70">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2.5 border-b border-white/60">
                 <span className="font-semibold text-slate-500 flex items-center gap-1.5">
                   <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
                   Địa chỉ Kho tổng:
@@ -108,7 +108,7 @@ export const CompanyProfile: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2 border-b border-slate-200/70">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2.5 border-b border-white/60">
                 <span className="font-semibold text-slate-500 flex items-center gap-1.5">
                   <Phone className="w-4 h-4 text-emerald-600 shrink-0" />
                   Hotline &amp; Zalo chính:
@@ -136,10 +136,10 @@ export const CompanyProfile: React.FC = () => {
           {/* Affiliated Units & Legal Ecosystem */}
           <div className="lg:col-span-5 space-y-6">
             {/* Associated units card */}
-            <div className="bg-emerald-950 text-white rounded-2xl p-6 sm:p-7 shadow-lg relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="glass-bubble-dark text-white rounded-[2rem] p-6 sm:p-7 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-400/20 rounded-full blur-2xl pointer-events-none" />
 
-              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400 mb-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 border border-white/25 text-xs font-semibold text-emerald-300 mb-3">
                 <ShieldCheck className="w-4 h-4" />
                 <span>HỆ THỐNG PHÁP NHÂN ĐỒNG HÀNH</span>
               </div>
@@ -147,7 +147,7 @@ export const CompanyProfile: React.FC = () => {
               <h4 className="text-base font-bold text-white font-heading">
                 Đơn Vị Đại Diện &amp; Trực Thuộc
               </h4>
-              <p className="text-xs text-emerald-200/80 mt-1 mb-5 leading-relaxed">
+              <p className="text-xs text-emerald-100/90 mt-1 mb-5 leading-relaxed">
                 Ngoài ra, người đại diện <strong>{companyInfo.representative}</strong> còn đồng thời đại diện cho các doanh nghiệp và đơn vị thành viên:
               </p>
 
@@ -155,16 +155,16 @@ export const CompanyProfile: React.FC = () => {
                 {companyInfo.affiliatedUnits.map((unit, idx) => (
                   <div
                     key={idx}
-                    className="p-3.5 rounded-xl bg-white/10 border border-white/15 backdrop-blur-xs flex items-start gap-3"
+                    className="p-3.5 rounded-2xl bg-white/12 border border-white/25 backdrop-blur-md flex items-start gap-3 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)]"
                   >
-                    <div className="w-6 h-6 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                    <div className="w-6 h-6 rounded-full bg-emerald-400 text-slate-950 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 shadow-sm">
                       {idx + 1}
                     </div>
                     <div>
                       <div className="text-xs font-bold text-white uppercase tracking-wide">
                         {unit}
                       </div>
-                      <div className="text-[11px] text-emerald-300 mt-0.5">
+                      <div className="text-[11px] text-emerald-200 mt-0.5">
                         Đại diện pháp luật: {companyInfo.representative}
                       </div>
                     </div>
@@ -172,19 +172,19 @@ export const CompanyProfile: React.FC = () => {
                 ))}
               </div>
 
-              <div className="mt-6 pt-4 border-t border-emerald-800/80 flex items-center justify-between text-xs text-emerald-300">
+              <div className="mt-6 pt-4 border-t border-white/20 flex items-center justify-between text-xs text-emerald-200">
                 <span>Xuất hóa đơn VAT tài chính</span>
                 <span className="font-semibold text-white">100% Đúng Quy Định</span>
               </div>
             </div>
 
             {/* Quality Commitment Card */}
-            <div className="bg-slate-50 rounded-2xl border border-slate-200 p-6">
+            <div className="glass-bubble rounded-[2rem] p-6">
               <div className="flex items-center gap-2 text-xs font-bold text-slate-900 mb-3">
                 <Award className="w-4 h-4 text-emerald-600" />
                 <span>Cam Kết Chất Lượng Đức Vinh Solar</span>
               </div>
-              <ul className="space-y-2 text-xs text-slate-600">
+              <ul className="space-y-2.5 text-xs text-slate-600">
                 <li className="flex items-start gap-2">
                   <span className="text-emerald-600 font-bold">✓</span>
                   <span>Thiết bị pin và biến tần mới 100%, bảo hành chính hãng từ 5 đến 30 năm.</span>

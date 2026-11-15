@@ -329,6 +329,70 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSelectedBrand(brand);
   };
 
+  // Activate Admin Modal only via keyboard shortcut: "Ctrl + X + 1"
+  useEffect(() => {
+    const pressedKeys = new Set<string>();
+    let lastCtrlXTime = 0;
+    let lastCtrl1Time = 0;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase();
+      const code = e.code;
+
+      pressedKeys.add(key);
+      if (code === 'KeyX') pressedKeys.add('x');
+      if (code === 'Digit1' || code === 'Numpad1' || key === '1' || key === '!') {
+        pressedKeys.add('1');
+      }
+
+      const isCtrlOrMeta =
+        e.ctrlKey || e.metaKey || pressedKeys.has('control') || pressedKeys.has('meta');
+
+      const isX = key === 'x' || code === 'KeyX';
+      const is1 = key === '1' || key === '!' || code === 'Digit1' || code === 'Numpad1';
+
+      if (isCtrlOrMeta && isX) {
+        lastCtrlXTime = Date.now();
+      }
+      if (isCtrlOrMeta && is1) {
+        lastCtrl1Time = Date.now();
+      }
+
+      const now = Date.now();
+      const isSimultaneous = isCtrlOrMeta && pressedKeys.has('x') && pressedKeys.has('1');
+      const isCtrlXThen1 = is1 && now - lastCtrlXTime < 1500;
+      const isCtrl1ThenX = isX && now - lastCtrl1Time < 1500;
+
+      if (isSimultaneous || isCtrlXThen1 || isCtrl1ThenX) {
+        e.preventDefault();
+        lastCtrlXTime = 0;
+        lastCtrl1Time = 0;
+        pressedKeys.clear();
+        setIsAdminModalOpen(true);
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase();
+      pressedKeys.delete(key);
+      if (e.code === 'KeyX') pressedKeys.delete('x');
+      if (e.code === 'Digit1' || e.code === 'Numpad1') pressedKeys.delete('1');
+    };
+
+    const handleBlur = () => {
+      pressedKeys.clear();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('blur', handleBlur);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('blur', handleBlur);
+    };
+  }, []);
+
   // Custom Confirmation Modal State
   const [confirmDialog, setConfirmDialog] = useState<{
     title: string;

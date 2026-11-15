@@ -123,9 +123,9 @@ export const Header: React.FC = () => {
 
   return (
     <>
-      {/* Main Header adhering to Top Bar 3-zone contract */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-8">
+      {/* Main Header styled as a floating frosted glass bubble */}
+      <header className="sticky top-2.5 sm:top-3.5 z-40 mx-auto max-w-7xl w-[calc(100%-1.25rem)] sm:w-[calc(100%-2.5rem)] lg:w-[calc(100%-3rem)] rounded-full bg-white/60 hover:bg-white/72 backdrop-blur-xl backdrop-saturate-150 border border-white/80 ring-1 ring-emerald-900/10 shadow-[0_14px_38px_-6px_rgba(15,23,42,0.16),0_4px_14px_-2px_rgba(16,185,129,0.10),inset_0_1.5px_2px_rgba(255,255,255,0.95)] transition-all duration-300">
+        <div className="px-4 sm:px-7 lg:px-8 h-16 sm:h-[72px] flex items-center justify-between gap-4 lg:gap-8">
           {/* Zone 1: Brand title wordmark */}
           <div className="flex items-center gap-3 shrink-0">
             <a
@@ -136,14 +136,14 @@ export const Header: React.FC = () => {
               }}
               className="group flex items-center gap-2.5 text-emerald-800 hover:text-emerald-950 transition-colors"
             >
-              <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-sm group-hover:bg-emerald-700 transition-colors">
-                <Sun className="w-6 h-6 animate-[spin_12s_linear_infinite]" />
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white shadow-[0_4px_12px_rgba(16,185,129,0.35),inset_0_1px_1px_rgba(255,255,255,0.6)] group-hover:scale-105 transition-transform">
+                <Sun className="w-5 h-5 animate-[spin_12s_linear_infinite]" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl sm:text-2xl font-extrabold tracking-tight font-heading text-emerald-950 whitespace-nowrap">
+                <span className="text-lg sm:text-2xl font-extrabold tracking-tight font-heading text-emerald-950 whitespace-nowrap drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]">
                   Đức Vinh <span className="text-emerald-600">Solar</span>
                 </span>
-                <span className="text-[10px] text-slate-500 uppercase tracking-widest font-medium hidden sm:block">
+                <span className="text-[10px] text-slate-600 uppercase tracking-widest font-medium hidden sm:block">
                   Năng Lượng Mặt Trời &amp; Tiết Kiệm Điện
                 </span>
               </div>
@@ -151,10 +151,10 @@ export const Header: React.FC = () => {
           </div>
 
           {/* Zone 2: Navigation links with cascading hover menu on "Sản Phẩm Solar" */}
-          <nav className="hidden lg:flex items-center gap-7 text-sm font-medium text-slate-600">
+          <nav className="hidden lg:flex items-center gap-6 text-sm font-semibold text-slate-700">
             {/* Cascading Dropdown Trigger: Sản Phẩm Solar -> Loại Sản Phẩm -> Hãng */}
             <div
-              className="relative py-6"
+              className="relative py-4"
               onMouseEnter={() => {
                 setIsProductMenuHovered(true);
                 if (!hoveredCategoryId && categories.length > 0) {
@@ -187,10 +187,10 @@ export const Header: React.FC = () => {
 
               {/* Level 1 Dropdown: Loại Sản Phẩm */}
               {isProductMenuHovered && (
-                <div className="absolute left-0 top-full pt-1 z-50">
-                  <div className="bg-white rounded-xl border border-slate-200 shadow-2xl flex min-w-[270px] overflow-visible">
+                <div className="absolute left-0 top-full pt-2 z-50">
+                  <div className="bg-white/85 backdrop-blur-2xl rounded-2xl border border-white/80 ring-1 ring-slate-900/10 shadow-[0_20px_50px_rgba(15,23,42,0.18),inset_0_1px_1px_rgba(255,255,255,0.9)] flex min-w-[270px] overflow-visible">
                     {/* Categories Column */}
-                    <div className="w-72 py-2 bg-white rounded-l-xl">
+                    <div className="w-72 py-2 bg-white/70 rounded-l-2xl">
                       <div className="px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
                         Loại Sản Phẩm
                       </div>
@@ -375,13 +375,13 @@ export const Header: React.FC = () => {
             </button>
           </nav>
 
-          {/* Zone 3: 1 Primary action or Admin control */}
-          <div className="flex items-center gap-3 shrink-0">
-            {isAdmin ? (
+          {/* Zone 3: Admin control (only visible after Admin is activated) & Mobile menu trigger */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            {isAdmin && (
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsAdminModalOpen(true)}
-                  className="px-3.5 py-2 text-xs font-semibold text-emerald-900 bg-emerald-100 hover:bg-emerald-200 rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap"
+                  className="px-3.5 py-2 text-xs font-semibold text-emerald-900 bg-emerald-100/80 hover:bg-emerald-200/90 backdrop-blur-sm rounded-full transition-colors flex items-center gap-1.5 whitespace-nowrap border border-emerald-300/60 shadow-2xs"
                   title="Mở bảng điều khiển quản trị"
                 >
                   <ShieldCheck className="w-4 h-4 text-emerald-700" />
@@ -390,37 +390,18 @@ export const Header: React.FC = () => {
                 </button>
                 <button
                   onClick={logoutAdmin}
-                  className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                  className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50/80 rounded-full transition-colors"
                   title="Đăng xuất quản trị"
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
               </div>
-            ) : (
-              <button
-                onClick={() => setIsAdminModalOpen(true)}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-600 hover:text-emerald-700 hover:bg-slate-100 rounded-lg transition-colors whitespace-nowrap"
-                title="Đăng nhập dành cho quản lý (Admin: DucVinh@123)"
-              >
-                <Lock className="w-3.5 h-3.5 text-slate-400" />
-                <span>Admin</span>
-              </button>
             )}
-
-            <a
-              href={`https://zalo.me/${companyInfo.hotlineZalo}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-2.5 text-xs sm:text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 rounded-lg shadow-xs transition-colors flex items-center gap-2 whitespace-nowrap shrink-0"
-            >
-              <Phone className="w-4 h-4" />
-              <span>Tư Vấn Zalo</span>
-            </a>
 
             {/* Mobile menu trigger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100"
+              className="lg:hidden p-2 text-slate-700 hover:text-slate-900 rounded-full hover:bg-white/70 transition-colors"
               aria-label="Mở menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -430,7 +411,7 @@ export const Header: React.FC = () => {
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-6 shadow-xl animate-in slide-in-from-top duration-150 max-h-[80vh] overflow-y-auto">
+          <div className="lg:hidden absolute left-0 right-0 top-[calc(100%+0.6rem)] rounded-3xl border border-white/80 ring-1 ring-slate-900/10 bg-white/85 backdrop-blur-2xl px-4 pt-3 pb-6 shadow-[0_20px_50px_rgba(15,23,42,0.2)] animate-in slide-in-from-top duration-150 max-h-[80vh] overflow-y-auto">
             <div className="flex flex-col gap-1.5">
               {/* Mobile expandable Sản Phẩm Solar -> Loại sản phẩm -> Hãng */}
               <div className="rounded-lg border border-slate-100 bg-slate-50/60 overflow-hidden">
@@ -543,17 +524,7 @@ export const Header: React.FC = () => {
                 Liên Hệ &amp; Báo Giá
               </button>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    setIsAdminModalOpen(true);
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-600 hover:text-emerald-700"
-                >
-                  <Lock className="w-3.5 h-3.5" />
-                  <span>{isAdmin ? 'Mở Quản Trị Admin' : 'Đăng Nhập Admin'}</span>
-                </button>
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end">
                 <a
                   href={`tel:${companyInfo.hotlineZalo}`}
                   className="text-xs font-bold text-emerald-700 flex items-center gap-1"

@@ -144,10 +144,10 @@ export const ProjectShowcase: React.FC = () => {
   };
 
   return (
-    <section id="projects-section" className="py-16 sm:py-20 bg-slate-50 border-t border-slate-200">
+    <section id="projects-section" className="py-12 sm:py-16 bg-transparent">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
+        <div className="glass-bubble rounded-[2rem] p-6 sm:p-8 flex flex-col md:flex-row md:items-end justify-between gap-5 mb-8">
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 tracking-wider uppercase mb-2">
               <Award className="w-4 h-4 text-emerald-600" />
@@ -166,61 +166,61 @@ export const ProjectShowcase: React.FC = () => {
               <button
                 type="button"
                 onClick={handleOpenAddProject}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition-colors"
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-full shadow-xs flex items-center gap-1.5 transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 <span>Thêm Dự Án Mới</span>
               </button>
             )}
 
-            {/* Category Filter */}
-            <div className="flex items-center gap-1.5 p-1 bg-slate-200/70 rounded-xl overflow-x-auto scrollbar-none">
+            {/* Category Filter in Bubble Capsule */}
+            <div className="flex items-center gap-1.5 p-1.5 glass-pill rounded-full overflow-x-auto scrollbar-none">
               <button
                 onClick={() => setActiveFilter('all')}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap ${
+                className={`px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all whitespace-nowrap ${
                   activeFilter === 'all'
-                    ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-700 hover:text-emerald-800'
                 }`}
               >
                 Tất Cả ({projects.length})
               </button>
               <button
                 onClick={() => setActiveFilter('residential')}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap ${
+                className={`px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all whitespace-nowrap ${
                   activeFilter === 'residential'
-                    ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-700 hover:text-emerald-800'
                 }`}
               >
                 Hộ Gia Đình
               </button>
               <button
                 onClick={() => setActiveFilter('commercial')}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap ${
+                className={`px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all whitespace-nowrap ${
                   activeFilter === 'commercial'
-                    ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-700 hover:text-emerald-800'
                 }`}
               >
                 Nhà Xưởng &amp; C&amp;I
               </button>
               <button
                 onClick={() => setActiveFilter('hybrid')}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap ${
+                className={`px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all whitespace-nowrap ${
                   activeFilter === 'hybrid'
-                    ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-700 hover:text-emerald-800'
                 }`}
               >
                 Lưu Trữ Hybrid
               </button>
               <button
                 onClick={() => setActiveFilter('lighting')}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap ${
+                className={`px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all whitespace-nowrap ${
                   activeFilter === 'lighting'
-                    ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-700 hover:text-emerald-800'
                 }`}
               >
                 Chiếu Sáng Năng Lượng
@@ -409,11 +409,11 @@ export const ProjectShowcase: React.FC = () => {
             return (
               <div
                 key={project.id}
-                className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-lg transition-shadow flex flex-col justify-between"
+                className="glass-bubble rounded-[2rem] p-3 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
               >
                 <div>
                   {/* Visual Header Banner / Multi-Image Gallery for Project */}
-                  <div className="h-56 sm:h-64 bg-gradient-to-br from-emerald-900 via-teal-900 to-slate-900 relative overflow-hidden text-white group">
+                  <div className="h-56 sm:h-64 rounded-[1.5rem] bg-gradient-to-br from-emerald-900 via-teal-900 to-slate-900 relative overflow-hidden text-white group">
                     {currentImg ? (
                       <>
                         <img
@@ -529,9 +529,9 @@ export const ProjectShowcase: React.FC = () => {
                   )}
 
                   {/* Content Details */}
-                  <div className="p-6">
+                  <div className="p-4 sm:p-5">
                     {/* Estimated saving callout */}
-                    <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200/80 mb-4">
+                    <div className="p-3.5 rounded-2xl bg-emerald-50/75 backdrop-blur-sm border border-emerald-200/80 mb-4">
                       <div className="text-[11px] font-bold text-emerald-900 uppercase tracking-wide">
                         Hiệu Quả Sinh Điện &amp; Tiết Kiệm:
                       </div>
@@ -562,13 +562,13 @@ export const ProjectShowcase: React.FC = () => {
                 </div>
 
                 {/* Bottom Consultation CTA + Admin Controls */}
-                <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-2">
+                <div className="px-4 py-3.5 border-t border-emerald-900/10 flex flex-wrap items-center justify-between gap-2">
                   {isAdmin ? (
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
                         onClick={() => handleOpenEditProject(project)}
-                        className="px-3 py-1.5 text-xs font-bold text-emerald-800 bg-emerald-100 hover:bg-emerald-200 rounded-md transition-colors flex items-center gap-1"
+                        className="px-3.5 py-1.5 text-xs font-bold text-emerald-800 bg-emerald-100/80 hover:bg-emerald-200 rounded-full transition-colors flex items-center gap-1"
                       >
                         <Edit2 className="w-3.5 h-3.5" />
                         <span>Sửa / Thêm Ảnh</span>
@@ -576,7 +576,7 @@ export const ProjectShowcase: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => deleteProject(project.id)}
-                        className="px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-100 hover:bg-rose-600 hover:text-white rounded-md transition-colors flex items-center gap-1"
+                        className="px-3.5 py-1.5 text-xs font-bold text-rose-700 bg-rose-100/80 hover:bg-rose-600 hover:text-white rounded-full transition-colors flex items-center gap-1"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                         <span>Xóa Dự Án</span>
@@ -596,7 +596,7 @@ export const ProjectShowcase: React.FC = () => {
                           setViewingProject(project);
                           setLightboxIdx(activeIdx);
                         }}
-                        className="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 rounded-md transition-colors flex items-center gap-1"
+                        className="px-3.5 py-1.5 text-xs font-semibold text-slate-700 glass-pill hover:bg-white rounded-full transition-all flex items-center gap-1"
                       >
                         <Eye className="w-3.5 h-3.5 text-emerald-600" />
                         <span>Xem Album ({imgs.length})</span>
@@ -606,9 +606,9 @@ export const ProjectShowcase: React.FC = () => {
                       href={`https://zalo.me/${companyInfo.hotlineZalo}?text=${encodeURIComponent('Tôi muốn tư vấn giải pháp tương tự dự án: ' + project.title)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-3.5 py-1.5 text-xs font-bold text-emerald-800 bg-emerald-100 hover:bg-emerald-200 rounded-md transition-colors flex items-center gap-1.5"
+                      className="px-4 py-1.5 text-xs font-bold text-emerald-900 bg-emerald-100/85 hover:bg-emerald-600 hover:text-white rounded-full transition-colors flex items-center gap-1.5 border border-emerald-300/60"
                     >
-                      <Phone className="w-3.5 h-3.5 text-emerald-700" />
+                      <Phone className="w-3.5 h-3.5" />
                       <span>Liên Hệ Zalo</span>
                     </a>
                   </div>

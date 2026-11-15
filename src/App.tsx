@@ -15,12 +15,20 @@ import { FloatingContact } from './components/FloatingContact';
 export default function App() {
   return (
     <AppProvider>
-      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased font-sans">
-        {/* Navigation Bar */}
+      <div className="relative min-h-screen flex flex-col bg-gradient-to-br from-emerald-50/90 via-teal-50/60 to-sky-50/80 text-slate-800 antialiased font-sans selection:bg-emerald-500 selection:text-white">
+        {/* Ambient Luminous Bubble Orbs in Background for Glassmorphism Depth */}
+        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
+          <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-emerald-300/35 blur-3xl" />
+          <div className="absolute top-1/4 -right-28 w-[28rem] h-[28rem] rounded-full bg-teal-300/30 blur-3xl" />
+          <div className="absolute top-2/3 left-1/4 w-[26rem] h-[26rem] rounded-full bg-amber-200/25 blur-3xl" />
+          <div className="absolute -bottom-32 right-1/3 w-96 h-96 rounded-full bg-emerald-400/25 blur-3xl" />
+        </div>
+
+        {/* Navigation Bar (Direct child: div#root > div > header) */}
         <Header />
 
         {/* Main Content Area */}
-        <main className="flex-1">
+        <main className="flex-1 relative z-10">
           {/* Product Catalog First - Immediately visible on page load */}
           <ProductCatalog />
 
@@ -41,7 +49,9 @@ export default function App() {
         </main>
 
         {/* Corporate Footer */}
-        <Footer />
+        <div className="relative z-10">
+          <Footer />
+        </div>
 
         {/* Floating Quick Action Widget */}
         <FloatingContact />
