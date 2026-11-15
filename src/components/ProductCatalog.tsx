@@ -148,16 +148,16 @@ export const ProductCatalog: React.FC = () => {
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div>
               <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-emerald-300 mb-2">
-                <span>ĐỨC VINH SOLAR</span>
+                <span className="text-[10px]">ĐỨC VINH SOLAR</span>
                 <span aria-hidden="true">·</span>
-                <span>DANH MỤC SẢN PHẨM CHÍNH HÃNG</span>
+                <span className="text-[10px]">DANH MỤC SẢN PHẨM CHÍNH HÃNG</span>
                 <span aria-hidden="true">·</span>
-                <span>ZALO: 0938288876</span>
+                <span className="text-[10px]">ZALO: 0938288876</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-heading tracking-tight text-white">
+              <h1 className="text-[18px] font-extrabold font-heading tracking-tight text-white">
                 Danh Mục Thiết Bị Năng Lượng Mặt Trời
               </h1>
-              <p className="text-xs sm:text-sm text-emerald-100/90 mt-1.5 max-w-2xl">
+              <p className="text-[10px] text-emerald-100/90 mt-1.5 max-w-2xl">
                 Phân phối sỉ &amp; lẻ tấm pin năng lượng mặt trời, biến tần Inverter, pin lưu trữ Lithium và phụ kiện Solar chính hãng.
               </p>
             </div>
@@ -368,7 +368,7 @@ export const ProductCatalog: React.FC = () => {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                 {paginatedProducts.map((product) => {
                   const imgList = Array.isArray(product.images) && product.images.length > 0
                     ? product.images
@@ -382,13 +382,14 @@ export const ProductCatalog: React.FC = () => {
                       onClick={() => setSelectedProduct(product)}
                       className="group bg-white rounded-2xl border border-slate-200/90 overflow-hidden hover:border-emerald-500 hover:shadow-xl transition-all duration-200 flex flex-col cursor-pointer"
                     >
-                      {/* Thumbnail slot */}
-                      <div className="relative aspect-4/3 bg-slate-100 overflow-hidden border-b border-slate-100">
+                      {/* Large, High-Clarity Studio Image Showcase */}
+                      <div className="relative h-64 sm:h-72 bg-white overflow-hidden border-b border-slate-100 flex items-center justify-center p-3">
                         <ProductSvgThumbnail
                           type={product.svgType}
                           imageUrl={imgList[0] || product.imageUrl}
                           name={product.name}
-                          className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
+                          fit="contain"
+                          className="w-full h-full max-h-full transition-transform duration-300 group-hover:scale-105"
                         />
 
                         {/* Stock status indicator badge */}
@@ -414,9 +415,9 @@ export const ProductCatalog: React.FC = () => {
 
                         {/* Multi-photo count badge */}
                         {imgList.length > 1 && (
-                          <div className="absolute bottom-2.5 right-2.5 bg-slate-900/75 text-white px-2 py-0.5 rounded-md text-[11px] font-semibold flex items-center gap-1 shadow-xs">
-                            <ImageIcon className="w-3 h-3 text-emerald-300" />
-                            <span>{imgList.length} ảnh</span>
+                          <div className="absolute bottom-2.5 right-2.5 bg-slate-900/80 text-white px-2.5 py-1 rounded-md text-[11px] font-semibold flex items-center gap-1 shadow-xs">
+                            <ImageIcon className="w-3.5 h-3.5 text-emerald-300" />
+                            <span>{imgList.length} ảnh thực tế</span>
                           </div>
                         )}
 
@@ -450,58 +451,74 @@ export const ProductCatalog: React.FC = () => {
                           </div>
                         )}
 
-                        {/* Quick view overlay icon */}
-                        <div className="absolute inset-0 bg-emerald-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                          <span className="px-3.5 py-2 rounded-lg bg-white/95 text-emerald-900 text-xs font-bold shadow-md flex items-center gap-1.5">
-                            <Eye className="w-4 h-4 text-emerald-700" />
-                            Xem Thông Số Chi Tiết
+                        {/* Subtle bottom-left zoom prompt on hover (keeps image 100% bright & unobstructed) */}
+                        <div className="absolute bottom-2.5 left-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                          <span className="px-2.5 py-1 rounded-md bg-emerald-700/95 text-white text-[11px] font-bold shadow-sm flex items-center gap-1">
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>Phóng to &amp; Xem thông số</span>
                           </span>
                         </div>
                       </div>
 
                       {/* Card Body */}
-                      <div className="p-5 flex-1 flex flex-col justify-between">
+                      <div className="p-5 flex-1 flex flex-col justify-between bg-white">
                         <div>
                           {/* Unboxed clean metadata (Zero-pill discipline) */}
-                          <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
-                            <span className="font-bold text-emerald-700 uppercase tracking-wide">
-                              Hãng {product.brand}
+                          <div className="flex items-center justify-between gap-2 text-xs text-slate-500 mb-1.5">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="font-bold text-emerald-700 uppercase tracking-wide truncate">
+                                Hãng {product.brand}
+                              </span>
+                              <span aria-hidden="true">·</span>
+                              <span className="font-mono text-[11px]">{product.sku}</span>
+                            </div>
+                            <span className="text-[11px] font-semibold text-slate-500 shrink-0">
+                              BH {product.warrantyYears} năm
                             </span>
-                            <span aria-hidden="true">·</span>
-                            <span className="font-mono">{product.sku}</span>
                           </div>
 
                           {/* Product Name */}
-                          <h3 className="text-base font-bold text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-2 leading-snug">
+                          <h3 className="text-base sm:text-lg font-bold text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-2 leading-snug">
                             {product.name}
                           </h3>
 
                           {/* Short Description */}
-                          <p className="text-xs text-slate-600 mt-2 line-clamp-2 leading-relaxed">
-                            {product.shortDesc}
-                          </p>
+                          {product.shortDesc && (
+                            <p className="text-xs text-slate-600 mt-1.5 line-clamp-2 leading-relaxed">
+                              {product.shortDesc}
+                            </p>
+                          )}
 
                           {/* Highlights Specs Summary */}
-                          <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-600">
-                            {(Array.isArray(product.specs) ? product.specs : []).slice(0, 3).map((spec, idx) => (
-                              <div key={idx} className="flex items-center justify-between">
-                                <span className="text-slate-500">{spec?.label}:</span>
-                                <span className="font-semibold text-slate-800 font-mono-nums text-right">
-                                  {spec?.value}
-                                                                </span>
+                          <div className="mt-3.5 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-700">
+                            {(Array.isArray(product.specs) ? product.specs : []).slice(0, 4).map((spec, idx) => (
+                              <div key={idx} className="flex items-start justify-between gap-2">
+                                {spec?.value ? (
+                                  <>
+                                    <span className="text-slate-500 shrink-0">{spec.label}:</span>
+                                    <span className="font-semibold text-slate-900 font-mono-nums text-right">
+                                      {spec.value}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <span className="font-medium text-slate-800 flex items-center gap-1.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                                    <span>{spec?.label}</span>
+                                  </span>
+                                )}
                               </div>
                             ))}
                           </div>
                         </div>
 
                         {/* Bottom Action Footer */}
-                        <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <div className="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between gap-2">
                           <span className="text-xs font-bold text-emerald-700 flex items-center gap-1 group-hover:underline">
-                            <span>Nhấn xem cấu hình chi tiết</span>
+                            <span>Xem ảnh lớn &amp; cấu hình chi tiết</span>
                             <ChevronRight className="w-4 h-4" />
                           </span>
 
-                          <span className="px-3 py-1.5 text-xs font-semibold text-emerald-900 bg-emerald-100 group-hover:bg-emerald-600 group-hover:text-white rounded-md transition-colors flex items-center gap-1">
+                          <span className="px-3 py-1.5 text-xs font-semibold text-emerald-900 bg-emerald-100 group-hover:bg-emerald-600 group-hover:text-white rounded-lg transition-colors flex items-center gap-1 shrink-0">
                             <Eye className="w-3.5 h-3.5" />
                             <span>Chi Tiết</span>
                           </span>

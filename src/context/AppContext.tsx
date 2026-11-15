@@ -1,15 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  setDoc,
-  deleteDoc,
-  onSnapshot
-} from 'firebase/firestore';
-import { db, OperationType, handleFirestoreError } from '../firebase';
-import {
   Product,
   ProjectItem,
   CompanyInfo,
@@ -27,7 +17,14 @@ import {
   INITIAL_BLOG_POSTS
 } from '../data/initialData';
 
-export type AdminTabType = 'inventory' | 'categories-brands' | 'projects' | 'blog' | 'inquiries' | 'company' | 'backup';
+export type AdminTabType =
+  | 'inventory'
+  | 'categories-brands'
+  | 'projects'
+  | 'blog'
+  | 'inquiries'
+  | 'company'
+  | 'backup';
 
 interface AppContextType {
   products: Product[];
@@ -94,7 +91,13 @@ interface AppContextType {
 
   // Company & Inquiries
   updateCompanyInfo: (info: Partial<CompanyInfo>) => void;
-  submitInquiry: (name: string, phone: string, address?: string, note?: string, product?: string) => void;
+  submitInquiry: (
+    name: string,
+    phone: string,
+    address?: string,
+    note?: string,
+    product?: string
+  ) => void;
   updateInquiryStatus: (id: string, status: CustomerInquiry['status']) => void;
 
   // System & Cloud Sync Tools
@@ -117,133 +120,11 @@ const STORAGE_KEYS = {
   BLOG_POSTS: 'dvs_blog_posts_v1',
   COMPANY: 'dvs_company_v1',
   INQUIRIES: 'dvs_inquiries_v1',
-  ADMIN_AUTH: 'dvs_admin_auth',
-  CLOUD_MIGRATED: 'dvs_cloud_migrated_v4'
+  ADMIN_AUTH: 'dvs_admin_auth'
 };
 
-// Natural order maps for default items so Firestore snapshots always sort deterministically
-const INITIAL_CATEGORY_ORDER = new Map<string, number>(
-  INITIAL_CATEGORIES.map((c, idx) => [c.id, idx])
-);
-const INITIAL_BRAND_ORDER = new Map<string, number>(
-  INITIAL_BRANDS.map((b, idx) => [b.id, idx])
-);
-const INITIAL_PRODUCT_ORDER = new Map<string, number>(
-  INITIAL_PRODUCTS.map((p, idx) => [p.id, idx])
-);
-const INITIAL_PROJECT_ORDER = new Map<string, number>(
-  INITIAL_PROJECTS.map((pr, idx) => [pr.id, idx])
-);
-const INITIAL_BLOG_ORDER = new Map<string, number>(
-  INITIAL_BLOG_POSTS.map((bp, idx) => [bp.id, idx])
-);
-
-/**
- * Recursively strips `undefined` properties so Firestore setDoc never fails
- */
-function cleanForFirestore<T>(obj: T): T {
-  if (obj === null || typeof obj !== 'object') {
-    return obj;
-  }
-  if (Array.isArray(obj)) {
-    return obj
-      .filter((item) => item !== undefined)
-      .map((item) => cleanForFirestore(item)) as unknown as T;
-  }
-  const cleaned: Record<string, any> = {};
-  Object.entries(obj as Record<string, any>).forEach(([key, value]) => {
-    if (value !== undefined) {
-      cleaned[key] = cleanForFirestore(value);
-    }
-  });
-  return cleaned as T;
-}
-
-/**
- * Compresses a single base64 data:image string if it exceeds maxChars
- */
-function compressDataUrl(dataUrl: string, maxDim = 600, quality = 0.55): Promise<string> {
-  if (!dataUrl || !dataUrl.startsWith('data:image/')) {
-    return Promise.resolve(dataUrl);
-  }
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      try {
-        let { width, height } = img;
-        if (width > maxDim || height > maxDim) {
-          if (width > height) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          } else {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
-          }
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, width);
-        canvas.height = Math.max(1, height);
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          resolve(dataUrl);
-          return;
-        }
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL('image/jpeg', quality));
-      } catch {
-        resolve(dataUrl);
-      }
-    };
-    img.onerror = () => resolve(dataUrl);
-    img.src = dataUrl;
-  });
-}
-
-/**
- * Guarantees that an array of image URLs / base64 strings will fit safely inside a single
- * Firestore document (< 700,000 bytes total) so Firestore never rejects a Product or Project write.
- */
-async function ensureFirestoreSafeImages(images: string[] | undefined): Promise<string[]> {
-  if (!Array.isArray(images) || images.length === 0) return [];
-  const valid = images.filter((s) => typeof s === 'string' && s.trim().length > 0);
-  if (valid.length === 0) return [];
-
-  // Target budget for all images in a single Firestore document: ~620,000 chars
-  const TOTAL_CHAR_BUDGET = 620000;
-  const perImageBudget = Math.min(80000, Math.floor(TOTAL_CHAR_BUDGET / Math.max(1, valid.length)));
-
-  const processed: string[] = [];
-  for (const imgStr of valid) {
-    if (imgStr.startsWith('data:image/') && imgStr.length > perImageBudget) {
-      let step1 = await compressDataUrl(imgStr, 600, 0.55);
-      if (step1.length > perImageBudget) {
-        step1 = await compressDataUrl(step1, 440, 0.48);
-      }
-      if (step1.length > perImageBudget) {
-        step1 = await compressDataUrl(step1, 340, 0.42);
-      }
-      processed.push(step1);
-    } else {
-      processed.push(imgStr);
-    }
-  }
-
-  // Final safety check on total size
-  const finalResult: string[] = [];
-  let runningChars = 0;
-  for (const item of processed) {
-    if (runningChars + item.length <= 750000) {
-      finalResult.push(item);
-      runningChars += item.length;
-    }
-  }
-  return finalResult;
-}
-
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Load initial categories from localStorage or defaults before Firestore sync
+  // Load initial categories from localStorage or defaults before Vercel Blob sync
   const [categories, setCategories] = useState<CategoryItem[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
@@ -482,523 +363,119 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAdminEditingProduct(null);
   };
 
-  // Helper functions to write to Firestore with structured error handling & automatic image compression
-  const saveCategoryToCloud = async (cat: CategoryItem, orderIndex?: number) => {
-    const path = `categories/${cat.id}`;
+  // Helper functions to communicate with Vercel Blob Store `ducvinhsolar` (/api/*)
+  const postToBlobApi = async (endpoint: string, body: unknown) => {
     try {
-      const order =
-        typeof orderIndex === 'number'
-          ? orderIndex
-          : INITIAL_CATEGORY_ORDER.get(cat.id) ?? Date.now();
-      await setDoc(doc(db, 'categories', cat.id), cleanForFirestore({ ...cat, order }));
-    } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, path);
-    }
-  };
-
-  const saveBrandToCloud = async (brand: BrandItem, orderIndex?: number) => {
-    const path = `brands/${brand.id}`;
-    try {
-      const order =
-        typeof orderIndex === 'number'
-          ? orderIndex
-          : INITIAL_BRAND_ORDER.get(brand.id) ?? Date.now();
-      await setDoc(doc(db, 'brands', brand.id), cleanForFirestore({ ...brand, order }));
-    } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, path);
-    }
-  };
-
-  const saveProductToCloud = async (prod: Product, orderIndex?: number) => {
-    const path = `products/${prod.id}`;
-    try {
-      const safeImages = await ensureFirestoreSafeImages(
-        Array.isArray(prod.images) && prod.images.length > 0
-          ? prod.images
-          : prod.imageUrl
-          ? [prod.imageUrl]
-          : []
-      );
-      const order =
-        typeof orderIndex === 'number'
-          ? orderIndex
-          : INITIAL_PRODUCT_ORDER.has(prod.id)
-          ? INITIAL_PRODUCT_ORDER.get(prod.id)!
-          : -1000;
-      const payload = cleanForFirestore({
-        ...prod,
-        images: safeImages,
-        imageUrl: safeImages[0] || undefined,
-        order
+      await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
       });
-      await setDoc(doc(db, 'products', prod.id), payload);
-    } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, path);
+    } catch (err) {
+      console.warn(`Vercel Blob API sync warning (${endpoint}):`, err);
     }
   };
 
-  const saveProjectToCloud = async (proj: ProjectItem, orderIndex?: number) => {
-    const path = `projects/${proj.id}`;
+  const deleteFromBlobApi = async (endpoint: string) => {
     try {
-      const safeImages = await ensureFirestoreSafeImages(
-        Array.isArray(proj.images) && proj.images.length > 0
-          ? proj.images
-          : proj.imageUrl
-          ? [proj.imageUrl]
-          : []
-      );
-      const order =
-        typeof orderIndex === 'number'
-          ? orderIndex
-          : INITIAL_PROJECT_ORDER.has(proj.id)
-          ? INITIAL_PROJECT_ORDER.get(proj.id)!
-          : -1000;
-      const payload = cleanForFirestore({
-        ...proj,
-        images: safeImages,
-        imageUrl: safeImages[0] || undefined,
-        order
-      });
-      await setDoc(doc(db, 'projects', proj.id), payload);
-    } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, path);
+      await fetch(endpoint, { method: 'DELETE' });
+    } catch (err) {
+      console.warn(`Vercel Blob API delete warning (${endpoint}):`, err);
     }
   };
 
-  const saveBlogPostToCloud = async (post: BlogPost, orderIndex?: number) => {
-    const path = `blogPosts/${post.id}`;
-    try {
-      const safeImages = await ensureFirestoreSafeImages(
-        Array.isArray(post.images) && post.images.length > 0
-          ? post.images
-          : post.imageUrl
-          ? [post.imageUrl]
-          : []
-      );
-      const order =
-        typeof orderIndex === 'number'
-          ? orderIndex
-          : INITIAL_BLOG_ORDER.has(post.id)
-          ? INITIAL_BLOG_ORDER.get(post.id)!
-          : -1000;
-      const payload = cleanForFirestore({
-        ...post,
-        images: safeImages,
-        imageUrl: safeImages[0] || undefined,
-        order
-      });
-      await setDoc(doc(db, 'blogPosts', post.id), payload);
-    } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, path);
-    }
-  };
-
-  const saveCompanyToCloud = async (info: CompanyInfo) => {
-    const path = 'settings/companyInfo';
-    try {
-      await setDoc(doc(db, 'settings', 'companyInfo'), cleanForFirestore(info));
-    } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, path);
-    }
-  };
-
-  const saveInquiryToCloud = async (inq: CustomerInquiry) => {
-    const path = `inquiries/${inq.id}`;
-    try {
-      await setDoc(doc(db, 'inquiries', inq.id), cleanForFirestore(inq));
-    } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, path);
-    }
-  };
-
-  // Real-time Firestore Cloud Sync Effect
   const isMountedRef = useRef(true);
+  const lastRemoteUpdatedAtRef = useRef<string>('');
 
+  // Sync with Vercel Blob Store `ducvinhsolar` on startup and tab focus
   useEffect(() => {
     isMountedRef.current = true;
-    let unsubCategories: (() => void) | undefined;
-    let unsubBrands: (() => void) | undefined;
-    let unsubProducts: (() => void) | undefined;
-    let unsubProjects: (() => void) | undefined;
-    let unsubBlogPosts: (() => void) | undefined;
-    let unsubCompany: (() => void) | undefined;
-    let unsubInquiries: (() => void) | undefined;
     let cancelled = false;
 
-    const initFirestoreSync = async () => {
+    const fetchAndSyncFromBlob = async (isInitial = false) => {
       try {
-        const seedDocRef = doc(db, 'settings', 'seedMeta');
-        const [seedSnap, catCheckSnap, brandCheckSnap, prodCheckSnap, projCheckSnap, blogCheckSnap] =
-          await Promise.all([
-            getDoc(seedDocRef),
-            getDocs(collection(db, 'categories')),
-            getDocs(collection(db, 'brands')),
-            getDocs(collection(db, 'products')),
-            getDocs(collection(db, 'projects')),
-            getDocs(collection(db, 'blogPosts'))
-          ]);
+        const res = await fetch('/api/state', { cache: 'no-store' });
+        if (!res.ok) return;
+        const blobData = await res.json();
+        const hasBlobData =
+          Array.isArray(blobData.categories) && blobData.categories.length > 0;
 
-        const seedExists = seedSnap.exists();
-
-        // 1. Seed any empty collections if initial seed has not completed
-        if (!seedExists || catCheckSnap.empty) {
-          const catsToSeed = categories.length > 0 ? categories : INITIAL_CATEGORIES;
-          await Promise.all(
-            catsToSeed.map((c, idx) => saveCategoryToCloud(c, idx))
-          );
+        if (!hasBlobData && isInitial) {
+          // Auto-seed the Vercel Blob Store `ducvinhsolar` on first visit
+          await postToBlobApi('/api/seed', {
+            categories: categories.length > 0 ? categories : INITIAL_CATEGORIES,
+            brands: brands.length > 0 ? brands : INITIAL_BRANDS,
+            products: products.length > 0 ? products : INITIAL_PRODUCTS,
+            projects: projects.length > 0 ? projects : INITIAL_PROJECTS,
+            blogPosts: blogPosts.length > 0 ? blogPosts : INITIAL_BLOG_POSTS,
+            inquiries,
+            companyInfo: companyInfo || INITIAL_COMPANY_INFO
+          });
+          return;
         }
 
-        if (!seedExists || brandCheckSnap.empty) {
-          const brandsToSeed = brands.length > 0 ? brands : INITIAL_BRANDS;
-          await Promise.all(
-            brandsToSeed.map((b, idx) => saveBrandToCloud(b, idx))
-          );
-        }
-
-        if (!seedExists || prodCheckSnap.empty) {
-          const prodsToSeed = products.length > 0 ? products : INITIAL_PRODUCTS;
-          await Promise.all(
-            prodsToSeed.map((p, idx) => saveProductToCloud(p, idx))
-          );
-        }
-
-        if (!seedExists || projCheckSnap.empty) {
-          const projsToSeed = projects.length > 0 ? projects : INITIAL_PROJECTS;
-          await Promise.all(
-            projsToSeed.map((pr, idx) => saveProjectToCloud(pr, idx))
-          );
-        }
-
-        if (!seedExists || blogCheckSnap.empty) {
-          const blogsToSeed = blogPosts.length > 0 ? blogPosts : INITIAL_BLOG_POSTS;
-          await Promise.all(
-            blogsToSeed.map((bp, idx) => saveBlogPostToCloud(bp, idx))
-          );
-        }
-
-        if (!seedExists) {
-          await Promise.all([
-            saveCompanyToCloud(companyInfo),
-            ...inquiries.map((inq) => saveInquiryToCloud(inq)),
-            setDoc(seedDocRef, {
-              seeded: true,
-              seedVersion: 4,
-              updatedAt: new Date().toISOString()
-            })
-          ]);
-        }
-
-        // 2. One-time migration: if this browser had custom user-created items in localStorage
-        // that failed to upload earlier (e.g. due to >1MB images), push them to Firestore now!
-        const alreadyMigrated = localStorage.getItem(STORAGE_KEYS.CLOUD_MIGRATED) === 'true';
-        if (!alreadyMigrated) {
-          const cloudCatIds = new Set(catCheckSnap.docs.map((d) => d.id));
-          const cloudBrandIds = new Set(brandCheckSnap.docs.map((d) => d.id));
-          const cloudProdIds = new Set(prodCheckSnap.docs.map((d) => d.id));
-          const cloudProjIds = new Set(projCheckSnap.docs.map((d) => d.id));
-
-          // Upload any custom categories created on this browser (`cat-...`) not yet in cloud
-          const customCats = categories.filter(
-            (c) => c.id.startsWith('cat-') && !cloudCatIds.has(c.id)
-          );
-          // Upload any custom brands created on this browser (`br-...` with timestamp) not yet in cloud
-          const customBrands = brands.filter(
-            (b) => !INITIAL_BRAND_ORDER.has(b.id) && !cloudBrandIds.has(b.id)
-          );
-          // Upload any custom products created on this browser (`prod-...`) not yet in cloud
-          const customProds = products.filter(
-            (p) => !INITIAL_PRODUCT_ORDER.has(p.id) && !cloudProdIds.has(p.id)
-          );
-          // Upload any custom projects created on this browser (`proj-...` with timestamp) not yet in cloud
-          const customProjs = projects.filter(
-            (pr) => !INITIAL_PROJECT_ORDER.has(pr.id) && !cloudProjIds.has(pr.id)
-          );
-
+        if (!cancelled && hasBlobData) {
           if (
-            customCats.length > 0 ||
-            customBrands.length > 0 ||
-            customProds.length > 0 ||
-            customProjs.length > 0
+            !isInitial &&
+            blobData.updatedAt &&
+            blobData.updatedAt === lastRemoteUpdatedAtRef.current
           ) {
-            await Promise.all([
-              ...customCats.map((c, i) => saveCategoryToCloud(c, 100 + i)),
-              ...customBrands.map((b, i) => saveBrandToCloud(b, 100 + i)),
-              ...customProds.map((p, i) => saveProductToCloud(p, -1000 - i)),
-              ...customProjs.map((pr, i) => saveProjectToCloud(pr, -1000 - i))
-            ]);
+            return;
           }
-          localStorage.setItem(STORAGE_KEYS.CLOUD_MIGRATED, 'true');
-        }
-      } catch (err) {
-        console.warn('Firestore initial seed check warning:', err);
-      }
-
-      if (cancelled) return;
-
-      // 3. Attach real-time listeners so all devices share identical live state
-      unsubCategories = onSnapshot(
-        collection(db, 'categories'),
-        (snap) => {
-          const list: (CategoryItem & { order: number })[] = [];
-          snap.forEach((docSnap) => {
-            const d = docSnap.data();
-            if (d && d.id && d.id !== 'power-savers') {
-              const fallbackOrder = INITIAL_CATEGORY_ORDER.get(d.id) ?? 999;
-              list.push({
-                id: d.id,
-                label: d.label || 'Danh mục',
-                shortLabel: d.shortLabel || d.label || 'Danh mục',
-                desc: d.desc || '',
-                iconName: d.iconName || 'Package',
-                order: typeof d.order === 'number' ? d.order : fallbackOrder
-              });
-            }
-          });
-          list.sort((a, b) => a.order - b.order);
-          if (list.length > 0 || !snap.metadata.fromCache) {
-            setCategories(list.map(({ order, ...rest }) => rest));
+          if (blobData.updatedAt) {
+            lastRemoteUpdatedAtRef.current = blobData.updatedAt;
           }
-        },
-        (error) => {
-          handleFirestoreError(error, OperationType.LIST, 'categories');
-        }
-      );
 
-      unsubBrands = onSnapshot(
-        collection(db, 'brands'),
-        (snap) => {
-          const list: (BrandItem & { order: number })[] = [];
-          snap.forEach((docSnap) => {
-            const d = docSnap.data();
-            if (d && d.id && d.categoryId !== 'power-savers') {
-              const fallbackOrder = INITIAL_BRAND_ORDER.get(d.id) ?? 999;
-              list.push({
-                id: d.id,
-                name: d.name || 'Hãng khác',
-                categoryId: d.categoryId || 'solar-panels',
-                origin: d.origin || 'Chính hãng',
-                order: typeof d.order === 'number' ? d.order : fallbackOrder
-              });
-            }
-          });
-          list.sort((a, b) => a.order - b.order);
-          if (list.length > 0 || !snap.metadata.fromCache) {
-            setBrands(list.map(({ order, ...rest }) => rest));
+          if (Array.isArray(blobData.categories) && blobData.categories.length > 0) {
+            setCategories(blobData.categories);
           }
-        },
-        (error) => {
-          handleFirestoreError(error, OperationType.LIST, 'brands');
-        }
-      );
-
-      unsubProducts = onSnapshot(
-        collection(db, 'products'),
-        (snap) => {
-          const list: (Product & { order: number })[] = [];
-          snap.forEach((docSnap) => {
-            const p = docSnap.data();
-            if (p && p.id && p.category !== 'power-savers') {
-              const imgs = Array.isArray(p.images)
-                ? p.images.filter(Boolean)
-                : p.imageUrl
-                ? [p.imageUrl]
-                : [];
-              const fallbackOrder = INITIAL_PRODUCT_ORDER.has(p.id)
-                ? INITIAL_PRODUCT_ORDER.get(p.id)!
-                : -500;
-              list.push({
-                id: p.id,
-                sku: p.sku || 'DVS',
-                name: p.name || 'Sản phẩm Đức Vinh Solar',
-                category: p.category || 'solar-panels',
-                brand: p.brand || 'Đức Vinh Solar',
-                shortDesc: p.shortDesc || '',
-                fullDesc: p.fullDesc || p.shortDesc || '',
-                stock: typeof p.stock === 'number' ? p.stock : Number(p.stock) || 0,
-                unit: p.unit || 'bộ',
-                featured: Boolean(p.featured),
-                imageUrl: imgs[0] || p.imageUrl,
-                images: imgs,
-                svgType: p.svgType || 'panel',
-                specs: Array.isArray(p.specs) ? p.specs : [],
-                highlights: Array.isArray(p.highlights) ? p.highlights : [],
-                applications: Array.isArray(p.applications) ? p.applications : [],
-                warrantyYears: Number(p.warrantyYears) || 10,
-                origin: p.origin || 'Chính hãng',
-                status: p.status || 'in-stock',
-                updatedAt: p.updatedAt || '2026-11-03',
-                order: typeof p.order === 'number' ? p.order : fallbackOrder
-              });
-            }
-          });
-          list.sort((a, b) => a.order - b.order);
-          if (list.length > 0 || !snap.metadata.fromCache) {
-            const cleanedList = list.map(({ order, ...rest }) => rest);
-            setProducts(cleanedList);
+          if (Array.isArray(blobData.brands) && blobData.brands.length > 0) {
+            setBrands(blobData.brands);
+          }
+          if (Array.isArray(blobData.products) && blobData.products.length > 0) {
+            setProducts(blobData.products);
             setSelectedProduct((prevSelected) => {
               if (!prevSelected) return null;
-              const updated = cleanedList.find((item) => item.id === prevSelected.id);
-              return updated || null;
+              return (
+                blobData.products.find((item: Product) => item.id === prevSelected.id) ||
+                null
+              );
             });
           }
-        },
-        (error) => {
-          handleFirestoreError(error, OperationType.LIST, 'products');
-        }
-      );
-
-      unsubProjects = onSnapshot(
-        collection(db, 'projects'),
-        (snap) => {
-          const list: (ProjectItem & { order: number })[] = [];
-          snap.forEach((docSnap) => {
-            const proj = docSnap.data();
-            if (proj && proj.id) {
-              const imgs = Array.isArray(proj.images)
-                ? proj.images.filter(Boolean)
-                : proj.imageUrl
-                ? [proj.imageUrl]
-                : [];
-              const fallbackOrder = INITIAL_PROJECT_ORDER.has(proj.id)
-                ? INITIAL_PROJECT_ORDER.get(proj.id)!
-                : -500;
-              list.push({
-                id: proj.id,
-                title: proj.title || 'Dự án Đức Vinh Solar',
-                location: proj.location || 'TP. Hồ Chí Minh',
-                capacity: proj.capacity || '10 kWp',
-                category: proj.category || 'residential',
-                completionDate: proj.completionDate || '2026',
-                description: proj.description || '',
-                keyEquipment: Array.isArray(proj.keyEquipment) ? proj.keyEquipment : [],
-                estimatedSaving: proj.estimatedSaving || '',
-                svgType: proj.svgType || 'rooftop',
-                imageUrl: imgs[0] || proj.imageUrl,
-                images: imgs,
-                order: typeof proj.order === 'number' ? proj.order : fallbackOrder
-              });
-            }
-          });
-          list.sort((a, b) => a.order - b.order);
-          if (list.length > 0 || !snap.metadata.fromCache) {
-            setProjects(list.map(({ order, ...rest }) => rest));
+          if (Array.isArray(blobData.projects) && blobData.projects.length > 0) {
+            setProjects(blobData.projects);
           }
-        },
-        (error) => {
-          handleFirestoreError(error, OperationType.LIST, 'projects');
-        }
-      );
-
-      unsubBlogPosts = onSnapshot(
-        collection(db, 'blogPosts'),
-        (snap) => {
-          const list: (BlogPost & { order: number })[] = [];
-          snap.forEach((docSnap) => {
-            const bp = docSnap.data();
-            if (bp && bp.id) {
-              const imgs = Array.isArray(bp.images)
-                ? bp.images.filter(Boolean)
-                : bp.imageUrl
-                ? [bp.imageUrl]
-                : [];
-              const fallbackOrder = INITIAL_BLOG_ORDER.has(bp.id)
-                ? INITIAL_BLOG_ORDER.get(bp.id)!
-                : -500;
-              list.push({
-                id: bp.id,
-                title: bp.title || 'Bài viết Đức Vinh Solar',
-                category: bp.category || 'Kinh Nghiệm Điện Mặt Trời',
-                author: bp.author || 'Kỹ Sư Đức Vinh Solar',
-                publishedAt: bp.publishedAt || '2026',
-                readTime: bp.readTime || '5 phút đọc',
-                summary: bp.summary || '',
-                content: bp.content || bp.summary || '',
-                tags: Array.isArray(bp.tags) ? bp.tags : [],
-                imageUrl: imgs[0] || bp.imageUrl,
-                images: imgs,
-                order: typeof bp.order === 'number' ? bp.order : fallbackOrder
-              });
-            }
-          });
-          list.sort((a, b) => a.order - b.order);
-          if (list.length > 0 || !snap.metadata.fromCache) {
-            setBlogPosts(list.map(({ order, ...rest }) => rest));
+          if (Array.isArray(blobData.blogPosts) && blobData.blogPosts.length > 0) {
+            setBlogPosts(blobData.blogPosts);
           }
-        },
-        (error) => {
-          handleFirestoreError(error, OperationType.LIST, 'blogPosts');
-        }
-      );
-
-      unsubCompany = onSnapshot(
-        doc(db, 'settings', 'companyInfo'),
-        (docSnap) => {
-          if (docSnap.exists()) {
-            const data = docSnap.data();
-            const mergedCompany: CompanyInfo = {
-              ...INITIAL_COMPANY_INFO,
-              ...data,
-              warehouseAddress: data?.warehouseAddress || INITIAL_COMPANY_INFO.warehouseAddress,
-              warehouseMapUrl: data?.warehouseMapUrl || INITIAL_COMPANY_INFO.warehouseMapUrl,
-              affiliatedUnits: Array.isArray(data?.affiliatedUnits)
-                ? data.affiliatedUnits
-                : INITIAL_COMPANY_INFO.affiliatedUnits
-            };
-            setCompanyInfo(mergedCompany);
-            if (
-              !data?.warehouseMapUrl ||
-              !data?.warehouseAddress
-            ) {
-              void saveCompanyToCloud(mergedCompany);
-            }
+          if (Array.isArray(blobData.inquiries) && blobData.inquiries.length > 0) {
+            setInquiries(blobData.inquiries);
           }
-        },
-        (error) => {
-          handleFirestoreError(error, OperationType.GET, 'settings/companyInfo');
-        }
-      );
-
-      unsubInquiries = onSnapshot(
-        collection(db, 'inquiries'),
-        (snap) => {
-          const list: CustomerInquiry[] = [];
-          snap.forEach((docSnap) => {
-            const d = docSnap.data();
-            if (d && d.id) {
-              list.push({
-                id: d.id,
-                customerName: d.customerName || 'Khách hàng',
-                phone: d.phone || '',
-                address: d.address,
-                productInterest: d.productInterest,
-                note: d.note,
-                createdAt: d.createdAt || '',
-                status: d.status || 'new'
-              });
-            }
-          });
-          if (list.length > 0 || !snap.metadata.fromCache) {
-            setInquiries(list);
+          if (blobData.companyInfo) {
+            setCompanyInfo((prev) => ({ ...prev, ...blobData.companyInfo }));
           }
-        },
-        (error) => {
-          handleFirestoreError(error, OperationType.LIST, 'inquiries');
         }
-      );
+      } catch (err) {
+        console.warn('Vercel Blob /api/state load warning:', err);
+      }
     };
 
-    initFirestoreSync();
+    void fetchAndSyncFromBlob(true);
+
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === 'visible') {
+        void fetchAndSyncFromBlob(false);
+      }
+    };
+
+    window.addEventListener('focus', handleVisibilityOrFocus);
+    document.addEventListener('visibilitychange', handleVisibilityOrFocus);
 
     return () => {
       cancelled = true;
       isMountedRef.current = false;
-      if (unsubCategories) unsubCategories();
-      if (unsubBrands) unsubBrands();
-      if (unsubProducts) unsubProducts();
-      if (unsubProjects) unsubProjects();
-      if (unsubBlogPosts) unsubBlogPosts();
-      if (unsubCompany) unsubCompany();
-      if (unsubInquiries) unsubInquiries();
+      window.removeEventListener('focus', handleVisibilityOrFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
     };
   }, []);
 
@@ -1088,9 +565,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       desc: catData.desc.trim(),
       iconName: catData.iconName || 'Package'
     };
-    const nextOrder = categories.length + 10;
     setCategories((prev) => [...prev, newCat]);
-    void saveCategoryToCloud(newCat, nextOrder);
+    void postToBlobApi('/api/categories', newCat);
     return newCat;
   };
 
@@ -1100,12 +576,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const updatedCat: CategoryItem = {
       id,
       label: (updates.label ?? existingCat?.label ?? 'Danh mục').trim(),
-      shortLabel: (updates.shortLabel ?? updates.label ?? existingCat?.shortLabel ?? 'Danh mục').trim(),
+      shortLabel: (
+        updates.shortLabel ??
+        updates.label ??
+        existingCat?.shortLabel ??
+        'Danh mục'
+      ).trim(),
       desc: (updates.desc ?? existingCat?.desc ?? '').trim(),
       iconName: updates.iconName ?? existingCat?.iconName ?? 'Package'
     };
     setCategories((prev) => prev.map((c) => (c.id === id ? updatedCat : c)));
-    void saveCategoryToCloud(updatedCat, existingIdx >= 0 ? existingIdx : 99);
+    void postToBlobApi('/api/categories', updatedCat);
   };
 
   const deleteCategory = (id: string, onConfirmed?: () => void) => {
@@ -1125,15 +606,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         if (onConfirmed) onConfirmed();
 
-        try {
-          await deleteDoc(doc(db, 'categories', id));
-          await Promise.all([
-            ...brandsToRemove.map((b) => deleteDoc(doc(db, 'brands', b.id))),
-            ...productsToRemove.map((p) => deleteDoc(doc(db, 'products', p.id)))
-          ]);
-        } catch (error) {
-          handleFirestoreError(error, OperationType.DELETE, `categories/${id}`);
-        }
+        void deleteFromBlobApi(`/api/categories/${encodeURIComponent(id)}`);
+        brandsToRemove.forEach((b) =>
+          void deleteFromBlobApi(`/api/brands/${encodeURIComponent(b.id)}`)
+        );
+        productsToRemove.forEach((p) =>
+          void deleteFromBlobApi(`/api/products/${encodeURIComponent(p.id)}`)
+        );
       }
     );
   };
@@ -1146,9 +625,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       categoryId: brandData.categoryId,
       origin: brandData.origin?.trim() || 'Chính hãng'
     };
-    const nextOrder = brands.length + 10;
     setBrands((prev) => [...prev, newBrand]);
-    void saveBrandToCloud(newBrand, nextOrder);
+    void postToBlobApi('/api/brands', newBrand);
     return newBrand;
   };
 
@@ -1165,11 +643,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (targetBrand) {
       setBrands((prev) => prev.map((b) => (b.id === id ? updatedBrand : b)));
-      void saveBrandToCloud(updatedBrand, existingIdx);
     } else {
       setBrands((prev) => [...prev, updatedBrand]);
-      void saveBrandToCloud(updatedBrand, brands.length + 10);
     }
+    void postToBlobApi('/api/brands', updatedBrand);
 
     const oldName = targetBrand?.name;
     const oldCat = targetBrand?.categoryId ?? updatedBrand.categoryId;
@@ -1189,7 +666,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         })
       );
       prodsToUpdate.forEach((up) => {
-        void saveProductToCloud(up);
+        void postToBlobApi('/api/products', up);
       });
     }
   };
@@ -1223,14 +700,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         if (onConfirmed) onConfirmed();
 
-        try {
-          await deleteDoc(doc(db, 'brands', id));
-          await Promise.all(
-            productsToRemove.map((p) => deleteDoc(doc(db, 'products', p.id)))
-          );
-        } catch (error) {
-          handleFirestoreError(error, OperationType.DELETE, `brands/${id}`);
-        }
+        void deleteFromBlobApi(`/api/brands/${encodeURIComponent(id)}`);
+        productsToRemove.forEach((p) =>
+          void deleteFromBlobApi(`/api/products/${encodeURIComponent(p.id)}`)
+        );
       }
     );
   };
@@ -1267,14 +740,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         );
         if (onConfirmed) onConfirmed();
 
-        try {
-          await Promise.all([
-            ...matchingBrands.map((b) => deleteDoc(doc(db, 'brands', b.id))),
-            ...matchingProducts.map((p) => deleteDoc(doc(db, 'products', p.id)))
-          ]);
-        } catch (error) {
-          handleFirestoreError(error, OperationType.DELETE, 'brands');
-        }
+        matchingBrands.forEach((b) => {
+          void deleteFromBlobApi(`/api/brands/${encodeURIComponent(b.id)}`);
+        });
+        matchingProducts.forEach((p) => {
+          void deleteFromBlobApi(`/api/products/${encodeURIComponent(p.id)}`);
+        });
       }
     );
   };
@@ -1293,10 +764,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `prod-${Date.now()}`,
       updatedAt: new Date().toISOString().split('T')[0]
     };
-    // Place newly added product at the top on all devices with negative timestamp order
-    const topOrder = -Math.floor(Date.now() / 1000);
     setProducts((prev) => [newProduct, ...prev]);
-    void saveProductToCloud(newProduct, topOrder);
+    void postToBlobApi('/api/products', newProduct);
 
     const trimmedBrand = (prodData.brand || '').trim();
     if (trimmedBrand) {
@@ -1341,12 +810,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setSelectedProduct(updatedObj);
     }
 
-    const orderToKeep = INITIAL_PRODUCT_ORDER.has(id)
-      ? INITIAL_PRODUCT_ORDER.get(id)!
-      : -1000 + existingIdx;
-    void saveProductToCloud(updatedObj, orderToKeep);
+    void postToBlobApi('/api/products', updatedObj);
 
-    // Ensure brand is also registered in brands collection if changed
     const trimmedBrand = (updatedObj.brand || '').trim();
     if (trimmedBrand) {
       const exists = brands.some(
@@ -1376,11 +841,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         if (onConfirmed) onConfirmed();
 
-        try {
-          await deleteDoc(doc(db, 'products', id));
-        } catch (error) {
-          handleFirestoreError(error, OperationType.DELETE, `products/${id}`);
-        }
+        void deleteFromBlobApi(`/api/products/${encodeURIComponent(id)}`);
       }
     );
   };
@@ -1406,9 +867,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       imageUrl: cleanImages[0] || projData.imageUrl,
       id: `proj-${Date.now()}`
     };
-    const topOrder = -Math.floor(Date.now() / 1000);
     setProjects((prev) => [newProj, ...prev]);
-    void saveProjectToCloud(newProj, topOrder);
+    void postToBlobApi('/api/projects', newProj);
   };
 
   const updateProject = (id: string, updates: Partial<ProjectItem>) => {
@@ -1432,10 +892,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     setProjects((prev) => prev.map((p) => (p.id === id ? updatedProj : p)));
-    const orderToKeep = INITIAL_PROJECT_ORDER.has(id)
-      ? INITIAL_PROJECT_ORDER.get(id)!
-      : -1000 + existingIdx;
-    void saveProjectToCloud(updatedProj, orderToKeep);
+    void postToBlobApi('/api/projects', updatedProj);
   };
 
   const deleteProject = (id: string, onConfirmed?: () => void) => {
@@ -1447,11 +904,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setProjects((prev) => prev.filter((p) => p.id !== id));
         if (onConfirmed) onConfirmed();
 
-        try {
-          await deleteDoc(doc(db, 'projects', id));
-        } catch (error) {
-          handleFirestoreError(error, OperationType.DELETE, `projects/${id}`);
-        }
+        void deleteFromBlobApi(`/api/projects/${encodeURIComponent(id)}`);
       }
     );
   };
@@ -1469,9 +922,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       imageUrl: cleanImages[0] || postData.imageUrl,
       id: `blog-${Date.now()}`
     };
-    const topOrder = -Math.floor(Date.now() / 1000);
     setBlogPosts((prev) => [newPost, ...prev]);
-    void saveBlogPostToCloud(newPost, topOrder);
+    void postToBlobApi('/api/blog-posts', newPost);
   };
 
   const updateBlogPost = (id: string, updates: Partial<BlogPost>) => {
@@ -1495,10 +947,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     setBlogPosts((prev) => prev.map((bp) => (bp.id === id ? updatedPost : bp)));
-    const orderToKeep = INITIAL_BLOG_ORDER.has(id)
-      ? INITIAL_BLOG_ORDER.get(id)!
-      : -1000 + existingIdx;
-    void saveBlogPostToCloud(updatedPost, orderToKeep);
+    void postToBlobApi('/api/blog-posts', updatedPost);
   };
 
   const deleteBlogPost = (id: string, onConfirmed?: () => void) => {
@@ -1510,11 +959,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setBlogPosts((prev) => prev.filter((bp) => bp.id !== id));
         if (onConfirmed) onConfirmed();
 
-        try {
-          await deleteDoc(doc(db, 'blogPosts', id));
-        } catch (error) {
-          handleFirestoreError(error, OperationType.DELETE, `blogPosts/${id}`);
-        }
+        void deleteFromBlobApi(`/api/blog-posts/${encodeURIComponent(id)}`);
       }
     );
   };
@@ -1523,7 +968,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateCompanyInfo = (info: Partial<CompanyInfo>) => {
     const updated = { ...companyInfo, ...info };
     setCompanyInfo(updated);
-    void saveCompanyToCloud(updated);
+    void postToBlobApi('/api/company-info', updated);
   };
 
   // Inquiries
@@ -1545,7 +990,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       status: 'new'
     };
     setInquiries((prev) => [newInquiry, ...prev]);
-    void saveInquiryToCloud(newInquiry);
+    void postToBlobApi('/api/inquiries', newInquiry);
   };
 
   const updateInquiryStatus = (id: string, status: CustomerInquiry['status']) => {
@@ -1553,7 +998,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!existing) return;
     const updated = { ...existing, status };
     setInquiries((prev) => prev.map((item) => (item.id === id ? updated : item)));
-    void saveInquiryToCloud(updated);
+    void postToBlobApi('/api/inquiries', updated);
   };
 
   // Modals
@@ -1565,67 +1010,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setQuoteModalProduct(null);
   };
 
-  // Helper to replace all docs in a collection with a fresh array
-  const replaceCollectionInCloud = async <T extends { id: string }>(
-    colName: string,
-    newItems: T[]
-  ) => {
-    try {
-      const existingSnap = await getDocs(collection(db, colName));
-      const newIds = new Set(newItems.map((i) => i.id));
-      const deletePromises: Promise<void>[] = [];
-      existingSnap.forEach((docSnap) => {
-        if (!newIds.has(docSnap.id)) {
-          deletePromises.push(deleteDoc(doc(db, colName, docSnap.id)));
-        }
-      });
-
-      const writePromises = newItems.map(async (item: any, idx) => {
-        if (colName === 'products' || colName === 'projects' || colName === 'blogPosts') {
-          const safeImages = await ensureFirestoreSafeImages(
-            Array.isArray(item.images) && item.images.length > 0
-              ? item.images
-              : item.imageUrl
-              ? [item.imageUrl]
-              : []
-          );
-          return setDoc(
-            doc(db, colName, item.id),
-            cleanForFirestore({
-              ...item,
-              images: safeImages,
-              imageUrl: safeImages[0] || undefined,
-              order: idx
-            })
-          );
-        }
-        return setDoc(
-          doc(db, colName, item.id),
-          cleanForFirestore({ ...item, order: idx })
-        );
-      });
-
-      await Promise.all([...deletePromises, ...writePromises]);
-    } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, colName);
-    }
-  };
-
-  // Force push all current state (categories, brands, products, projects, blogPosts, companyInfo) to Cloud
+  // Force push all current state to Vercel Blob Store `ducvinhsolar`
   const syncAllToCloud = async (): Promise<boolean> => {
     setIsSyncingCloud(true);
     try {
-      await Promise.all([
-        replaceCollectionInCloud('categories', categories),
-        replaceCollectionInCloud('brands', brands),
-        replaceCollectionInCloud('products', products),
-        replaceCollectionInCloud('projects', projects),
-        replaceCollectionInCloud('blogPosts', blogPosts),
-        saveCompanyToCloud(companyInfo)
-      ]);
+      await postToBlobApi('/api/restore', {
+        mode: 'replace',
+        categories,
+        brands,
+        products,
+        projects,
+        blogPosts,
+        inquiries,
+        companyInfo
+      });
       return true;
     } catch (e) {
-      console.error('Sync all to cloud error:', e);
+      console.error('Sync all to Vercel Blob error:', e);
       return false;
     } finally {
       if (isMountedRef.current) {
@@ -1654,14 +1055,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           localStorage.removeItem(STORAGE_KEYS.BLOG_POSTS);
           localStorage.removeItem(STORAGE_KEYS.COMPANY);
 
-          await Promise.all([
-            replaceCollectionInCloud('categories', INITIAL_CATEGORIES),
-            replaceCollectionInCloud('brands', INITIAL_BRANDS),
-            replaceCollectionInCloud('products', INITIAL_PRODUCTS),
-            replaceCollectionInCloud('projects', INITIAL_PROJECTS),
-            replaceCollectionInCloud('blogPosts', INITIAL_BLOG_POSTS),
-            saveCompanyToCloud(INITIAL_COMPANY_INFO)
-          ]);
+          await postToBlobApi('/api/restore', {
+            mode: 'replace',
+            categories: INITIAL_CATEGORIES,
+            brands: INITIAL_BRANDS,
+            products: INITIAL_PRODUCTS,
+            projects: INITIAL_PROJECTS,
+            blogPosts: INITIAL_BLOG_POSTS,
+            companyInfo: INITIAL_COMPANY_INFO
+          });
           if (onConfirmed) onConfirmed();
         } finally {
           if (isMountedRef.current) {
@@ -1676,8 +1078,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const exportBackup = (): string => {
     const backupData = {
       appName: 'CÔNG TY TNHH ĐỨC VINH SOLAR NĂNG LƯỢNG XANH',
+      storeName: 'ducvinhsolar',
       taxCode: companyInfo.taxCode || '0317971512',
-      version: '3.1',
+      version: '3.2',
       exportedAt: new Date().toISOString(),
       summary: {
         categoriesCount: categories.length,
@@ -1719,7 +1122,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
     }
 
-      const hasValidSection =
+    const hasValidSection =
       Array.isArray(raw.categories) ||
       Array.isArray(raw.brands) ||
       Array.isArray(raw.products) ||
@@ -1731,7 +1134,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!hasValidSection) {
       return {
         success: false,
-        message: 'Tệp JSON không chứa dữ liệu hệ thống hợp lệ (thiếu danh mục, hãng, sản phẩm, dự án hoặc bài viết)!'
+        message:
+          'Tệp JSON không chứa dữ liệu hệ thống hợp lệ (thiếu danh mục, hãng, sản phẩm, dự án hoặc bài viết)!'
       };
     }
 
@@ -1767,11 +1171,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ? raw.products
             .filter((p: any) => p && (p.name || p.id))
             .map((p: any, idx: number) => {
-              const imgs: string[] = Array.isArray(p.images) && p.images.length > 0
-                ? p.images.filter(Boolean)
-                : p.imageUrl
-                ? [String(p.imageUrl)]
-                : [];
+              const imgs: string[] =
+                Array.isArray(p.images) && p.images.length > 0
+                  ? p.images.filter(Boolean)
+                  : p.imageUrl
+                  ? [String(p.imageUrl)]
+                  : [];
               const stockNum = Math.max(0, Number(p.stock ?? 10));
               const status: Product['status'] =
                 p.status === 'in-stock' || p.status === 'low-stock' || p.status === 'order-only'
@@ -1810,11 +1215,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ? raw.projects
             .filter((pr: any) => pr && (pr.title || pr.id))
             .map((pr: any, idx: number) => {
-              const imgs: string[] = Array.isArray(pr.images) && pr.images.length > 0
-                ? pr.images.filter(Boolean)
-                : pr.imageUrl
-                ? [String(pr.imageUrl)]
-                : [];
+              const imgs: string[] =
+                Array.isArray(pr.images) && pr.images.length > 0
+                  ? pr.images.filter(Boolean)
+                  : pr.imageUrl
+                  ? [String(pr.imageUrl)]
+                  : [];
               return {
                 id: String(pr.id || `proj-imp-${idx}`),
                 title: String(pr.title || 'Dự án Điện mặt trời').trim(),
@@ -1828,7 +1234,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 capacity: String(pr.capacity || '10 kWp').trim(),
                 location: String(pr.location || 'TP. Hồ Chí Minh').trim(),
                 completionDate: String(pr.completionDate || pr.completedDate || '2026').trim(),
-                estimatedSaving: String(pr.estimatedSaving || pr.savingEstimate || 'Tiết kiệm hiệu quả').trim(),
+                estimatedSaving: String(
+                  pr.estimatedSaving || pr.savingEstimate || 'Tiết kiệm hiệu quả'
+                ).trim(),
                 description: String(pr.description || '').trim(),
                 keyEquipment: Array.isArray(pr.keyEquipment)
                   ? pr.keyEquipment.filter(Boolean)
@@ -1847,11 +1255,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ? raw.blogPosts
             .filter((bp: any) => bp && (bp.title || bp.id))
             .map((bp: any, idx: number) => {
-              const imgs: string[] = Array.isArray(bp.images) && bp.images.length > 0
-                ? bp.images.filter(Boolean)
-                : bp.imageUrl
-                ? [String(bp.imageUrl)]
-                : [];
+              const imgs: string[] =
+                Array.isArray(bp.images) && bp.images.length > 0
+                  ? bp.images.filter(Boolean)
+                  : bp.imageUrl
+                  ? [String(bp.imageUrl)]
+                  : [];
               return {
                 id: String(bp.id || `blog-imp-${idx}`),
                 title: String(bp.title || 'Bài viết Đức Vinh Solar').trim(),
@@ -1877,7 +1286,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               customerName: String(inq.customerName || 'Khách hàng').trim(),
               phone: String(inq.phone || '').trim(),
               address: inq.address ? String(inq.address).trim() : undefined,
-              productInterest: inq.productInterest ? String(inq.productInterest).trim() : undefined,
+              productInterest: inq.productInterest
+                ? String(inq.productInterest).trim()
+                : undefined,
               note: inq.note ? String(inq.note).trim() : undefined,
               createdAt: String(inq.createdAt || new Date().toLocaleString('vi-VN')),
               status:
@@ -1885,7 +1296,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             }))
         : [];
 
-      // Helper to merge arrays by ID (preserving order & updating matching IDs)
       const mergeById = <T extends { id: string }>(current: T[], incoming: T[]): T[] => {
         const map = new Map<string, T>();
         current.forEach((item) => map.set(item.id, item));
@@ -1893,28 +1303,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return Array.from(map.values());
       };
 
-      const finalCategories =
-        Array.isArray(raw.categories)
-          ? mode === 'merge'
-            ? mergeById(categories, incomingCategories)
-            : incomingCategories
-          : categories;
+      const finalCategories = Array.isArray(raw.categories)
+        ? mode === 'merge'
+          ? mergeById(categories, incomingCategories)
+          : incomingCategories
+        : categories;
 
-      let finalBrands =
-        Array.isArray(raw.brands)
-          ? mode === 'merge'
-            ? mergeById(brands, incomingBrands)
-            : incomingBrands
-          : brands;
+      let finalBrands = Array.isArray(raw.brands)
+        ? mode === 'merge'
+          ? mergeById(brands, incomingBrands)
+          : incomingBrands
+        : brands;
 
-      const finalProducts =
-        Array.isArray(raw.products)
-          ? mode === 'merge'
-            ? mergeById(products, incomingProducts)
-            : incomingProducts
-          : products;
+      const finalProducts = Array.isArray(raw.products)
+        ? mode === 'merge'
+          ? mergeById(products, incomingProducts)
+          : incomingProducts
+        : products;
 
-      // Ensure every product's brand is also registered in finalBrands so no brand is orphaned
       const brandKeySet = new Set(
         finalBrands.map((b) => `${b.categoryId}::${b.name.trim().toLowerCase()}`)
       );
@@ -1937,32 +1343,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       });
 
-      const finalProjects =
-        Array.isArray(raw.projects)
-          ? mode === 'merge'
-            ? mergeById(projects, incomingProjects)
-            : incomingProjects
-          : projects;
+      const finalProjects = Array.isArray(raw.projects)
+        ? mode === 'merge'
+          ? mergeById(projects, incomingProjects)
+          : incomingProjects
+        : projects;
 
-      const finalBlogPosts =
-        Array.isArray(raw.blogPosts)
-          ? mode === 'merge'
-            ? mergeById(blogPosts, incomingBlogPosts)
-            : incomingBlogPosts
-          : blogPosts;
+      const finalBlogPosts = Array.isArray(raw.blogPosts)
+        ? mode === 'merge'
+          ? mergeById(blogPosts, incomingBlogPosts)
+          : incomingBlogPosts
+        : blogPosts;
 
       const finalCompanyInfo: CompanyInfo = raw.companyInfo
         ? { ...INITIAL_COMPANY_INFO, ...companyInfo, ...raw.companyInfo }
         : companyInfo;
 
-      const finalInquiries =
-        Array.isArray(raw.inquiries)
-          ? mode === 'merge'
-            ? mergeById(inquiries, incomingInquiries)
-            : incomingInquiries
-          : inquiries;
+      const finalInquiries = Array.isArray(raw.inquiries)
+        ? mode === 'merge'
+          ? mergeById(inquiries, incomingInquiries)
+          : incomingInquiries
+        : inquiries;
 
-      // Apply to local state immediately
       setCategories(finalCategories);
       setBrands(finalBrands);
       setProducts(finalProducts);
@@ -1971,31 +1373,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCompanyInfo(finalCompanyInfo);
       setInquiries(finalInquiries);
 
-      // Sync all restored collections to Firebase Cloud so all devices update immediately
-      await Promise.all([
-        replaceCollectionInCloud('categories', finalCategories),
-        replaceCollectionInCloud('brands', finalBrands),
-        replaceCollectionInCloud('products', finalProducts),
-        replaceCollectionInCloud('projects', finalProjects),
-        replaceCollectionInCloud('blogPosts', finalBlogPosts),
-        replaceCollectionInCloud('inquiries', finalInquiries),
-        saveCompanyToCloud(finalCompanyInfo),
-        setDoc(doc(db, 'settings', 'seedMeta'), {
-          seeded: true,
-          seedVersion: 4,
-          updatedAt: new Date().toISOString()
-        })
-      ]);
+      await postToBlobApi('/api/restore', {
+        mode,
+        categories: finalCategories,
+        brands: finalBrands,
+        products: finalProducts,
+        projects: finalProjects,
+        blogPosts: finalBlogPosts,
+        inquiries: finalInquiries,
+        companyInfo: finalCompanyInfo
+      });
 
       return {
         success: true,
-        message: `Đã khôi phục & đồng bộ lên web thành công: ${finalCategories.length} loại thiết bị, ${finalBrands.length} hãng, ${finalProducts.length} sản phẩm, ${finalProjects.length} dự án và ${finalBlogPosts.length} bài viết!`
+        message: `Đã khôi phục & đồng bộ lên Vercel Blob (ducvinhsolar) thành công: ${finalCategories.length} loại thiết bị, ${finalBrands.length} hãng, ${finalProducts.length} sản phẩm, ${finalProjects.length} dự án và ${finalBlogPosts.length} bài viết!`
       };
     } catch (error) {
       console.error('Import backup error:', error);
       return {
         success: false,
-        message: 'Có lỗi xảy ra khi đồng bộ dữ liệu khôi phục lên đám mây. Vui lòng thử lại!'
+        message:
+          'Có lỗi xảy ra khi đồng bộ dữ liệu khôi phục lên Vercel Blob. Vui lòng thử lại!'
       };
     } finally {
       if (isMountedRef.current) {
@@ -2004,7 +1402,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-      return (
+  return (
     <AppContext.Provider
       value={{
         products,

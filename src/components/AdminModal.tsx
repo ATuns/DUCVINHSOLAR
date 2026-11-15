@@ -61,6 +61,54 @@ const getCompactPageItems = (current: number, total: number): (number | string)[
   return [1, 'ellipsis-start', current - 1, current, current + 1, 'ellipsis-end', total];
 };
 
+const specsToMultilineText = (specs: ProductSpec[]): string => {
+  if (!Array.isArray(specs) || specs.length === 0) return '';
+  return specs
+    .map((s) => {
+      const l = (s?.label || '').trim();
+      const v = (s?.value || '').trim();
+      if (!l && !v) return '';
+      return v ? `${l}: ${v}` : l;
+    })
+    .filter(Boolean)
+    .join('\n');
+};
+
+const parseMultilineSpecs = (text: string): ProductSpec[] => {
+  if (!text || !text.trim()) return [];
+  return text
+    .split(/\r?\n/)
+    .map((rawLine) => rawLine.trim().replace(/^[-•*+]\s*/, ''))
+    .filter(Boolean)
+    .map((line) => {
+      const colonIdx = line.indexOf(':');
+      if (colonIdx > 0) {
+        return {
+          label: line.slice(0, colonIdx).trim(),
+          value: line.slice(colonIdx + 1).trim()
+        };
+      }
+      const tabIdx = line.indexOf('\t');
+      if (tabIdx > 0) {
+        return {
+          label: line.slice(0, tabIdx).trim(),
+          value: line.slice(tabIdx + 1).trim()
+        };
+      }
+      const dashMatch = line.match(/^(.+?)\s+(?:\||-|–)\s+(.+)$/);
+      if (dashMatch) {
+        return {
+          label: dashMatch[1].trim(),
+          value: dashMatch[2].trim()
+        };
+      }
+      return {
+        label: line,
+        value: ''
+      };
+    });
+};
+
 export const AdminModal: React.FC = () => {
   const {
     isAdmin,
@@ -128,10 +176,9 @@ export const AdminModal: React.FC = () => {
   const [formOrigin, setFormOrigin] = useState('Chính hãng');
   const [formImages, setFormImages] = useState<string[]>([]);
   const [formSvgType, setFormSvgType] = useState<Product['svgType']>('panel');
-  const [formSpecs, setFormSpecs] = useState<ProductSpec[]>([
-    { label: 'Công suất', value: '550 Wp' },
-    { label: 'Hiệu suất', value: '22%' }
-  ]);
+  const [formSpecsText, setFormSpecsText] = useState<string>(
+    'Công suất: 580 Wp\nHiệu suất: 22.5%\nChuẩn bảo vệ: IP68'
+  );
 
   // Project Management Form States
   const [editingProject, setEditingProject] = useState<ProjectItem | null>(null);
@@ -249,7 +296,7 @@ export const AdminModal: React.FC = () => {
       : [];
     setFormImages(existingImgs);
     setFormSvgType(p.svgType || 'panel');
-    setFormSpecs(Array.isArray(p.specs) ? [...p.specs] : []);
+    setFormSpecsText(specsToMultilineText(Array.isArray(p.specs) ? p.specs : []));
   };
 
   useEffect(() => {
@@ -278,11 +325,7 @@ export const AdminModal: React.FC = () => {
     setFormOrigin('Chính Hãng (Có CO/CQ)');
     setFormImages([]);
     setFormSvgType('panel');
-    setFormSpecs([
-      { label: 'Công suất', value: '580 Wp' },
-      { label: 'Hiệu suất', value: '22.5%' },
-      { label: 'Chuẩn bảo vệ', value: 'IP68' }
-    ]);
+    setFormSpecsText('Công suất: 580 Wp\nHiệu suất: 22.5%\nChuẩn bảo vệ: IP68');
   };
 
   const handleSaveProduct = (e: React.FormEvent) => {
@@ -293,6 +336,7 @@ export const AdminModal: React.FC = () => {
       formStock <= 0 ? 'order-only' : formStock < 10 ? 'low-stock' : 'in-stock';
 
     const cleanImages = formImages.filter(Boolean);
+    const parsedSpecs = parseMultilineSpecs(formSpecsText);
 
     if (isAddingNew) {
       addProduct({
@@ -309,7 +353,7 @@ export const AdminModal: React.FC = () => {
         images: cleanImages,
         imageUrl: cleanImages[0] || undefined,
         svgType: formSvgType,
-        specs: formSpecs,
+        specs: parsedSpecs,
         highlights: ['Sản phẩm chính hãng Đức Vinh Solar', 'Bảo hành đầy đủ'],
         applications: ['Dân dụng và công nghiệp'],
         status
@@ -330,7 +374,7 @@ export const AdminModal: React.FC = () => {
         images: cleanImages,
         imageUrl: cleanImages[0] || undefined,
         svgType: formSvgType,
-        specs: formSpecs,
+        specs: parsedSpecs,
         status
       });
       showNotice(`Đã cập nhật sản phẩm "${formName}"!`);
@@ -506,25 +550,6 @@ export const AdminModal: React.FC = () => {
 
     setEditingBlog(null);
     setIsAddingBlog(false);
-  };
-
-  const handleAddSpecRow = () => {
-    setFormSpecs(prev => [...prev, { label: '', value: '' }]);
-  };
-
-  const handleUpdateSpecRow = (idx: number, field: 'label' | 'value', val: string) => {
-    setFormSpecs(prev =>
-      prev.map((row, i) => (i === idx ? { ...row, [field]: val } : row))
-    );
-  };
-
-  const handleRemoveSpecRow = (idx: number) => {
-    requestConfirm(
-      'Bạn chắc chắn muốn xóa dòng thông số kỹ thuật này hay không?',
-      () => {
-        setFormSpecs(prev => prev.filter((_, i) => i !== idx));
-      }
-    );
   };
 
   // Category CRUD Handlers in Admin Tab
@@ -1613,49 +1638,59 @@ export const AdminModal: React.FC = () => {
                           />
                         </div>
 
-                        {/* Specs Table Editing */}
+                        {/* Multi-line Specs Textarea Editing */}
                         <div className="pt-2">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-bold text-slate-800">
-                              Thông Số Kỹ Thuật Chi Tiết
+                          <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                            <label className="text-xs font-bold text-slate-800">
+                              Thông Số Kỹ Thuật Chi Tiết (Mỗi lần xuống dòng là 1 thông số mới)
+                            </label>
+                            <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">
+                              Đã nhập: {parseMultilineSpecs(formSpecsText).length} dòng thông số
                             </span>
-                            <button
-                              type="button"
-                              onClick={handleAddSpecRow}
-                              className="text-xs text-emerald-700 font-semibold flex items-center gap-1 hover:underline"
-                            >
-                              <Plus className="w-3.5 h-3.5" />
-                              <span>Thêm dòng thông số</span>
-                            </button>
                           </div>
+                          <p className="text-[11px] text-slate-500 mb-2">
+                            Gõ hoặc dán toàn bộ thông số vào ô bên dưới, cứ bấm <strong>Enter (xuống dòng)</strong> là sang thông số mới (Ví dụ: <code>Công suất: 580 Wp</code> hoặc gõ tự do từng dòng).
+                          </p>
 
-                          <div className="space-y-2">
-                            {formSpecs.map((spec, idx) => (
-                              <div key={idx} className="flex items-center gap-2">
-                                <input
-                                  type="text"
-                                  placeholder="Tên thông số (Vd: Công suất đỉnh)"
-                                  value={spec.label}
-                                  onChange={(e) => handleUpdateSpecRow(idx, 'label', e.target.value)}
-                                  className="w-1/2 px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-md"
-                                />
-                                <input
-                                  type="text"
-                                  placeholder="Giá trị (Vd: 580 Wp)"
-                                  value={spec.value}
-                                  onChange={(e) => handleUpdateSpecRow(idx, 'value', e.target.value)}
-                                  className="w-1/2 px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-md font-mono"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveSpecRow(idx)}
-                                  className="p-1.5 text-slate-400 hover:text-rose-600"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
+                          <textarea
+                            rows={7}
+                            value={formSpecsText}
+                            onChange={(e) => setFormSpecsText(e.target.value)}
+                            placeholder={
+                              'Công suất cực đại: 580 Wp\nHiệu suất chuyển đổi: 22.5%\nĐiện áp hở mạch (Voc): 51.2 V\nDòng điện ngắn mạch (Isc): 14.2 A\nKích thước: 2278 x 1134 x 30 mm\nKhối lượng: 27.5 kg\nChuẩn bảo vệ: IP68'
+                            }
+                            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-emerald-600 font-mono leading-relaxed"
+                          />
+
+                          {/* Live Preview of Parsed Specs */}
+                          {parseMultilineSpecs(formSpecsText).length > 0 && (
+                            <div className="mt-2.5 p-3 rounded-lg bg-white border border-slate-200">
+                              <div className="text-[11px] font-bold text-slate-600 mb-2 uppercase tracking-wider">
+                                Xem trước hiển thị thông số ({parseMultilineSpecs(formSpecsText).length} dòng):
                               </div>
-                            ))}
-                          </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-xs max-h-40 overflow-y-auto">
+                                {parseMultilineSpecs(formSpecsText).map((spec, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="flex items-center justify-between gap-2 py-1 px-2 rounded bg-slate-50 border border-slate-100"
+                                  >
+                                    {spec.value ? (
+                                      <>
+                                        <span className="text-slate-600 truncate">{spec.label}:</span>
+                                        <span className="font-bold text-emerald-800 font-mono shrink-0">
+                                          {spec.value}
+                                        </span>
+                                      </>
+                                    ) : (
+                                      <span className="font-semibold text-slate-800 truncate">
+                                        • {spec.label}
+                                      </span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-200">
@@ -2680,13 +2715,13 @@ export const AdminModal: React.FC = () => {
 
                   {/* SECTION 1: LIVE SYSTEM DATA SUMMARY */}
                   <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 text-white border border-slate-800 shadow-sm">
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                       <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-                        1. Thống Kê Dữ Liệu Đang Hoạt Động Trên Hệ Thống
+                        1. Thống Kê Dữ Liệu (Vercel Blob Store: ducvinhsolar)
                       </span>
                       <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-300 bg-emerald-950/80 border border-emerald-700/50 px-2.5 py-0.5 rounded-md">
                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                        Đồng bộ thời gian thực
+                        Store: ducvinhsolar · Prefix: DUCVINHSOLAR
                       </span>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">

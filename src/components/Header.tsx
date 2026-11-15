@@ -123,35 +123,6 @@ export const Header: React.FC = () => {
 
   return (
     <>
-      {/* Top emergency / advisory ticker */}
-      <div className="bg-emerald-950 text-emerald-100 text-xs py-2 px-4 border-b border-emerald-900">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 text-xs">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-semibold text-emerald-400">ĐỨC VINH SOLAR:</span>
-            <a
-              href={companyInfo.warehouseMapUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-emerald-300 underline decoration-emerald-600/60 underline-offset-2 transition-colors"
-              title="Xem vị trí Kho tổng trên Google Maps"
-            >
-              Kho tổng: 137 Đ. Thới Tam Thôn 9, Đông Thạnh, Hóc Môn (Xem bản đồ)
-            </a>
-          </div>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-emerald-200">
-            <a
-              href={`https://zalo.me/${companyInfo.hotlineZalo}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-white flex items-center gap-1 transition-colors"
-            >
-              <Phone className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Hotline/Zalo: <strong className="text-white font-mono">{companyInfo.hotlineZalo}</strong></span>
-            </a>
-          </div>
-        </div>
-      </div>
-
       {/* Main Header adhering to Top Bar 3-zone contract */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-8">

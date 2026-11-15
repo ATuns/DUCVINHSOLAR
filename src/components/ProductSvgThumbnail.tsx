@@ -5,23 +5,30 @@ interface ProductSvgThumbnailProps {
   imageUrl?: string;
   name: string;
   className?: string;
+  fit?: 'contain' | 'cover';
 }
 
 export const ProductSvgThumbnail: React.FC<ProductSvgThumbnailProps> = ({
   type,
   imageUrl,
   name,
-  className = 'w-full h-full'
+  className = 'w-full h-full',
+  fit = 'contain'
 }) => {
   // If a valid image URL is supplied, attempt to display it with fallback
   const [imgError, setImgError] = React.useState(false);
 
+  React.useEffect(() => {
+    setImgError(false);
+  }, [imageUrl]);
+
   if (imageUrl && !imgError) {
+    const fitClass = fit === 'contain' ? 'object-contain' : 'object-cover';
     return (
       <img
         src={imageUrl}
         alt={name}
-        className={`${className} object-cover`}
+        className={`${className} ${fitClass}`}
         referrerPolicy="no-referrer"
         onError={() => setImgError(true)}
       />

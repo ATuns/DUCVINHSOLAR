@@ -107,14 +107,36 @@ export const MultiImageInput: React.FC<MultiImageInputProps> = ({
     setIsUploading(true);
     try {
       const filesArray = Array.from(fileList);
-      const dataUrls: string[] = [];
+      const uploadedUrls: string[] = [];
       for (const file of filesArray) {
         if (!file.type.startsWith('image/')) continue;
-        const compressed = await compressImageFile(file);
-        dataUrls.push(compressed);
+        // Use higher resolution (1200px, 0.80 quality) for crisp studio display;
+        // if Vercel Blob is active it returns a fast CDN URL, otherwise falls back to compressed Data URL
+        const compressedDataUrl = await compressImageFile(file, 1100, 0.78);
+        try {
+          const res = await fetch('/api/blob/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              filename: file.name || `solar-${Date.now()}.jpg`,
+              contentType: 'image/jpeg',
+              dataUrl: compressedDataUrl
+            })
+          });
+          if (res.ok) {
+            const payload = await res.json();
+            if (payload && typeof payload.url === 'string' && payload.url) {
+              uploadedUrls.push(payload.url);
+              continue;
+            }
+          }
+        } catch {
+          // Fallback to local compressed Data URL if offline
+        }
+        uploadedUrls.push(compressedDataUrl);
       }
-      if (dataUrls.length > 0) {
-        onChange([...safeImages, ...dataUrls]);
+      if (uploadedUrls.length > 0) {
+        onChange([...safeImages, ...uploadedUrls]);
       }
     } finally {
       setIsUploading(false);
