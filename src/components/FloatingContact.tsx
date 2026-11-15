@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Phone, MessageCircle, FileText, ChevronUp } from 'lucide-react';
+import { ChevronUp, MapPin } from 'lucide-react';
 
 export const FloatingContact: React.FC = () => {
   const { companyInfo } = useApp();
@@ -37,16 +37,13 @@ export const FloatingContact: React.FC = () => {
         href={companyInfo.warehouseMapUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-2 px-3.5 py-2 rounded-full glass-bubble-dark text-white transition-all hover:scale-105 text-xs"
-        title="Mở bản đồ Google Maps Kho Tổng"
+        className="flex items-center gap-2 px-3.5 py-2.5 rounded-full glass-bubble-dark text-white transition-all hover:scale-105 text-xs"
+        title="Mở bản đồ Google Maps Tới Kho"
       >
-        <div className="w-5 h-5 rounded-full bg-emerald-400 text-slate-950 font-extrabold text-[10px] flex items-center justify-center shadow-xs">
-          Map
+        <div className="w-6 h-6 rounded-full bg-emerald-400 text-slate-950 flex items-center justify-center shadow-xs shrink-0">
+          <MapPin className="w-3.5 h-3.5 stroke-[2.5]" />
         </div>
-        <div className="flex flex-col text-left">
-          <span className="text-[10px] text-emerald-300 font-semibold leading-none">Bản đồ Kho tổng</span>
-          <span className="text-[11px] font-bold tracking-tight leading-tight">137 Thới Tam Thôn 9</span>
-        </div>
+        <span className="text-xs font-extrabold tracking-tight leading-none pr-0.5">Tới Kho</span>
       </a>
 
       {/* Floating Zalo Button with distinctive Vietnamese Zalo branding and phone */}

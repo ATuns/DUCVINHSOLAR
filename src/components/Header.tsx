@@ -124,7 +124,7 @@ export const Header: React.FC = () => {
   return (
     <>
       {/* Main Header styled as a floating frosted glass bubble that always follows scroll */}
-      <header className="fixed top-2 sm:top-3 left-0 right-0 z-50 mx-auto max-w-7xl w-[calc(100%-1rem)] sm:w-[calc(100%-2rem)] lg:w-[calc(100%-2.5rem)] rounded-full bg-white/65 hover:bg-white/78 backdrop-blur-xl backdrop-saturate-150 border border-white/85 ring-1 ring-emerald-900/10 shadow-[0_14px_38px_-6px_rgba(15,23,42,0.18),0_4px_14px_-2px_rgba(16,185,129,0.12),inset_0_1.5px_2px_rgba(255,255,255,0.95)] transition-all duration-300">
+      <header className="fixed top-2 sm:top-3 left-0 right-0 z-50 mx-auto max-w-7xl w-[calc(100%-1rem)] sm:w-[calc(100%-2rem)] lg:w-[calc(100%-2.5rem)] rounded-full bg-white/40 hover:bg-white/55 backdrop-blur-2xl backdrop-saturate-180 border border-white/80 ring-1 ring-emerald-900/5 shadow-[0_14px_38px_-6px_rgba(15,23,42,0.12),0_4px_14px_-2px_rgba(16,185,129,0.08),inset_0_1.5px_2px_rgba(255,255,255,0.92)] transition-all duration-300">
         <div className="px-3.5 sm:px-6 lg:px-7 h-14 sm:h-16 lg:h-[68px] flex items-center justify-between gap-2 sm:gap-4 lg:gap-5">
           {/* Zone 1: Brand title wordmark */}
           <div className="flex items-center gap-2.5 min-w-0 shrink-0">
@@ -537,6 +537,15 @@ export const Header: React.FC = () => {
           </div>
         )}
       </header>
+
+      {/* Light, blurred background overlay behind the mobile/tablet menu when open */}
+      {mobileMenuOpen && (
+        <div
+          onClick={() => setMobileMenuOpen(false)}
+          className="lg:hidden fixed inset-0 z-40 bg-white/45 backdrop-blur-md transition-opacity"
+          aria-hidden="true"
+        />
+      )}
     </>
   );
 };
