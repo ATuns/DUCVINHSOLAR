@@ -29,6 +29,10 @@ let memoryCache: BlobDatabaseState | null = null;
 let lastBlobFetchAt = 0;
 const CACHE_TTL_MS = 3500;
 
+// Default to 'private' because the user's `ducvinhsolar` store is configured with private access;
+// automatically falls back to 'public' if connected to a public store.
+let detectedStoreAccess: 'private' | 'public' = 'private';
+
 export function getVercelBlobToken(): string {
   const candidates = [
     process.env.DUCVINHSOLAR_READ_WRITE_TOKEN,
@@ -50,6 +54,63 @@ export function getVercelBlobToken(): string {
 
 export function isVercelBlobConfigured(): boolean {
   return Boolean(getVercelBlobToken());
+}
+
+/**
+ * Helper that writes to Vercel Blob with automatic private/public store access detection.
+ */
+async function putBlobWithAutoAccess(
+  pathname: string,
+  body: string | Buffer,
+  options: {
+    addRandomSuffix: boolean;
+    allowOverwrite?: boolean;
+    contentType: string;
+    cacheControlMaxAge?: number;
+    token: string;
+  }
+) {
+  try {
+    return await put(pathname, body, {
+      ...options,
+      access: detectedStoreAccess
+    });
+  } catch (err: any) {
+    const msg = String(err?.message || '');
+    if (msg.includes('Cannot use public access on a private store')) {
+      detectedStoreAccess = 'private';
+      return await put(pathname, body, {
+        ...options,
+        access: 'private'
+      });
+    }
+    if (msg.includes('Cannot use private access on a public store')) {
+      detectedStoreAccess = 'public';
+      return await put(pathname, body, {
+        ...options,
+        access: 'public'
+      });
+    }
+    throw err;
+  }
+}
+
+/**
+ * Fetches a blob URL supporting both private stores (Bearer token) and public stores.
+ */
+async function fetchBlobUrl(url: string, blobToken: string, noStore = true): Promise<Response> {
+  const targetUrl = noStore ? `${url}${url.includes('?') ? '&' : '?'}t=${Date.now()}` : url;
+  // For private Vercel Blob stores, Authorization: Bearer <token> is required
+  const res = await fetch(targetUrl, {
+    headers: blobToken ? { Authorization: `Bearer ${blobToken}` } : undefined,
+    cache: noStore ? 'no-store' : 'default'
+  });
+  if (res.ok) return res;
+
+  // Fallback without Authorization header in case of public CDN URL
+  return fetch(targetUrl, {
+    cache: noStore ? 'no-store' : 'default'
+  });
 }
 
 function createEmptyState(): BlobDatabaseState {
@@ -102,7 +163,6 @@ async function readDatabaseState(forceRefresh = false): Promise<BlobDatabaseStat
       let exactBlob =
         blobs.find((b) => b.pathname === STATE_BLOB_PATH) || blobs[0];
 
-      // Check legacy path if new store path has not been written yet
       if (!exactBlob) {
         const legacyList = await list({
           prefix: LEGACY_STATE_BLOB_PATH,
@@ -115,9 +175,10 @@ async function readDatabaseState(forceRefresh = false): Promise<BlobDatabaseStat
       }
 
       if (exactBlob && exactBlob.url) {
-        const res = await fetch(`${exactBlob.url}?t=${now}`, {
-          cache: 'no-store'
-        });
+        if (exactBlob.url.includes('.private.blob.vercel-storage.com')) {
+          detectedStoreAccess = 'private';
+        }
+        const res = await fetchBlobUrl(exactBlob.url, blobToken, true);
         if (res.ok) {
           const parsed = await res.json();
           memoryCache = normalizeState(parsed);
@@ -163,8 +224,7 @@ async function writeDatabaseState(nextState: BlobDatabaseState): Promise<BlobDat
 
   const blobToken = getVercelBlobToken();
   if (blobToken) {
-    await put(STATE_BLOB_PATH, JSON.stringify(normalized), {
-      access: 'public',
+    await putBlobWithAutoAccess(STATE_BLOB_PATH, JSON.stringify(normalized), {
       addRandomSuffix: false,
       allowOverwrite: true,
       contentType: 'application/json',
@@ -263,6 +323,7 @@ export default async function apiHandler(req: any, res: any) {
         ok: true,
         storeName: STORE_NAME,
         envPrefix: 'DUCVINHSOLAR',
+        storeAccess: detectedStoreAccess,
         storageEngine: 'vercel-blob',
         storageMode: isVercelBlobConfigured() ? 'vercel-blob' : 'local-fallback',
         updatedAt: state.updatedAt,
@@ -276,7 +337,27 @@ export default async function apiHandler(req: any, res: any) {
       });
     }
 
-    // 2. POST /api/blob/upload -> Upload image file directly to Vercel Blob Store `ducvinhsolar`
+    // 2. GET /api/blob/media -> Stream private Vercel Blob images securely to the browser
+    if (method === 'GET' && pathname === '/api/blob/media') {
+      const blobUrl = urlObj.searchParams.get('url') || '';
+      if (!blobUrl || !blobUrl.includes('blob.vercel-storage.com')) {
+        return sendJson(res, 400, { ok: false, error: 'Invalid blob media URL' });
+      }
+      const blobToken = getVercelBlobToken();
+      const upstream = await fetchBlobUrl(blobUrl, blobToken, false);
+      if (!upstream.ok) {
+        return sendJson(res, upstream.status, { ok: false, error: 'Failed to load blob media' });
+      }
+      const contentType = upstream.headers.get('content-type') || 'image/jpeg';
+      const arrayBuf = await upstream.arrayBuffer();
+      const buffer = Buffer.from(arrayBuf);
+      res.statusCode = 200;
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      return res.end(buffer);
+    }
+
+    // 3. POST /api/blob/upload -> Upload image file directly to Vercel Blob Store `ducvinhsolar`
     if (method === 'POST' && pathname === '/api/blob/upload') {
       const body = await parseJsonBody(req);
       const dataUrl = typeof body.dataUrl === 'string' ? body.dataUrl : '';
@@ -296,17 +377,26 @@ export default async function apiHandler(req: any, res: any) {
           const buffer = Buffer.from(base64Data, 'base64');
           const blobPath = `${STORE_NAME}/media/${Date.now()}-${safeFilename}`;
 
-          const uploaded = await put(blobPath, buffer, {
-            access: 'public',
+          const uploaded = await putBlobWithAutoAccess(blobPath, buffer, {
             addRandomSuffix: true,
             contentType,
             token: blobToken
           });
 
+          // If the store is private, serve the image via our authenticated /api/blob/media proxy route
+          const isPrivateBlob =
+            detectedStoreAccess === 'private' ||
+            uploaded.url.includes('.private.blob.vercel-storage.com');
+          const browserUrl = isPrivateBlob
+            ? `/api/blob/media?url=${encodeURIComponent(uploaded.url)}`
+            : uploaded.url;
+
           return sendJson(res, 200, {
             ok: true,
             storeName: STORE_NAME,
-            url: uploaded.url,
+            storeAccess: detectedStoreAccess,
+            url: browserUrl,
+            rawBlobUrl: uploaded.url,
             pathname: uploaded.pathname,
             storageMode: 'vercel-blob'
           });
@@ -321,7 +411,7 @@ export default async function apiHandler(req: any, res: any) {
       });
     }
 
-    // 3. POST /api/seed -> Seed initial data only if database is currently empty
+    // 4. POST /api/seed -> Seed initial data only if database is currently empty
     if (method === 'POST' && pathname === '/api/seed') {
       const current = await readDatabaseState();
       const isEmpty =
@@ -350,7 +440,7 @@ export default async function apiHandler(req: any, res: any) {
       return sendJson(res, 200, { ok: true, seeded: true, state: nextState });
     }
 
-    // 4. POST /api/restore -> Full replace or merge sync to Vercel Blob `ducvinhsolar`
+    // 5. POST /api/restore -> Full replace or merge sync to Vercel Blob `ducvinhsolar`
     if (method === 'POST' && pathname === '/api/restore') {
       const body = await parseJsonBody(req);
       const mode = body.mode === 'merge' ? 'merge' : 'replace';
@@ -400,12 +490,13 @@ export default async function apiHandler(req: any, res: any) {
         ok: true,
         mode,
         storeName: STORE_NAME,
+        storeAccess: detectedStoreAccess,
         updatedAt: saved.updatedAt,
         storageMode: isVercelBlobConfigured() ? 'vercel-blob' : 'local-fallback'
       });
     }
 
-    // 5. Categories CRUD
+    // 6. Categories CRUD
     if (method === 'POST' && pathname === '/api/categories') {
       const item = await parseJsonBody(req);
       if (!item || !item.id) return sendJson(res, 400, { ok: false, error: 'Invalid category' });
@@ -422,7 +513,7 @@ export default async function apiHandler(req: any, res: any) {
       return sendJson(res, 200, { ok: true, updatedAt: saved.updatedAt });
     }
 
-    // 6. Brands CRUD
+    // 7. Brands CRUD
     if (method === 'POST' && pathname === '/api/brands') {
       const item = await parseJsonBody(req);
       if (!item || !item.id) return sendJson(res, 400, { ok: false, error: 'Invalid brand' });
@@ -439,7 +530,7 @@ export default async function apiHandler(req: any, res: any) {
       return sendJson(res, 200, { ok: true, updatedAt: saved.updatedAt });
     }
 
-    // 7. Products CRUD
+    // 8. Products CRUD
     if (method === 'POST' && pathname === '/api/products') {
       const item = await parseJsonBody(req);
       if (!item || !item.id) return sendJson(res, 400, { ok: false, error: 'Invalid product' });
@@ -456,7 +547,7 @@ export default async function apiHandler(req: any, res: any) {
       return sendJson(res, 200, { ok: true, updatedAt: saved.updatedAt });
     }
 
-    // 8. Projects CRUD
+    // 9. Projects CRUD
     if (method === 'POST' && pathname === '/api/projects') {
       const item = await parseJsonBody(req);
       if (!item || !item.id) return sendJson(res, 400, { ok: false, error: 'Invalid project' });
@@ -473,7 +564,7 @@ export default async function apiHandler(req: any, res: any) {
       return sendJson(res, 200, { ok: true, updatedAt: saved.updatedAt });
     }
 
-    // 9. Blog Posts CRUD
+    // 10. Blog Posts CRUD
     if (method === 'POST' && pathname === '/api/blog-posts') {
       const item = await parseJsonBody(req);
       if (!item || !item.id) return sendJson(res, 400, { ok: false, error: 'Invalid blog post' });
@@ -490,7 +581,7 @@ export default async function apiHandler(req: any, res: any) {
       return sendJson(res, 200, { ok: true, updatedAt: saved.updatedAt });
     }
 
-    // 10. Company Info update
+    // 11. Company Info update
     if (method === 'POST' && pathname === '/api/company-info') {
       const info = await parseJsonBody(req);
       const current = await readDatabaseState();
@@ -499,7 +590,7 @@ export default async function apiHandler(req: any, res: any) {
       return sendJson(res, 200, { ok: true, updatedAt: saved.updatedAt });
     }
 
-    // 11. Inquiries CRUD
+    // 12. Inquiries CRUD
     if (method === 'POST' && pathname === '/api/inquiries') {
       const item = await parseJsonBody(req);
       if (!item || !item.id) return sendJson(res, 400, { ok: false, error: 'Invalid inquiry' });
