@@ -123,27 +123,27 @@ export const Header: React.FC = () => {
 
   return (
     <>
-      {/* Main Header styled as a floating frosted glass bubble */}
-      <header className="sticky top-2.5 sm:top-3.5 z-40 mx-auto max-w-7xl w-[calc(100%-1.25rem)] sm:w-[calc(100%-2.5rem)] lg:w-[calc(100%-3rem)] rounded-full bg-white/60 hover:bg-white/72 backdrop-blur-xl backdrop-saturate-150 border border-white/80 ring-1 ring-emerald-900/10 shadow-[0_14px_38px_-6px_rgba(15,23,42,0.16),0_4px_14px_-2px_rgba(16,185,129,0.10),inset_0_1.5px_2px_rgba(255,255,255,0.95)] transition-all duration-300">
-        <div className="px-4 sm:px-7 lg:px-8 h-16 sm:h-[72px] flex items-center justify-between gap-4 lg:gap-8">
+      {/* Main Header styled as a floating frosted glass bubble that always follows scroll */}
+      <header className="fixed top-2 sm:top-3 left-0 right-0 z-50 mx-auto max-w-7xl w-[calc(100%-1rem)] sm:w-[calc(100%-2rem)] lg:w-[calc(100%-2.5rem)] rounded-full bg-white/65 hover:bg-white/78 backdrop-blur-xl backdrop-saturate-150 border border-white/85 ring-1 ring-emerald-900/10 shadow-[0_14px_38px_-6px_rgba(15,23,42,0.18),0_4px_14px_-2px_rgba(16,185,129,0.12),inset_0_1.5px_2px_rgba(255,255,255,0.95)] transition-all duration-300">
+        <div className="px-3.5 sm:px-6 lg:px-7 h-14 sm:h-16 lg:h-[68px] flex items-center justify-between gap-2 sm:gap-4 lg:gap-5">
           {/* Zone 1: Brand title wordmark */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0 shrink-0">
             <a
               href="#"
               onClick={(e) => {
                 e.preventDefault();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="group flex items-center gap-2.5 text-emerald-800 hover:text-emerald-950 transition-colors"
+              className="group flex items-center gap-2 sm:gap-2.5 text-emerald-800 hover:text-emerald-950 transition-colors min-w-0"
             >
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white shadow-[0_4px_12px_rgba(16,185,129,0.35),inset_0_1px_1px_rgba(255,255,255,0.6)] group-hover:scale-105 transition-transform">
-                <Sun className="w-5 h-5 animate-[spin_12s_linear_infinite]" />
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white shadow-[0_4px_12px_rgba(16,185,129,0.35),inset_0_1px_1px_rgba(255,255,255,0.6)] group-hover:scale-105 transition-transform shrink-0">
+                <Sun className="w-4 h-4 sm:w-5 sm:h-5 animate-[spin_12s_linear_infinite]" />
               </div>
-              <div className="flex flex-col">
-                <span className="text-lg sm:text-2xl font-extrabold tracking-tight font-heading text-emerald-950 whitespace-nowrap drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]">
+              <div className="flex flex-col min-w-0">
+                <span className="text-base sm:text-xl xl:text-2xl font-extrabold tracking-tight font-heading text-emerald-950 whitespace-nowrap truncate drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]">
                   Đức Vinh <span className="text-emerald-600">Solar</span>
                 </span>
-                <span className="text-[10px] text-slate-600 uppercase tracking-widest font-medium hidden sm:block">
+                <span className="text-[9px] xl:text-[10px] text-slate-600 uppercase tracking-wider font-medium hidden sm:block lg:hidden xl:block truncate">
                   Năng Lượng Mặt Trời &amp; Tiết Kiệm Điện
                 </span>
               </div>
@@ -151,7 +151,7 @@ export const Header: React.FC = () => {
           </div>
 
           {/* Zone 2: Navigation links with cascading hover menu on "Sản Phẩm Solar" */}
-          <nav className="hidden lg:flex items-center gap-6 text-sm font-semibold text-slate-700">
+          <nav className="hidden lg:flex items-center gap-3.5 xl:gap-6 text-xs xl:text-sm font-semibold text-slate-700 min-w-0">
             {/* Cascading Dropdown Trigger: Sản Phẩm Solar -> Loại Sản Phẩm -> Hãng */}
             <div
               className="relative py-4"
@@ -171,7 +171,7 @@ export const Header: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleSelectFromNav('all', 'all')}
-                className={`flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 py-1 font-semibold ${
+                className={`flex items-center gap-1 transition-colors whitespace-nowrap shrink-0 py-1 font-semibold ${
                   isProductMenuHovered || selectedCategory !== 'all'
                     ? 'text-emerald-700'
                     : 'text-slate-700 hover:text-emerald-700'
@@ -179,7 +179,7 @@ export const Header: React.FC = () => {
               >
                 <span>Sản Phẩm Solar</span>
                 <ChevronDown
-                  className={`w-4 h-4 transition-transform duration-150 ${
+                  className={`w-3.5 h-3.5 xl:w-4 xl:h-4 transition-transform duration-150 ${
                     isProductMenuHovered ? 'rotate-180 text-emerald-600' : 'text-slate-400'
                   }`}
                 />
@@ -401,7 +401,7 @@ export const Header: React.FC = () => {
             {/* Mobile menu trigger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 text-slate-700 hover:text-slate-900 rounded-full hover:bg-white/70 transition-colors"
+              className="lg:hidden p-2 text-slate-800 hover:text-slate-950 rounded-full bg-white hover:bg-slate-100 border border-slate-200/80 shadow-2xs transition-colors"
               aria-label="Mở menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -409,12 +409,12 @@ export const Header: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation Drawer */}
+        {/* Mobile Navigation Drawer (solid background, no blur on phone & tablet) */}
         {mobileMenuOpen && (
-          <div className="lg:hidden absolute left-0 right-0 top-[calc(100%+0.6rem)] rounded-3xl border border-white/80 ring-1 ring-slate-900/10 bg-white/85 backdrop-blur-2xl px-4 pt-3 pb-6 shadow-[0_20px_50px_rgba(15,23,42,0.2)] animate-in slide-in-from-top duration-150 max-h-[80vh] overflow-y-auto">
+          <div className="lg:hidden absolute left-0 right-0 top-[calc(100%+0.6rem)] rounded-2xl border border-slate-200 bg-white px-4 pt-3 pb-6 shadow-2xl max-h-[80vh] overflow-y-auto">
             <div className="flex flex-col gap-1.5">
               {/* Mobile expandable Sản Phẩm Solar -> Loại sản phẩm -> Hãng */}
-              <div className="rounded-lg border border-slate-100 bg-slate-50/60 overflow-hidden">
+              <div className="rounded-lg border border-slate-200 bg-slate-50 overflow-hidden">
                 <div className="flex items-center justify-between">
                   <button
                     type="button"
@@ -436,7 +436,7 @@ export const Header: React.FC = () => {
                 </div>
 
                 {mobileCatalogOpen && (
-                  <div className="px-2 pb-2.5 pt-1 border-t border-slate-200/70 space-y-1 bg-white">
+                  <div className="px-2 pb-2.5 pt-1 border-t border-slate-200 space-y-1 bg-white">
                     <button
                       type="button"
                       onClick={() => handleSelectFromNav('all', 'all')}

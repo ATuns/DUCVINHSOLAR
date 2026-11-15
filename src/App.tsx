@@ -27,8 +27,8 @@ export default function App() {
         {/* Navigation Bar (Direct child: div#root > div > header) */}
         <Header />
 
-        {/* Main Content Area */}
-        <main className="flex-1 relative z-10">
+        {/* Main Content Area (padded for fixed floating header) */}
+        <main className="flex-1 relative z-10 pt-[4.25rem] sm:pt-[5rem]">
           {/* Product Catalog First - Immediately visible on page load */}
           <ProductCatalog />
 

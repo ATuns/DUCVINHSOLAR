@@ -265,31 +265,31 @@ export const BlogSection: React.FC = () => {
   return (
     <section
       id="blog-section"
-      className="py-12 sm:py-16 bg-transparent overflow-hidden"
+      className="py-8 sm:py-14 bg-transparent overflow-hidden"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Section Header + Slider Navigation Controls in Frosted Bubble */}
-        <div className="glass-bubble rounded-[2rem] p-6 sm:p-8 flex flex-col lg:flex-row lg:items-end justify-between gap-5 mb-6">
-          <div>
+        <div className="glass-bubble rounded-3xl sm:rounded-[2rem] p-5 sm:p-8 flex flex-col lg:flex-row lg:items-end justify-between gap-4 sm:gap-5 mb-6 overflow-hidden">
+          <div className="min-w-0">
             <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 tracking-wider uppercase mb-2">
-              <BookOpen className="w-4 h-4 text-emerald-600" />
-              <span>Góc Chia Sẻ Kỹ Thuật &amp; Kinh Nghiệm Solar</span>
+              <BookOpen className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span className="truncate">Góc Chia Sẻ Kỹ Thuật &amp; Kinh Nghiệm Solar</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 font-heading">
+            <h2 className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 font-heading break-words">
               Blog Bài Viết &amp; Cẩm Nang Năng Lượng Mặt Trời
             </h2>
-            <p className="text-sm text-slate-600 mt-2 max-w-2xl">
+            <p className="text-xs sm:text-sm text-slate-600 mt-2 max-w-2xl break-words">
               Trượt ngang để chọn bài viết chuyên sâu về kinh nghiệm chọn tấm pin, biến tần Hybrid, pin lưu trữ Lithium và giải pháp tiết kiệm điện thực tế. Ấn vào từng bài viết để xem chi tiết.
             </p>
           </div>
 
           {/* Right Controls: Admin Add Button + Horizontal Slide Left/Right Buttons */}
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 shrink-0">
             {isAdmin && (
               <button
                 type="button"
                 onClick={handleOpenAddBlog}
-                className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-full shadow-xs flex items-center gap-1.5 transition-colors"
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-full shadow-xs flex items-center gap-1.5 transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 <span>Thêm Bài Viết Mới</span>
@@ -300,7 +300,7 @@ export const BlogSection: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleSlide('left')}
-                className="px-4 py-2.5 rounded-full glass-pill hover:bg-emerald-600 hover:text-white text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all"
+                className="px-3.5 sm:px-4 py-2 rounded-full glass-pill hover:bg-emerald-600 hover:text-white text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all"
                 title="Trượt sang trái"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -309,7 +309,7 @@ export const BlogSection: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleSlide('right')}
-                className="px-4 py-2.5 rounded-full glass-pill hover:bg-emerald-600 hover:text-white text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all"
+                className="px-3.5 sm:px-4 py-2 rounded-full glass-pill hover:bg-emerald-600 hover:text-white text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all"
                 title="Trượt sang phải"
               >
                 <span>Trượt phải</span>
