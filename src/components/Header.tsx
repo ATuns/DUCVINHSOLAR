@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   Phone,
@@ -51,6 +51,21 @@ export const Header: React.FC = () => {
   const [mobileExpandedCat, setMobileExpandedCat] = useState<string | null>(null);
   const [isProductMenuHovered, setIsProductMenuHovered] = useState(false);
   const [hoveredCategoryId, setHoveredCategoryId] = useState<string | null>(null);
+  const productMenuRef = useRef<HTMLDivElement>(null);
+  const lastPointerTypeRef = useRef<string>('mouse');
+
+  // Close the desktop/tablet cascading product menu when tapping or clicking outside
+  useEffect(() => {
+    if (!isProductMenuHovered) return;
+    const handleOutsidePointerDown = (e: PointerEvent) => {
+      if (productMenuRef.current && !productMenuRef.current.contains(e.target as Node)) {
+        setIsProductMenuHovered(false);
+        setHoveredCategoryId(null);
+      }
+    };
+    document.addEventListener('pointerdown', handleOutsidePointerDown);
+    return () => document.removeEventListener('pointerdown', handleOutsidePointerDown);
+  }, [isProductMenuHovered]);
 
   // Compute brands per category for the cascading menu
   const brandsByCategory = useMemo(() => {
@@ -154,23 +169,50 @@ export const Header: React.FC = () => {
           <nav className="hidden lg:flex items-center gap-3.5 xl:gap-6 text-xs xl:text-sm font-semibold text-slate-700 min-w-0">
             {/* Cascading Dropdown Trigger: Sản Phẩm Solar -> Loại Sản Phẩm -> Hãng */}
             <div
+              ref={productMenuRef}
               className="relative py-4"
-              onMouseEnter={() => {
-                setIsProductMenuHovered(true);
-                if (!hoveredCategoryId && categories.length > 0) {
-                  setHoveredCategoryId(
-                    selectedCategory !== 'all' ? selectedCategory : categories[0].id
-                  );
+              onPointerEnter={(e) => {
+                lastPointerTypeRef.current = e.pointerType || 'mouse';
+                if (e.pointerType === 'mouse') {
+                  setIsProductMenuHovered(true);
+                  if (!hoveredCategoryId && categories.length > 0) {
+                    setHoveredCategoryId(
+                      selectedCategory !== 'all' ? selectedCategory : categories[0].id
+                    );
+                  }
                 }
               }}
-              onMouseLeave={() => {
-                setIsProductMenuHovered(false);
-                setHoveredCategoryId(null);
+              onPointerLeave={(e) => {
+                if (e.pointerType === 'mouse') {
+                  setIsProductMenuHovered(false);
+                  setHoveredCategoryId(null);
+                }
               }}
             >
               <button
                 type="button"
-                onClick={() => handleSelectFromNav('all', 'all')}
+                onPointerDown={(e) => {
+                  lastPointerTypeRef.current = e.pointerType || 'mouse';
+                }}
+                onClick={() => {
+                  // On touch/tablet (no mouse hover) or if closed, toggle dropdown instead of immediately navigating away
+                  if (lastPointerTypeRef.current !== 'mouse' || !isProductMenuHovered) {
+                    if (isProductMenuHovered) {
+                      setIsProductMenuHovered(false);
+                      setHoveredCategoryId(null);
+                    } else {
+                      setIsProductMenuHovered(true);
+                      if (!hoveredCategoryId && categories.length > 0) {
+                        setHoveredCategoryId(
+                          selectedCategory !== 'all' ? selectedCategory : categories[0].id
+                        );
+                      }
+                    }
+                  } else {
+                    handleSelectFromNav('all', 'all');
+                  }
+                }}
+                aria-expanded={isProductMenuHovered}
                 className={`flex items-center gap-1 transition-colors whitespace-nowrap shrink-0 py-1 font-semibold ${
                   isProductMenuHovered || selectedCategory !== 'all'
                     ? 'text-emerald-700'
@@ -188,9 +230,9 @@ export const Header: React.FC = () => {
               {/* Level 1 Dropdown: Loại Sản Phẩm */}
               {isProductMenuHovered && (
                 <div className="absolute left-0 top-full pt-2 z-50">
-                  <div className="bg-white/85 backdrop-blur-2xl rounded-2xl border border-white/80 ring-1 ring-slate-900/10 shadow-[0_20px_50px_rgba(15,23,42,0.18),inset_0_1px_1px_rgba(255,255,255,0.9)] flex min-w-[270px] overflow-visible">
+                  <div className="bg-white/95 backdrop-blur-2xl rounded-2xl border border-white/80 ring-1 ring-slate-900/10 shadow-[0_20px_50px_rgba(15,23,42,0.18),inset_0_1px_1px_rgba(255,255,255,0.9)] flex max-w-[calc(100vw-2rem)] overflow-visible">
                     {/* Categories Column */}
-                    <div className="w-72 py-2 bg-white/70 rounded-l-2xl">
+                    <div className="w-56 xl:w-72 py-2 bg-white/80 rounded-l-2xl shrink-0">
                       <div className="px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
                         Loại Sản Phẩm
                       </div>
@@ -198,7 +240,9 @@ export const Header: React.FC = () => {
                       {/* All Products Item */}
                       <button
                         type="button"
-                        onMouseEnter={() => setHoveredCategoryId(null)}
+                        onPointerEnter={(e) => {
+                          if (e.pointerType === 'mouse') setHoveredCategoryId(null);
+                        }}
                         onClick={() => handleSelectFromNav('all', 'all')}
                         className={`w-full px-3.5 py-2.5 text-left text-xs font-semibold flex items-center justify-between gap-2 transition-colors ${
                           selectedCategory === 'all' && hoveredCategoryId === null
@@ -225,12 +269,28 @@ export const Header: React.FC = () => {
                         return (
                           <div
                             key={cat.id}
-                            onMouseEnter={() => setHoveredCategoryId(cat.id)}
+                            onPointerEnter={(e) => {
+                              if (e.pointerType === 'mouse') {
+                                setHoveredCategoryId(cat.id);
+                              }
+                            }}
                             className="relative"
                           >
                             <button
                               type="button"
-                              onClick={() => handleSelectFromNav(cat.id, 'all')}
+                              onPointerDown={(e) => {
+                                lastPointerTypeRef.current = e.pointerType || 'mouse';
+                              }}
+                              onClick={() => {
+                                if (
+                                  lastPointerTypeRef.current !== 'mouse' &&
+                                  hoveredCategoryId !== cat.id
+                                ) {
+                                  setHoveredCategoryId(cat.id);
+                                } else {
+                                  handleSelectFromNav(cat.id, 'all');
+                                }
+                              }}
                               className={`w-full px-3.5 py-2.5 text-left text-xs font-semibold flex items-center justify-between gap-2 transition-colors ${
                                 isHovered || isSelected
                                   ? 'bg-emerald-600 text-white'
@@ -272,7 +332,7 @@ export const Header: React.FC = () => {
                       if (!activeCat) return null;
 
                       return (
-                        <div className="w-64 py-2 bg-slate-50/90 border-l border-slate-200 rounded-r-xl flex flex-col justify-between">
+                        <div className="w-52 xl:w-64 py-2 bg-slate-50/95 border-l border-slate-200 rounded-r-2xl flex flex-col justify-between min-w-0">
                           <div>
                             <div className="px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-800 border-b border-slate-200/80 flex items-center justify-between">
                               <span className="truncate">Hãng: {activeCat.shortLabel || activeCat.label}</span>
@@ -418,7 +478,7 @@ export const Header: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <button
                     type="button"
-                    onClick={() => handleSelectFromNav('all', 'all')}
+                    onClick={() => setMobileCatalogOpen(!mobileCatalogOpen)}
                     className="flex-1 text-left px-3 py-2.5 text-sm font-semibold text-slate-900 hover:text-emerald-700"
                   >
                     Sản Phẩm Solar
