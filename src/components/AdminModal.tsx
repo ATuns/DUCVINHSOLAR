@@ -146,6 +146,9 @@ export const AdminModal: React.FC = () => {
     adminEditingProduct,
     clearAdminEditingProduct,
     syncAllToCloud,
+    connectVercelBlobToken,
+    blobConnected,
+    storageMode,
     isSyncingCloud,
     resetToDefaults,
     exportBackup,
@@ -259,6 +262,8 @@ export const AdminModal: React.FC = () => {
   const [showPasteJson, setShowPasteJson] = useState(false);
   const [pastedJsonText, setPastedJsonText] = useState('');
   const [copiedBackup, setCopiedBackup] = useState(false);
+  const [blobTokenInput, setBlobTokenInput] = useState('');
+  const [showTokenBox, setShowTokenBox] = useState(false);
 
   const showNotice = (msg: string) => {
     setAdminNotice(msg);
@@ -2713,17 +2718,76 @@ export const AdminModal: React.FC = () => {
                     </button>
                   </div>
 
-                  {/* SECTION 1: LIVE SYSTEM DATA SUMMARY */}
-                  <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 text-white border border-slate-800 shadow-sm">
-                    <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                  {/* SECTION 1: LIVE SYSTEM DATA SUMMARY & VERCEL BLOB CONNECTION */}
+                  <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 text-white border border-slate-800 shadow-sm space-y-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-                        1. Thống Kê Dữ Liệu (Vercel Blob Store: ducvinhsolar)
+                        1. Trạng Thái Đồng Bộ (Preview &harr; GitHub &harr; Vercel Blob: ducvinhsolar)
                       </span>
-                      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-300 bg-emerald-950/80 border border-emerald-700/50 px-2.5 py-0.5 rounded-md">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                        Store: ducvinhsolar · Prefix: DUCVINHSOLAR
-                      </span>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-md border ${
+                            blobConnected
+                              ? 'text-emerald-300 bg-emerald-950/80 border-emerald-600/60'
+                              : 'text-amber-300 bg-amber-950/70 border-amber-600/60'
+                          }`}
+                        >
+                          <span
+                            className={`w-2 h-2 rounded-full ${
+                              blobConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
+                            }`}
+                          />
+                          {blobConnected
+                            ? 'Đã kết nối trực tiếp Vercel Blob (ducvinhsolar)'
+                            : `Đồng bộ qua GitHub Snapshot (${storageMode})`}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setShowTokenBox((prev) => !prev)}
+                          className="text-[11px] font-bold px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 transition-colors"
+                        >
+                          {showTokenBox ? 'Ẩn cài đặt Token' : 'Kết nối Token Vercel Blob'}
+                        </button>
+                      </div>
                     </div>
+
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      • <strong>Chống mất dữ liệu khi cập nhật App:</strong> Mọi thay đổi trên bản Preview đều được lưu tự động vào tệp <code>src/data/databaseSnapshot.json</code> (đẩy kèm lên GitHub) và hợp nhất thông minh với Store <code>ducvinhsolar</code> trên Vercel mà không bao giờ bị reset về mặc định.<br />
+                      • <strong>Đồng bộ thời gian thực 2 chiều (Preview &harr; Vercel):</strong> Nếu bạn muốn bản Preview và bản trên Vercel dùng chung trực tiếp 100% theo thời gian thực ngay cả trước khi đẩy code lên GitHub, hãy bấm <strong>"Kết nối Token Vercel Blob"</strong> và dán mã <code>DUCVINHSOLAR_READ_WRITE_TOKEN</code> (bắt đầu bằng <code>vercel_blob_rw_...</code>).
+                    </p>
+
+                    {showTokenBox && (
+                      <div className="p-3.5 rounded-xl bg-slate-800/90 border border-emerald-500/40 space-y-2.5">
+                        <label className="block text-xs font-bold text-emerald-300">
+                          Nhập mã DUCVINHSOLAR_READ_WRITE_TOKEN từ Vercel Dashboard (Storage &rarr; ducvinhsolar):
+                        </label>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <input
+                            type="password"
+                            value={blobTokenInput}
+                            onChange={(e) => setBlobTokenInput(e.target.value)}
+                            placeholder="vercel_blob_rw_..."
+                            className="flex-1 px-3 py-2 text-xs font-mono bg-slate-950 text-white border border-slate-700 rounded-lg focus:outline-hidden focus:border-emerald-400"
+                          />
+                          <button
+                            type="button"
+                            disabled={isSyncingCloud || !blobTokenInput.trim()}
+                            onClick={async () => {
+                              const res = await connectVercelBlobToken(blobTokenInput);
+                              showNotice(res.message);
+                              if (res.ok) {
+                                setBlobTokenInput('');
+                                setShowTokenBox(false);
+                              }
+                            }}
+                            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-extrabold text-xs rounded-lg transition-colors shrink-0"
+                          >
+                            {isSyncingCloud ? 'Đang Kết Nối & Đồng Bộ...' : 'Lưu Token & Đồng Bộ Ngay'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
                       <div className="p-3 rounded-xl bg-slate-800/90 border border-slate-700/70">
                         <div className="text-xl font-extrabold text-white">{categories.length}</div>

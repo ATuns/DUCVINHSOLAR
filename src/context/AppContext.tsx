@@ -41,6 +41,8 @@ interface AppContextType {
   adminActiveTab: AdminTabType;
   adminEditingProduct: Product | null;
   isSyncingCloud: boolean;
+  blobConnected: boolean;
+  storageMode: 'vercel-blob' | 'git-snapshot-sync';
   selectedCategory: 'all' | string;
   selectedBrand: string;
 
@@ -102,6 +104,7 @@ interface AppContextType {
 
   // System & Cloud Sync Tools
   syncAllToCloud: () => Promise<boolean>;
+  connectVercelBlobToken: (token: string) => Promise<{ ok: boolean; message: string }>;
   resetToDefaults: (onConfirmed?: () => void) => void;
   exportBackup: () => string;
   importBackup: (
@@ -321,6 +324,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [adminActiveTab, setAdminActiveTab] = useState<AdminTabType>('inventory');
   const [adminEditingProduct, setAdminEditingProduct] = useState<Product | null>(null);
   const [isSyncingCloud, setIsSyncingCloud] = useState<boolean>(false);
+  const [blobConnected, setBlobConnected] = useState<boolean>(false);
+  const [storageMode, setStorageMode] = useState<'vercel-blob' | 'git-snapshot-sync'>('git-snapshot-sync');
   const [selectedCategory, setSelectedCategory] = useState<'all' | string>('all');
   const [selectedBrand, setSelectedBrand] = useState<string>('all');
 
@@ -461,22 +466,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const res = await fetch('/api/state', { cache: 'no-store' });
         if (!res.ok) return;
         const blobData = await res.json();
-        const hasBlobData =
-          Array.isArray(blobData.categories) && blobData.categories.length > 0;
 
-        if (!hasBlobData && isInitial) {
-          // Auto-seed the Vercel Blob Store `ducvinhsolar` on first visit
-          await postToBlobApi('/api/seed', {
-            categories: categories.length > 0 ? categories : INITIAL_CATEGORIES,
-            brands: brands.length > 0 ? brands : INITIAL_BRANDS,
-            products: products.length > 0 ? products : INITIAL_PRODUCTS,
-            projects: projects.length > 0 ? projects : INITIAL_PROJECTS,
-            blogPosts: blogPosts.length > 0 ? blogPosts : INITIAL_BLOG_POSTS,
-            inquiries,
-            companyInfo: companyInfo || INITIAL_COMPANY_INFO
-          });
-          return;
+        if (!cancelled) {
+          setBlobConnected(Boolean(blobData.blobConnected));
+          setStorageMode(blobData.storageMode === 'vercel-blob' ? 'vercel-blob' : 'git-snapshot-sync');
         }
+
+        const hasBlobData =
+          (Array.isArray(blobData.categories) && blobData.categories.length > 0) ||
+          (Array.isArray(blobData.products) && blobData.products.length > 0);
 
         if (!cancelled && hasBlobData) {
           if (
@@ -490,13 +488,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             lastRemoteUpdatedAtRef.current = blobData.updatedAt;
           }
 
-          if (Array.isArray(blobData.categories) && blobData.categories.length > 0) {
+          if (Array.isArray(blobData.categories)) {
             setCategories(blobData.categories);
           }
-          if (Array.isArray(blobData.brands) && blobData.brands.length > 0) {
+          if (Array.isArray(blobData.brands)) {
             setBrands(blobData.brands);
           }
-          if (Array.isArray(blobData.products) && blobData.products.length > 0) {
+          if (Array.isArray(blobData.products)) {
             setProducts(blobData.products);
             setSelectedProduct((prevSelected) => {
               if (!prevSelected) return null;
@@ -506,13 +504,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               );
             });
           }
-          if (Array.isArray(blobData.projects) && blobData.projects.length > 0) {
+          if (Array.isArray(blobData.projects)) {
             setProjects(blobData.projects);
           }
-          if (Array.isArray(blobData.blogPosts) && blobData.blogPosts.length > 0) {
+          if (Array.isArray(blobData.blogPosts)) {
             setBlogPosts(blobData.blogPosts);
           }
-          if (Array.isArray(blobData.inquiries) && blobData.inquiries.length > 0) {
+          if (Array.isArray(blobData.inquiries)) {
             setInquiries(blobData.inquiries);
           }
           if (blobData.companyInfo) {
@@ -1074,24 +1072,85 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setQuoteModalProduct(null);
   };
 
-  // Force push all current state to Vercel Blob Store `ducvinhsolar`
+  // Force push all current state to Vercel Blob Store `ducvinhsolar` & GitHub snapshot
   const syncAllToCloud = async (): Promise<boolean> => {
     setIsSyncingCloud(true);
     try {
-      await postToBlobApi('/api/restore', {
-        mode: 'replace',
-        categories,
-        brands,
-        products,
-        projects,
-        blogPosts,
-        inquiries,
-        companyInfo
+      const res = await fetch('/api/restore', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'replace',
+          categories,
+          brands,
+          products,
+          projects,
+          blogPosts,
+          inquiries,
+          companyInfo
+        })
       });
-      return true;
+      if (res.ok) {
+        const data = await res.json();
+        setBlobConnected(Boolean(data.blobConnected));
+        setStorageMode(data.storageMode === 'vercel-blob' ? 'vercel-blob' : 'git-snapshot-sync');
+        if (data.updatedAt) {
+          lastRemoteUpdatedAtRef.current = data.updatedAt;
+        }
+        return true;
+      }
+      return false;
     } catch (e) {
       console.error('Sync all to Vercel Blob error:', e);
       return false;
+    } finally {
+      if (isMountedRef.current) {
+        setIsSyncingCloud(false);
+      }
+    }
+  };
+
+  // Connect AI Studio Preview directly to Vercel Blob Store `ducvinhsolar` using DUCVINHSOLAR_READ_WRITE_TOKEN
+  const connectVercelBlobToken = async (
+    token: string
+  ): Promise<{ ok: boolean; message: string }> => {
+    setIsSyncingCloud(true);
+    try {
+      const res = await fetch('/api/blob/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: token.trim() })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        return {
+          ok: false,
+          message: data.error || 'Không thể kết nối với Vercel Blob Store ducvinhsolar.'
+        };
+      }
+
+      setBlobConnected(true);
+      setStorageMode('vercel-blob');
+      if (data.state) {
+        if (Array.isArray(data.state.categories)) setCategories(data.state.categories);
+        if (Array.isArray(data.state.brands)) setBrands(data.state.brands);
+        if (Array.isArray(data.state.products)) setProducts(data.state.products);
+        if (Array.isArray(data.state.projects)) setProjects(data.state.projects);
+        if (Array.isArray(data.state.blogPosts)) setBlogPosts(data.state.blogPosts);
+        if (Array.isArray(data.state.inquiries)) setInquiries(data.state.inquiries);
+        if (data.state.companyInfo) {
+          setCompanyInfo((prev) => ({ ...prev, ...data.state.companyInfo }));
+        }
+      }
+      return {
+        ok: true,
+        message: 'Đã kết nối trực tiếp bản Preview với Vercel Blob (ducvinhsolar) và đồng bộ dữ liệu 2 chiều thành công!'
+      };
+    } catch (err: any) {
+      return {
+        ok: false,
+        message: err?.message || 'Lỗi kết nối đến máy chủ khi lưu Token.'
+      };
     } finally {
       if (isMountedRef.current) {
         setIsSyncingCloud(false);
@@ -1483,6 +1542,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         adminActiveTab,
         adminEditingProduct,
         isSyncingCloud,
+        blobConnected,
+        storageMode,
         selectedCategory,
         selectedBrand,
         setSelectedProduct,
@@ -1520,6 +1581,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         submitInquiry,
         updateInquiryStatus,
         syncAllToCloud,
+        connectVercelBlobToken,
         resetToDefaults,
         exportBackup,
         importBackup

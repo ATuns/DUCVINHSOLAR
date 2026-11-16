@@ -5,3 +5,5 @@ coverage/
 *.log
 .env*
 !.env.example
+.blob-token.json
+.local-blob-db.json
