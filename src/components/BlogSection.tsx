@@ -1,7 +1,9 @@
 import React, { useState, useRef, useMemo } from 'react';
+import { motion } from 'motion/react';
 import { useApp } from '../context/AppContext';
 import { BlogPost } from '../types';
 import { MultiImageInput } from './MultiImageInput';
+import { ScrollReveal, EXPO_EASE } from './MotionPrimitives';
 import {
   BookOpen,
   Calendar,
@@ -269,7 +271,8 @@ export const BlogSection: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Section Header + Slider Navigation Controls in Frosted Bubble */}
-        <div className="glass-bubble rounded-3xl sm:rounded-[2rem] p-5 sm:p-8 flex flex-col lg:flex-row lg:items-end justify-between gap-4 sm:gap-5 mb-6 overflow-hidden">
+        <ScrollReveal y={22}>
+          <div className="glass-bubble rounded-3xl sm:rounded-[2rem] p-5 sm:p-8 flex flex-col lg:flex-row lg:items-end justify-between gap-4 sm:gap-5 mb-6 overflow-hidden">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 tracking-wider uppercase mb-2">
               <BookOpen className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -317,10 +320,12 @@ export const BlogSection: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
+          </div>
+        </ScrollReveal>
 
         {/* Category Filter Bar */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 scrollbar-none">
+        <ScrollReveal y={14} delay={0.08}>
+          <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 scrollbar-none">
           <button
             type="button"
             onClick={() => setSelectedCategory('all')}
@@ -353,7 +358,8 @@ export const BlogSection: React.FC = () => {
               </button>
             );
           })}
-        </div>
+          </div>
+        </ScrollReveal>
 
         {/* Admin Inline Add / Edit Blog Post Form */}
         {isAdmin && showBlogForm && (
@@ -567,10 +573,15 @@ export const BlogSection: React.FC = () => {
                 const coverImg = postImages[0];
 
                 return (
-                  <article
+                  <motion.article
                     key={post.id}
+                    initial={{ opacity: 0, y: 22, scale: 0.98 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    viewport={{ once: true, amount: 0.08 }}
+                    transition={{ duration: 0.52, delay: Math.min(idx * 0.07, 0.24), ease: EXPO_EASE }}
+                    whileHover={{ y: -5 }}
                     onClick={() => handleOpenPost(post)}
-                    className="snap-start shrink-0 w-[86vw] sm:w-[360px] lg:w-[390px] glass-bubble rounded-[1.85rem] p-3 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden cursor-pointer group"
+                    className="snap-start shrink-0 w-[86vw] sm:w-[360px] lg:w-[390px] glass-bubble rounded-[1.85rem] p-3 transition-colors duration-300 flex flex-col justify-between overflow-hidden cursor-pointer group"
                   >
                     <div>
                       {/* Card Cover Thumbnail */}
@@ -667,7 +678,7 @@ export const BlogSection: React.FC = () => {
                         <ChevronRight className="w-4 h-4" />
                       </span>
                     </div>
-                  </article>
+                  </motion.article>
                 );
               })}
             </div>

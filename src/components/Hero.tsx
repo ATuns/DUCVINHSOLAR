@@ -1,6 +1,8 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import { useApp } from '../context/AppContext';
 import { Zap, ShieldCheck, CheckCircle2, ArrowRight, Sparkles } from 'lucide-react';
+import { ScrollReveal, EXPO_EASE } from './MotionPrimitives';
 
 export const Hero: React.FC = () => {
   const { companyInfo } = useApp();
@@ -18,15 +20,16 @@ export const Hero: React.FC = () => {
   return (
     <section className="py-5 sm:py-10 bg-transparent">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="relative overflow-hidden glass-bubble-dark rounded-3xl sm:rounded-[2.25rem] text-white p-5 sm:p-9 lg:p-12">
-          {/* Decorative ambient solar bubble glows */}
-          <div className="absolute -top-20 right-1/4 w-96 h-96 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-20 left-10 w-80 h-80 bg-teal-300/20 rounded-full blur-3xl pointer-events-none" />
+        <ScrollReveal y={28} scale={0.985} amount={0.08}>
+          <div className="relative overflow-hidden glass-bubble-dark rounded-3xl sm:rounded-[2.25rem] text-white p-5 sm:p-9 lg:p-12">
+            {/* Decorative ambient solar bubble glows */}
+            <div className="animate-orb-slow absolute -top-20 right-1/4 w-96 h-96 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="animate-orb-reverse absolute -bottom-20 left-10 w-80 h-80 bg-teal-300/20 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="relative z-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center">
-              {/* Left Column: Headline and Content */}
-              <div className="lg:col-span-7 flex flex-col items-start min-w-0">
+            <div className="relative z-10">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center">
+                {/* Left Column: Headline and Content */}
+                <ScrollReveal y={18} delay={0.08} className="lg:col-span-7 flex flex-col items-start min-w-0">
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] sm:text-xs font-medium text-emerald-300 mb-3 sm:mb-4 tracking-wide">
                   <span>ĐỨC VINH SOLAR</span>
                   <span aria-hidden="true" className="text-emerald-400">·</span>
@@ -79,10 +82,10 @@ export const Hero: React.FC = () => {
                     <span>Kho sẵn tại Hóc Môn – Giao hỏa tốc</span>
                   </div>
                 </div>
-              </div>
+              </ScrollReveal>
 
               {/* Right Column: Visual Showcase Frosted Bubble Card */}
-              <div className="lg:col-span-5 min-w-0">
+              <ScrollReveal y={22} delay={0.16} className="lg:col-span-5 min-w-0">
                 <div className="bg-white/12 rounded-3xl sm:rounded-[1.85rem] border border-white/30 p-4 sm:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.25),inset_0_1.5px_2px_rgba(255,255,255,0.4)] backdrop-blur-2xl relative overflow-hidden">
                   <div className="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-white/15">
                     <div className="flex items-center gap-2.5 min-w-0">
@@ -141,12 +144,19 @@ export const Hero: React.FC = () => {
                     </a>
                   </div>
                 </div>
-              </div>
+              </ScrollReveal>
             </div>
 
             {/* 4-column KPI strip below hero split */}
             <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-white/15 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
-              <div className="p-3.5 sm:p-4 rounded-2xl bg-white/8 border border-white/15 backdrop-blur-md min-w-0 overflow-hidden">
+              <motion.div
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.1 }}
+                transition={{ duration: 0.5, delay: 0.05, ease: EXPO_EASE }}
+                whileHover={{ y: -3 }}
+                className="p-3.5 sm:p-4 rounded-2xl bg-white/8 border border-white/15 backdrop-blur-md min-w-0 overflow-hidden"
+              >
                 <div className="text-lg sm:text-2xl xl:text-3xl font-extrabold text-emerald-300 font-mono-nums break-words">
                   100%
                 </div>
@@ -156,9 +166,16 @@ export const Hero: React.FC = () => {
                 <div className="text-[11px] sm:text-xs text-emerald-200/75 mt-0.5 break-words">
                   Đầy đủ CO, CQ, hóa đơn VAT
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="p-3.5 sm:p-4 rounded-2xl bg-white/8 border border-white/15 backdrop-blur-md min-w-0 overflow-hidden">
+              <motion.div
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.1 }}
+                transition={{ duration: 0.5, delay: 0.11, ease: EXPO_EASE }}
+                whileHover={{ y: -3 }}
+                className="p-3.5 sm:p-4 rounded-2xl bg-white/8 border border-white/15 backdrop-blur-md min-w-0 overflow-hidden"
+              >
                 <div className="text-lg sm:text-2xl xl:text-3xl font-extrabold text-emerald-300 font-mono-nums break-words">
                   25 - 30 Năm
                 </div>
@@ -168,9 +185,16 @@ export const Hero: React.FC = () => {
                 <div className="text-[11px] sm:text-xs text-emerald-200/75 mt-0.5 break-words">
                   Cam kết công suất phát &ge; 88%
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="p-3.5 sm:p-4 rounded-2xl bg-white/8 border border-white/15 backdrop-blur-md min-w-0 overflow-hidden">
+              <motion.div
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.1 }}
+                transition={{ duration: 0.5, delay: 0.17, ease: EXPO_EASE }}
+                whileHover={{ y: -3 }}
+                className="p-3.5 sm:p-4 rounded-2xl bg-white/8 border border-white/15 backdrop-blur-md min-w-0 overflow-hidden"
+              >
                 <div className="text-lg sm:text-2xl xl:text-3xl font-extrabold text-emerald-300 font-mono-nums break-words">
                   10% - 25%
                 </div>
@@ -180,9 +204,16 @@ export const Hero: React.FC = () => {
                 <div className="text-[11px] sm:text-xs text-emerald-200/75 mt-0.5 break-words">
                   Đo kiểm bằng đồng hồ công tơ
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="p-3.5 sm:p-4 rounded-2xl bg-white/8 border border-white/15 backdrop-blur-md min-w-0 overflow-hidden">
+              <motion.div
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.1 }}
+                transition={{ duration: 0.5, delay: 0.23, ease: EXPO_EASE }}
+                whileHover={{ y: -3 }}
+                className="p-3.5 sm:p-4 rounded-2xl bg-white/8 border border-white/15 backdrop-blur-md min-w-0 overflow-hidden"
+              >
                 <div className="text-base sm:text-2xl xl:text-3xl font-extrabold text-emerald-300 font-mono-nums break-words">
                   0938.288.876
                 </div>
@@ -192,10 +223,11 @@ export const Hero: React.FC = () => {
                 <div className="text-[11px] sm:text-xs text-emerald-200/75 mt-0.5 break-words">
                   Khảo sát &amp; báo giá tận nơi
                 </div>
-              </div>
+              </motion.div>
             </div>
           </div>
-        </div>
+          </div>
+        </ScrollReveal>
       </div>
     </section>
   );

@@ -102,3 +102,43 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #34d399;
 }
+
+/* Smooth Ambient Floating Orbs & Reduced Motion Support */
+@keyframes orbFloatSlow {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(24px, -18px, 0) scale(1.06);
+  }
+}
+
+@keyframes orbFloatReverse {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-22px, 20px, 0) scale(1.05);
+  }
+}
+
+.animate-orb-slow {
+  animation: orbFloatSlow 18s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-orb-reverse {
+  animation: orbFloatReverse 22s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-orb-slow,
+  .animate-orb-reverse {
+    animation: none !important;
+  }
+}
+

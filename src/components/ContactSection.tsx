@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Phone, MapPin, Mail, Clock, Send, CheckCircle2, MessageSquare } from 'lucide-react';
+import { ScrollReveal } from './MotionPrimitives';
 
 export const ContactSection: React.FC = () => {
   const { companyInfo, submitInquiry } = useApp();
@@ -32,21 +33,24 @@ export const ContactSection: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 items-start">
           {/* Left Column: Contact details & Map */}
           <div className="lg:col-span-5 min-w-0">
-            <div className="glass-bubble rounded-3xl sm:rounded-[2rem] p-5 sm:p-6 mb-4 sm:mb-5 overflow-hidden">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-pill text-xs font-semibold text-emerald-700 tracking-wider uppercase mb-2.5">
-                <MessageSquare className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Kết Nối Trực Tiếp</span>
+            <ScrollReveal y={20}>
+              <div className="glass-bubble rounded-3xl sm:rounded-[2rem] p-5 sm:p-6 mb-4 sm:mb-5 overflow-hidden">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-pill text-xs font-semibold text-emerald-700 tracking-wider uppercase mb-2.5">
+                  <MessageSquare className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Kết Nối Trực Tiếp</span>
+                </div>
+                <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 font-heading break-words">
+                  Liên Hệ &amp; Nhận Báo Giá Dự Án
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed break-words">
+                  Quý khách hàng cần tư vấn kỹ thuật, kiểm tra hàng tại kho hoặc nhận bảng dự toán vật tư theo thiết kế, vui lòng liên hệ ngay với Đức Vinh Solar qua các kênh dưới đây:
+                </p>
               </div>
-              <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 font-heading break-words">
-                Liên Hệ &amp; Nhận Báo Giá Dự Án
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed break-words">
-                Quý khách hàng cần tư vấn kỹ thuật, kiểm tra hàng tại kho hoặc nhận bảng dự toán vật tư theo thiết kế, vui lòng liên hệ ngay với Đức Vinh Solar qua các kênh dưới đây:
-              </p>
-            </div>
+            </ScrollReveal>
 
             <div className="space-y-4">
               {/* Hotline Zalo Card */}
+              <ScrollReveal y={18} delay={0.06}>
               <div className="p-4 sm:p-5 rounded-3xl sm:rounded-[1.75rem] glass-bubble flex flex-wrap items-center justify-between gap-3 overflow-hidden">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-emerald-100/90 text-emerald-700 flex items-center justify-center shrink-0 border border-white/80 shadow-xs">
@@ -72,8 +76,10 @@ export const ContactSection: React.FC = () => {
                   Chat Zalo
                 </a>
               </div>
+              </ScrollReveal>
 
               {/* Central Warehouse Address & Google Maps Card */}
+              <ScrollReveal y={18} delay={0.1}>
               <div className="p-4 sm:p-5 rounded-3xl sm:rounded-[1.85rem] glass-bubble space-y-3.5 overflow-hidden">
                 <div className="flex items-start gap-3 min-w-0">
                   <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-emerald-100/90 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5 border border-white/80 shadow-xs">
@@ -111,8 +117,10 @@ export const ContactSection: React.FC = () => {
                   />
                 </div>
               </div>
+              </ScrollReveal>
 
               {/* Working Hours & Email Card */}
+              <ScrollReveal y={18} delay={0.14}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div className="p-3.5 sm:p-4 rounded-2xl sm:rounded-[1.5rem] glass-bubble flex items-center gap-3 min-w-0 overflow-hidden">
                   <div className="w-9 h-9 rounded-xl bg-emerald-100/90 text-emerald-700 flex items-center justify-center shrink-0 border border-white/80">
@@ -141,11 +149,12 @@ export const ContactSection: React.FC = () => {
                   </div>
                 </div>
               </div>
+              </ScrollReveal>
             </div>
           </div>
 
           {/* Right Column: Inquiry Submission Form */}
-          <div className="lg:col-span-7 glass-bubble rounded-3xl sm:rounded-[2.25rem] p-5 sm:p-8 overflow-hidden min-w-0">
+          <ScrollReveal y={24} delay={0.1} className="lg:col-span-7 glass-bubble rounded-3xl sm:rounded-[2.25rem] p-5 sm:p-8 overflow-hidden min-w-0">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 font-heading break-words">
               Gửi Yêu Cầu Khảo Sát &amp; Dự Toán Chi Phí
             </h3>
@@ -254,7 +263,7 @@ export const ContactSection: React.FC = () => {
                 </div>
               </form>
             )}
-          </div>
+          </ScrollReveal>
         </div>
       </div>
     </section>

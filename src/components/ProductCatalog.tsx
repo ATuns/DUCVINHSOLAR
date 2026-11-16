@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { useApp } from '../context/AppContext';
 import { ProductSvgThumbnail } from './ProductSvgThumbnail';
+import { MountReveal, ScrollReveal, EXPO_EASE } from './MotionPrimitives';
 import {
   Search,
   ChevronLeft,
@@ -144,7 +146,8 @@ export const ProductCatalog: React.FC = () => {
     <section id="products-section" className="pt-4 pb-10 sm:pt-8 sm:pb-16 bg-transparent">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Top Compact Welcome & Search Header in Frosted Glass Bubble */}
-        <div className="glass-bubble-dark rounded-3xl sm:rounded-[2rem] p-4 sm:p-7 lg:p-8 text-white mb-5 sm:mb-6 overflow-hidden">
+        <MountReveal y={18} delay={0.04}>
+          <div className="glass-bubble-dark rounded-3xl sm:rounded-[2rem] p-4 sm:p-7 lg:p-8 text-white mb-5 sm:mb-6 overflow-hidden">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-emerald-300 mb-2">
@@ -260,12 +263,14 @@ export const ProductCatalog: React.FC = () => {
               )}
             </div>
           </div>
-        </div>
+          </div>
+        </MountReveal>
 
         {/* ================= DANH SÁCH SẢN PHẨM ================= */}
         <div id="product-results-grid">
           {/* Simple Active Filter & Count Bar in Frosted Bubble (rounded-2xl on mobile/tablet so wrapping rows never clip corners) */}
-          <div className="glass-bubble rounded-2xl sm:rounded-3xl lg:rounded-full px-4 sm:px-6 py-3 sm:py-3.5 flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center justify-between gap-2.5 sm:gap-3 mb-6">
+          <MountReveal y={16} delay={0.12}>
+            <div className="glass-bubble rounded-2xl sm:rounded-3xl lg:rounded-full px-4 sm:px-6 py-3 sm:py-3.5 flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center justify-between gap-2.5 sm:gap-3 mb-6">
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs sm:text-sm min-w-0 max-w-full">
               <span className="text-emerald-800 font-bold break-words">
                 {currentCategoryLabel}
@@ -330,7 +335,8 @@ export const ProductCatalog: React.FC = () => {
                 )}
               </div>
             </div>
-          </div>
+            </div>
+          </MountReveal>
 
           {filteredProducts.length === 0 ? (
             <div className="glass-bubble rounded-3xl p-8 sm:p-12 text-center max-w-lg mx-auto">
@@ -369,18 +375,26 @@ export const ProductCatalog: React.FC = () => {
           ) : (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-7">
-                {paginatedProducts.map((product) => {
+                {paginatedProducts.map((product, idx) => {
                   const imgList = Array.isArray(product.images) && product.images.length > 0
                     ? product.images
                     : product.imageUrl
                     ? [product.imageUrl]
                     : [];
 
+                  const cardDelay = Math.min((idx % 3) * 0.06 + Math.floor(idx / 3) * 0.04, 0.24);
+
                   return (
-                    <div
+                    <motion.div
                       key={product.id}
+                      initial={{ opacity: 0, y: 22, scale: 0.98 }}
+                      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                      viewport={{ once: true, amount: 0.06 }}
+                      transition={{ duration: 0.52, delay: cardDelay, ease: EXPO_EASE }}
+                      whileHover={{ y: -5 }}
+                      whileTap={{ scale: 0.99 }}
                       onClick={() => setSelectedProduct(product)}
-                      className="group glass-bubble rounded-[1.75rem] sm:rounded-[1.85rem] p-2.5 sm:p-3 hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer overflow-hidden min-w-0"
+                      className="group glass-bubble rounded-[1.75rem] sm:rounded-[1.85rem] p-2.5 sm:p-3 transition-colors duration-300 flex flex-col cursor-pointer overflow-hidden min-w-0"
                     >
                       {/* Large, High-Clarity Studio Image Showcase inside Bubble Frame */}
                       <div className="relative h-60 sm:h-64 lg:h-72 bg-white/85 backdrop-blur-md rounded-[1.25rem] sm:rounded-[1.35rem] overflow-hidden border border-white/95 shadow-[inset_0_1px_2px_rgba(255,255,255,0.9)] flex items-center justify-center p-3">
@@ -524,14 +538,15 @@ export const ProductCatalog: React.FC = () => {
                           </span>
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>
 
               {/* Product Pagination Controls in Frosted Bubble */}
               {filteredProducts.length > PRODUCTS_PER_PAGE && (
-                <div className="mt-8 glass-bubble rounded-2xl sm:rounded-3xl lg:rounded-full px-4 sm:px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <ScrollReveal y={16} delay={0.05}>
+                  <div className="mt-8 glass-bubble rounded-2xl sm:rounded-3xl lg:rounded-full px-4 sm:px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
                   <span className="text-xs sm:text-sm text-slate-700 text-center sm:text-left">
                     Trang sản phẩm <strong className="text-emerald-800">{safeProductPage} / {totalProductPages}</strong> (Hiển thị {(safeProductPage - 1) * PRODUCTS_PER_PAGE + 1}–{Math.min(safeProductPage * PRODUCTS_PER_PAGE, filteredProducts.length)} / <strong>{filteredProducts.length}</strong> sản phẩm)
                   </span>
@@ -590,7 +605,8 @@ export const ProductCatalog: React.FC = () => {
                       <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>
-                </div>
+                  </div>
+                </ScrollReveal>
               )}
             </>
           )}

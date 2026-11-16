@@ -1,6 +1,8 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import { useApp } from '../context/AppContext';
 import { Sun, Phone, MapPin, Mail, ShieldCheck, Lock, Heart } from 'lucide-react';
+import { EXPO_EASE } from './MotionPrimitives';
 
 export const Footer: React.FC = () => {
   const { companyInfo, setIsAdminModalOpen, isAdmin } = useApp();
@@ -13,7 +15,13 @@ export const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="mx-auto max-w-7xl w-[calc(100%-1.25rem)] sm:w-[calc(100%-2.5rem)] lg:w-[calc(100%-3rem)] mb-8 mt-6 rounded-3xl sm:rounded-[2.25rem] glass-bubble-dark text-slate-200 text-xs overflow-hidden">
+    <motion.footer
+      initial={{ opacity: 0, y: 24, scale: 0.99 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, amount: 0.08 }}
+      transition={{ duration: 0.6, ease: EXPO_EASE }}
+      className="mx-auto max-w-7xl w-[calc(100%-1.25rem)] sm:w-[calc(100%-2.5rem)] lg:w-[calc(100%-3rem)] mb-8 mt-6 rounded-3xl sm:rounded-[2.25rem] glass-bubble-dark text-slate-200 text-xs overflow-hidden"
+    >
       {/* Upper Footer: 4 Columns */}
       <div className="px-4 sm:px-8 lg:px-10 py-8 sm:py-10 lg:py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-7 sm:gap-8 lg:gap-10">
@@ -182,6 +190,6 @@ export const Footer: React.FC = () => {
           </div>
         </div>
       </div>
-    </footer>
+    </motion.footer>
   );
 };

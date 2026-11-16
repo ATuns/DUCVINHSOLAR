@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { motion } from 'motion/react';
 import { useApp } from '../context/AppContext';
 import { ProjectItem } from '../types';
 import { MultiImageInput } from './MultiImageInput';
+import { ScrollReveal, EXPO_EASE } from './MotionPrimitives';
 import {
   MapPin,
   Calendar,
@@ -147,7 +149,8 @@ export const ProjectShowcase: React.FC = () => {
     <section id="projects-section" className="py-8 sm:py-14 bg-transparent">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="glass-bubble rounded-3xl sm:rounded-[2rem] p-5 sm:p-8 flex flex-col lg:flex-row lg:items-end justify-between gap-4 sm:gap-5 mb-6 sm:mb-8 overflow-hidden">
+        <ScrollReveal y={22}>
+          <div className="glass-bubble rounded-3xl sm:rounded-[2rem] p-5 sm:p-8 flex flex-col lg:flex-row lg:items-end justify-between gap-4 sm:gap-5 mb-6 sm:mb-8 overflow-hidden">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 tracking-wider uppercase mb-2">
               <Award className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -227,7 +230,8 @@ export const ProjectShowcase: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
+          </div>
+        </ScrollReveal>
 
         {/* Admin Inline Add / Edit Project Form */}
         {isAdmin && showProjectForm && (
@@ -401,15 +405,21 @@ export const ProjectShowcase: React.FC = () => {
 
         {/* Projects Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-          {filteredProjects.map((project) => {
+          {filteredProjects.map((project, idx) => {
             const imgs = getProjectImages(project);
             const activeIdx = cardImageIndexes[project.id] || 0;
             const currentImg = imgs[activeIdx] || imgs[0];
+            const cardDelay = Math.min((idx % 2) * 0.08 + Math.floor(idx / 2) * 0.04, 0.22);
 
             return (
-              <div
+              <motion.div
                 key={project.id}
-                className="glass-bubble rounded-3xl sm:rounded-[2rem] p-2.5 sm:p-3 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden min-w-0"
+                initial={{ opacity: 0, y: 24, scale: 0.98 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, amount: 0.08 }}
+                transition={{ duration: 0.56, delay: cardDelay, ease: EXPO_EASE }}
+                whileHover={{ y: -5 }}
+                className="glass-bubble rounded-3xl sm:rounded-[2rem] p-2.5 sm:p-3 transition-colors duration-300 flex flex-col justify-between overflow-hidden min-w-0"
               >
                 <div className="min-w-0">
                   {/* Visual Header Banner / Multi-Image Gallery for Project */}
@@ -613,7 +623,7 @@ export const ProjectShowcase: React.FC = () => {
                     </a>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>

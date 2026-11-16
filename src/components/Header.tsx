@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '../context/AppContext';
 import {
   Phone,
@@ -139,7 +140,12 @@ export const Header: React.FC = () => {
   return (
     <>
       {/* Main Header styled as a floating frosted glass bubble that always follows scroll */}
-      <header className="fixed top-2 sm:top-3 left-0 right-0 z-50 mx-auto max-w-7xl w-[calc(100%-1rem)] sm:w-[calc(100%-2rem)] lg:w-[calc(100%-2.5rem)] rounded-full bg-white/40 hover:bg-white/55 backdrop-blur-2xl backdrop-saturate-180 border border-white/80 ring-1 ring-emerald-900/5 shadow-[0_14px_38px_-6px_rgba(15,23,42,0.12),0_4px_14px_-2px_rgba(16,185,129,0.08),inset_0_1.5px_2px_rgba(255,255,255,0.92)] transition-all duration-300">
+      <motion.header
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        className="fixed top-2 sm:top-3 left-0 right-0 z-50 mx-auto max-w-7xl w-[calc(100%-1rem)] sm:w-[calc(100%-2rem)] lg:w-[calc(100%-2.5rem)] rounded-full bg-white/40 hover:bg-white/55 backdrop-blur-2xl backdrop-saturate-180 border border-white/80 ring-1 ring-emerald-900/5 shadow-[0_14px_38px_-6px_rgba(15,23,42,0.12),0_4px_14px_-2px_rgba(16,185,129,0.08),inset_0_1.5px_2px_rgba(255,255,255,0.92)] transition-colors duration-300"
+      >
         <div className="px-3.5 sm:px-6 lg:px-7 h-14 sm:h-16 lg:h-[68px] flex items-center justify-between gap-2 sm:gap-4 lg:gap-5">
           {/* Zone 1: Brand title wordmark */}
           <div className="flex items-center gap-2.5 min-w-0 shrink-0">
@@ -228,9 +234,16 @@ export const Header: React.FC = () => {
               </button>
 
               {/* Level 1 Dropdown: Loại Sản Phẩm */}
-              {isProductMenuHovered && (
-                <div className="absolute left-0 top-full pt-2 z-50">
-                  <div className="bg-white/95 backdrop-blur-2xl rounded-2xl border border-white/80 ring-1 ring-slate-900/10 shadow-[0_20px_50px_rgba(15,23,42,0.18),inset_0_1px_1px_rgba(255,255,255,0.9)] flex max-w-[calc(100vw-2rem)] overflow-visible">
+              <AnimatePresence>
+                {isProductMenuHovered && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                    transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                    className="absolute left-0 top-full pt-2 z-50 origin-top-left"
+                  >
+                    <div className="bg-white/95 backdrop-blur-2xl rounded-2xl border border-white/80 ring-1 ring-slate-900/10 shadow-[0_20px_50px_rgba(15,23,42,0.18),inset_0_1px_1px_rgba(255,255,255,0.9)] flex max-w-[calc(100vw-2rem)] overflow-visible">
                     {/* Categories Column */}
                     <div className="w-56 xl:w-72 py-2 bg-white/80 rounded-l-2xl shrink-0">
                       <div className="px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
@@ -404,9 +417,10 @@ export const Header: React.FC = () => {
                         </div>
                       );
                     })()}
-                  </div>
-                </div>
-              )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <button
@@ -470,8 +484,15 @@ export const Header: React.FC = () => {
         </div>
 
         {/* Mobile Navigation Drawer (solid background, no blur on phone & tablet) */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden absolute left-0 right-0 top-[calc(100%+0.6rem)] rounded-2xl border border-slate-200 bg-white px-4 pt-3 pb-6 shadow-2xl max-h-[80vh] overflow-y-auto">
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.98 }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              className="lg:hidden absolute left-0 right-0 top-[calc(100%+0.6rem)] rounded-2xl border border-slate-200 bg-white px-4 pt-3 pb-6 shadow-2xl max-h-[80vh] overflow-y-auto origin-top"
+            >
             <div className="flex flex-col gap-1.5">
               {/* Mobile expandable Sản Phẩm Solar -> Loại sản phẩm -> Hãng */}
               <div className="rounded-lg border border-slate-200 bg-slate-50 overflow-hidden">
@@ -593,19 +614,26 @@ export const Header: React.FC = () => {
                   {companyInfo.hotlineZalo}
                 </a>
               </div>
-            </div>
-          </div>
-        )}
-      </header>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.header>
 
       {/* Light, blurred background overlay behind the mobile/tablet menu when open */}
-      {mobileMenuOpen && (
-        <div
-          onClick={() => setMobileMenuOpen(false)}
-          className="lg:hidden fixed inset-0 z-40 bg-white/45 backdrop-blur-md transition-opacity"
-          aria-hidden="true"
-        />
-      )}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setMobileMenuOpen(false)}
+            className="lg:hidden fixed inset-0 z-40 bg-white/45 backdrop-blur-md"
+            aria-hidden="true"
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 };
