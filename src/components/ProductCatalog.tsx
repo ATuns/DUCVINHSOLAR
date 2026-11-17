@@ -15,7 +15,8 @@ import {
   Edit2,
   Trash2,
   Settings,
-  Image as ImageIcon
+  Image as ImageIcon,
+  ListOrdered
 } from 'lucide-react';
 
 const PRODUCTS_PER_PAGE = 9;
@@ -66,6 +67,7 @@ export const ProductCatalog: React.FC = () => {
     isAdmin,
     openAdminTab,
     openEditProductInAdmin,
+    openPageOneOrderInAdmin,
     deleteProduct
   } = useApp();
 
@@ -120,7 +122,21 @@ export const ProductCatalog: React.FC = () => {
       const matchStock = inStockOnly ? (item.stock ?? 0) > 0 : true;
 
       return matchCategory && matchBrand && matchSearch && matchStock;
-    });
+    })
+    .map((item, originalIdx) => ({ item, originalIdx }))
+    .sort((a, b) => {
+      const pinA =
+        typeof a.item.pinOrder === 'number' && a.item.pinOrder >= 1 && a.item.pinOrder <= 10
+          ? a.item.pinOrder
+          : Number.POSITIVE_INFINITY;
+      const pinB =
+        typeof b.item.pinOrder === 'number' && b.item.pinOrder >= 1 && b.item.pinOrder <= 10
+          ? b.item.pinOrder
+          : Number.POSITIVE_INFINITY;
+      if (pinA !== pinB) return pinA - pinB;
+      return a.originalIdx - b.originalIdx;
+    })
+    .map((entry) => entry.item);
   }, [products, categories, selectedCategory, selectedBrand, searchQuery, inStockOnly]);
 
   const currentCategoryLabel =
@@ -320,13 +336,25 @@ export const ProductCatalog: React.FC = () => {
               </label>
 
               {isAdmin && (
-                <button
-                  onClick={() => openAdminTab('inventory')}
-                  className="px-3.5 py-1.5 text-xs font-bold text-emerald-900 bg-emerald-100/85 hover:bg-emerald-200 rounded-full flex items-center gap-1 transition-colors border border-emerald-300/60"
-                >
-                  <Plus className="w-3.5 h-3.5 shrink-0" />
-                  <span>Thêm / Quản Lý SP</span>
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => openPageOneOrderInAdmin()}
+                    className="px-3.5 py-1.5 text-xs font-bold text-amber-950 bg-amber-100/90 hover:bg-amber-200 rounded-full flex items-center gap-1 transition-colors border border-amber-300/70"
+                    title="Tùy chọn & sắp xếp thứ tự 10 sản phẩm đầu tiên trên Trang 1"
+                  >
+                    <ListOrdered className="w-3.5 h-3.5 shrink-0" />
+                    <span>Sắp Xếp 10 SP Trang 1</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openAdminTab('inventory')}
+                    className="px-3.5 py-1.5 text-xs font-bold text-emerald-900 bg-emerald-100/85 hover:bg-emerald-200 rounded-full flex items-center gap-1 transition-colors border border-emerald-300/60"
+                  >
+                    <Plus className="w-3.5 h-3.5 shrink-0" />
+                    <span>Thêm / Quản Lý SP</span>
+                  </button>
+                </div>
               )}
               <div className="text-xs text-slate-600">
                 Hiển thị <strong className="text-emerald-800 font-mono-nums">{filteredProducts.length}</strong> SP
@@ -438,6 +466,16 @@ export const ProductCatalog: React.FC = () => {
                         {/* Admin Quick Edit & Delete Product Buttons */}
                         {isAdmin && (
                           <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1">
+                            {typeof product.pinOrder === 'number' &&
+                              product.pinOrder >= 1 &&
+                              product.pinOrder <= 10 && (
+                                <span
+                                  className="px-2 py-1 rounded-md bg-amber-500 text-white text-[11px] font-extrabold shadow-sm"
+                                  title={`Vị trí #${product.pinOrder} trên Trang 1`}
+                                >
+                                  Top #{product.pinOrder}
+                                </span>
+                              )}
                             <button
                               type="button"
                               onClick={(e) => {

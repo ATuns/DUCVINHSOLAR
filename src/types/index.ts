@@ -41,6 +41,7 @@ export interface Product {
   stock: number;
   unit: string;
   featured?: boolean;
+  pinOrder?: number;
   imageUrl?: string;
   images?: string[];
   svgType: 'panel' | 'inverter' | 'battery' | 'optimizer' | 'streetlight' | 'custom';

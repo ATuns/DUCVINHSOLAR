@@ -58,6 +58,9 @@ interface AppContextType {
   openAdminTab: (tab: AdminTabType) => void;
   openEditProductInAdmin: (product: Product) => void;
   clearAdminEditingProduct: () => void;
+  adminPageOneOrderRequested: boolean;
+  openPageOneOrderInAdmin: () => void;
+  clearAdminPageOneOrderRequest: () => void;
   loginAdmin: (user: string, pass: string) => boolean;
   logoutAdmin: () => void;
 
@@ -80,6 +83,10 @@ interface AppContextType {
   updateProduct: (id: string, product: Partial<Product>) => void;
   deleteProduct: (id: string, onConfirmed?: () => void) => void;
   updateProductStock: (id: string, newStock: number) => void;
+  savePageOneProductOrder: (orderedIds: string[]) => Promise<boolean>;
+  togglePinProductToPageOne: (
+    productId: string
+  ) => Promise<{ ok: boolean; pinnedPosition?: number; message: string }>;
 
   // Project Management
   addProject: (proj: Omit<ProjectItem, 'id'>) => void;
@@ -194,6 +201,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             stock: typeof p?.stock === 'number' ? p.stock : Number(p?.stock) || 0,
             unit: p?.unit || 'bộ',
             featured: Boolean(p?.featured),
+            pinOrder:
+              typeof p?.pinOrder === 'number' && p.pinOrder >= 1 && p.pinOrder <= 10
+                ? p.pinOrder
+                : undefined,
             imageUrl: imgs[0] || p?.imageUrl,
             images: imgs,
             svgType: p?.svgType || 'panel',
@@ -323,6 +334,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isAdminModalOpen, setIsAdminModalOpen] = useState<boolean>(false);
   const [adminActiveTab, setAdminActiveTab] = useState<AdminTabType>('inventory');
   const [adminEditingProduct, setAdminEditingProduct] = useState<Product | null>(null);
+  const [adminPageOneOrderRequested, setAdminPageOneOrderRequested] = useState<boolean>(false);
   const [isSyncingCloud, setIsSyncingCloud] = useState<boolean>(false);
   const [blobConnected, setBlobConnected] = useState<boolean>(false);
   const [storageMode, setStorageMode] = useState<'vercel-blob' | 'git-snapshot-sync'>('git-snapshot-sync');
@@ -423,6 +435,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const openEditProductInAdmin = (product: Product) => {
+    setAdminPageOneOrderRequested(false);
     setAdminEditingProduct(product);
     setAdminActiveTab('inventory');
     setIsAdminModalOpen(true);
@@ -430,6 +443,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const clearAdminEditingProduct = () => {
     setAdminEditingProduct(null);
+  };
+
+  const openPageOneOrderInAdmin = () => {
+    setAdminEditingProduct(null);
+    setAdminPageOneOrderRequested(true);
+    setAdminActiveTab('inventory');
+    setIsAdminModalOpen(true);
+  };
+
+  const clearAdminPageOneOrderRequest = () => {
+    setAdminPageOneOrderRequested(false);
   };
 
   // Helper functions to communicate with Vercel Blob Store `ducvinhsolar` (/api/*)
@@ -916,6 +940,107 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateProduct(id, { stock: validStock, status });
   };
 
+  const savePageOneProductOrder = async (orderedIds: string[]): Promise<boolean> => {
+    const existingSet = new Set(products.map((p) => p.id));
+    const uniqueCleanIds = Array.from(new Set(orderedIds))
+      .filter((id) => existingSet.has(id))
+      .slice(0, 10);
+
+    const rankMap = new Map<string, number>();
+    uniqueCleanIds.forEach((id, idx) => {
+      rankMap.set(id, idx + 1);
+    });
+
+    const nextProducts: Product[] = products.map((p) => {
+      const rank = rankMap.get(p.id);
+      if (rank !== undefined) {
+        return { ...p, pinOrder: rank };
+      }
+      if (p.pinOrder !== undefined) {
+        const { pinOrder: _removed, ...rest } = p;
+        return rest;
+      }
+      return p;
+    });
+
+    setProducts(nextProducts);
+    setSelectedProduct((prev) => {
+      if (!prev) return null;
+      return nextProducts.find((item) => item.id === prev.id) || prev;
+    });
+
+    setIsSyncingCloud(true);
+    try {
+      const res = await fetch('/api/restore', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'replace',
+          categories,
+          brands,
+          products: nextProducts,
+          projects,
+          blogPosts,
+          inquiries,
+          companyInfo
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setBlobConnected(Boolean(data.blobConnected));
+        setStorageMode(data.storageMode === 'vercel-blob' ? 'vercel-blob' : 'git-snapshot-sync');
+        if (data.updatedAt) {
+          lastRemoteUpdatedAtRef.current = data.updatedAt;
+        }
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.warn('Save page-one product order warning:', err);
+      return false;
+    } finally {
+      if (isMountedRef.current) {
+        setIsSyncingCloud(false);
+      }
+    }
+  };
+
+  const togglePinProductToPageOne = async (
+    productId: string
+  ): Promise<{ ok: boolean; pinnedPosition?: number; message: string }> => {
+    const currentPinned = products
+      .filter((p) => typeof p.pinOrder === 'number' && p.pinOrder >= 1 && p.pinOrder <= 10)
+      .sort((a, b) => (a.pinOrder || 99) - (b.pinOrder || 99))
+      .map((p) => p.id);
+
+    const existingIdx = currentPinned.indexOf(productId);
+    if (existingIdx >= 0) {
+      const nextIds = currentPinned.filter((id) => id !== productId);
+      const saved = await savePageOneProductOrder(nextIds);
+      return {
+        ok: saved,
+        message: saved
+          ? 'Đã gỡ sản phẩm khỏi danh sách Top 10 Trang 1.'
+          : 'Đã gỡ cục bộ (đang chờ đồng bộ).'
+      };
+    }
+
+    if (currentPinned.length >= 10) {
+      return {
+        ok: false,
+        message: 'Danh sách Trang 1 đã đủ tối đa 10 sản phẩm. Vui lòng vào mục Sắp Xếp Top 10 để bỏ bớt hoặc đổi vị trí.'
+      };
+    }
+
+    const nextIds = [...currentPinned, productId];
+    const saved = await savePageOneProductOrder(nextIds);
+    return {
+      ok: saved,
+      pinnedPosition: nextIds.length,
+      message: `Đã đưa sản phẩm lên vị trí #${nextIds.length} trên Trang 1!`
+    };
+  };
+
   // Project Operations
   const addProject = (projData: Omit<ProjectItem, 'id'>) => {
     const cleanImages = Array.isArray(projData.images)
@@ -1325,6 +1450,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 applications: Array.isArray(p.applications) ? p.applications : [],
                 warrantyYears: Number(p.warrantyYears ?? 10),
                 origin: String(p.origin || 'Chính hãng').trim(),
+                featured: Boolean(p.featured),
+                pinOrder:
+                  typeof p.pinOrder === 'number' && p.pinOrder >= 1 && p.pinOrder <= 10
+                    ? p.pinOrder
+                    : undefined,
                 images: imgs,
                 imageUrl: imgs[0] || undefined,
                 svgType: p.svgType || 'panel',
@@ -1557,6 +1687,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         openAdminTab,
         openEditProductInAdmin,
         clearAdminEditingProduct,
+        adminPageOneOrderRequested,
+        openPageOneOrderInAdmin,
+        clearAdminPageOneOrderRequest,
         loginAdmin,
         logoutAdmin,
         requestConfirm,
@@ -1571,6 +1704,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateProduct,
         deleteProduct,
         updateProductStock,
+        savePageOneProductOrder,
+        togglePinProductToPageOne,
         addProject,
         updateProject,
         deleteProject,

@@ -34,7 +34,13 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
-  Image as ImageIcon
+  Image as ImageIcon,
+  ArrowUp,
+  ArrowDown,
+  Pin,
+  PinOff,
+  ListOrdered,
+  GripVertical
 } from 'lucide-react';
 
 const ADMIN_CATEGORIES_PER_PAGE = 5;
@@ -133,6 +139,8 @@ export const AdminModal: React.FC = () => {
     updateProduct,
     deleteProduct,
     updateProductStock,
+    savePageOneProductOrder,
+    togglePinProductToPageOne,
     addProject,
     updateProject,
     deleteProject,
@@ -145,6 +153,8 @@ export const AdminModal: React.FC = () => {
     updateCompanyInfo,
     adminEditingProduct,
     clearAdminEditingProduct,
+    adminPageOneOrderRequested,
+    clearAdminPageOneOrderRequest,
     syncAllToCloud,
     connectVercelBlobToken,
     blobConnected,
@@ -165,6 +175,13 @@ export const AdminModal: React.FC = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [adminProductSearch, setAdminProductSearch] = useState('');
+
+  // Top 10 Page 1 Customizer state
+  const [isManagingPageOneOrder, setIsManagingPageOneOrder] = useState(false);
+  const [pageOneDraftIds, setPageOneDraftIds] = useState<string[]>([]);
+  const [pageOnePickerSearch, setPageOnePickerSearch] = useState('');
+  const [pageOnePickerCategory, setPageOnePickerCategory] = useState<string>('all');
+  const [draggedPageOneId, setDraggedPageOneId] = useState<string | null>(null);
 
   // Form states for product
   const [formName, setFormName] = useState('');
@@ -304,18 +321,45 @@ export const AdminModal: React.FC = () => {
     setFormSpecsText(specsToMultilineText(Array.isArray(p.specs) ? p.specs : []));
   };
 
+  const initPageOneDraftFromProducts = () => {
+    const pinned = products
+      .filter((p) => typeof p.pinOrder === 'number' && p.pinOrder >= 1 && p.pinOrder <= 10)
+      .sort((a, b) => (a.pinOrder || 99) - (b.pinOrder || 99))
+      .map((p) => p.id)
+      .slice(0, 10);
+    setPageOneDraftIds(pinned);
+  };
+
+  const handleOpenPageOneOrderManager = () => {
+    setEditingProduct(null);
+    setIsAddingNew(false);
+    initPageOneDraftFromProducts();
+    setPageOnePickerSearch('');
+    setPageOnePickerCategory('all');
+    setIsManagingPageOneOrder(true);
+  };
+
   useEffect(() => {
     if (isAdminModalOpen && adminEditingProduct) {
+      setIsManagingPageOneOrder(false);
       handleOpenEdit(adminEditingProduct);
       clearAdminEditingProduct();
     }
   }, [isAdminModalOpen, adminEditingProduct]);
+
+  useEffect(() => {
+    if (isAdminModalOpen && adminPageOneOrderRequested) {
+      handleOpenPageOneOrderManager();
+      clearAdminPageOneOrderRequest();
+    }
+  }, [isAdminModalOpen, adminPageOneOrderRequested]);
 
   if (!isAdminModalOpen) return null;
 
   const handleOpenAddNew = () => {
     const defaultCat = categories[0]?.id || 'solar-panels';
     const firstBrandOfCat = brands.find(b => b.categoryId === defaultCat)?.name || 'SolaX';
+    setIsManagingPageOneOrder(false);
     setEditingProduct(null);
     setIsAddingNew(true);
     setFormName('');
@@ -934,6 +978,7 @@ export const AdminModal: React.FC = () => {
                   setAdminActiveTab('inventory');
                   setEditingProduct(null);
                   setIsAddingNew(false);
+                  setIsManagingPageOneOrder(false);
                 }}
                 className={`px-4 py-2 text-xs font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                   adminActiveTab === 'inventory'
@@ -1716,6 +1761,367 @@ export const AdminModal: React.FC = () => {
                         </div>
                       </form>
                     </div>
+                  ) : isManagingPageOneOrder ? (
+                    /* Top 10 Page 1 Customizer View */
+                    <div className="space-y-5">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200">
+                        <div>
+                          <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+                            <ListOrdered className="w-5 h-5 text-amber-600 shrink-0" />
+                            <span>Tùy Chọn &amp; Sắp Xếp 10 Sản Phẩm Đầu Tiên (Trang 1 Khi Mở Web)</span>
+                          </h3>
+                          <p className="text-xs text-slate-500 mt-1">
+                            Chọn tối đa 10 sản phẩm và sắp xếp thứ tự từ #1 đến #10. Mỗi trang hiển thị 9 sản phẩm (vị trí #1–#9 nằm trọn trên Trang 1, #10 đứng đầu Trang 2).
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setIsManagingPageOneOrder(false)}
+                          className="px-3.5 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg shrink-0 self-start sm:self-auto"
+                        >
+                          &larr; Quay lại Kho SP
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                        {/* Left Column: Selected Top 10 Order List */}
+                        <div className="lg:col-span-6 bg-amber-50/50 border border-amber-200 rounded-xl p-4 flex flex-col">
+                          <div className="flex items-center justify-between gap-2 mb-3">
+                            <div>
+                              <h4 className="text-xs font-bold uppercase tracking-wider text-amber-900">
+                                Danh Sách Ưu Tiên Trang 1 ({pageOneDraftIds.length}/10)
+                              </h4>
+                              <p className="text-[11px] text-amber-700 mt-0.5">
+                                Kéo thả, chọn số thứ tự hoặc dùng nút mũi tên &uarr; &darr; để đổi vị trí
+                              </p>
+                            </div>
+                            {pageOneDraftIds.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => setPageOneDraftIds([])}
+                                className="px-2.5 py-1 text-[11px] font-bold text-rose-700 bg-rose-100 hover:bg-rose-200 rounded-md shrink-0"
+                              >
+                                Xóa hết
+                              </button>
+                            )}
+                          </div>
+
+                          {pageOneDraftIds.length === 0 ? (
+                            <div className="flex-1 min-h-[260px] flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-amber-300/70 rounded-xl bg-white/60">
+                              <ListOrdered className="w-8 h-8 text-amber-400 mb-2" />
+                              <div className="text-xs font-bold text-slate-700">
+                                Chưa chọn sản phẩm nào cho Top 10 Trang 1
+                              </div>
+                              <p className="text-[11px] text-slate-500 mt-1 max-w-xs">
+                                Hãy bấm nút <strong>+ Chọn</strong> ở danh sách Kho bên cạnh để đưa tối đa 10 sản phẩm lên Trang 1. Nếu chọn ít hơn 10, các vị trí còn lại sẽ tự động điền từ kho.
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+                              {pageOneDraftIds.map((pid, index) => {
+                                const prod = products.find((item) => item.id === pid);
+                                if (!prod) return null;
+                                const thumbUrl =
+                                  (Array.isArray(prod.images) && prod.images[0]) || prod.imageUrl;
+
+                                return (
+                                  <div
+                                    key={prod.id}
+                                    draggable
+                                    onDragStart={() => setDraggedPageOneId(prod.id)}
+                                    onDragOver={(e) => e.preventDefault()}
+                                    onDrop={() => {
+                                      if (!draggedPageOneId || draggedPageOneId === prod.id) return;
+                                      setPageOneDraftIds((prev) => {
+                                        const fromIdx = prev.indexOf(draggedPageOneId);
+                                        const toIdx = prev.indexOf(prod.id);
+                                        if (fromIdx < 0 || toIdx < 0) return prev;
+                                        const copy = [...prev];
+                                        const [moved] = copy.splice(fromIdx, 1);
+                                        copy.splice(toIdx, 0, moved);
+                                        return copy;
+                                      });
+                                      setDraggedPageOneId(null);
+                                    }}
+                                    onDragEnd={() => setDraggedPageOneId(null)}
+                                    className={`p-2.5 rounded-xl border bg-white flex items-center gap-2.5 shadow-2xs transition-colors ${
+                                      draggedPageOneId === prod.id
+                                        ? 'border-amber-500 opacity-60'
+                                        : 'border-amber-200/80 hover:border-amber-400'
+                                    }`}
+                                  >
+                                    <div
+                                      className="text-slate-400 cursor-grab active:cursor-grabbing shrink-0 hidden sm:block"
+                                      title="Kéo để sắp xếp lại vị trí"
+                                    >
+                                      <GripVertical className="w-4 h-4" />
+                                    </div>
+
+                                    <select
+                                      value={index}
+                                      onChange={(e) => {
+                                        const targetIdx = Number(e.target.value);
+                                        setPageOneDraftIds((prev) => {
+                                          const copy = [...prev];
+                                          const [moved] = copy.splice(index, 1);
+                                          copy.splice(targetIdx, 0, moved);
+                                          return copy;
+                                        });
+                                      }}
+                                      aria-label={`Chọn vị trí cho ${prod.name}`}
+                                      className="px-1.5 py-1 text-xs font-extrabold text-amber-900 bg-amber-100 border border-amber-300 rounded-md shrink-0 cursor-pointer"
+                                    >
+                                      {pageOneDraftIds.map((_, slotIdx) => (
+                                        <option key={slotIdx} value={slotIdx}>
+                                          #{slotIdx + 1}
+                                        </option>
+                                      ))}
+                                    </select>
+
+                                    <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                                      {thumbUrl ? (
+                                        <img
+                                          src={thumbUrl}
+                                          alt={prod.name}
+                                          className="w-full h-full object-contain p-0.5"
+                                        />
+                                      ) : (
+                                        <Package className="w-4 h-4 text-slate-400" />
+                                      )}
+                                    </div>
+
+                                    <div className="min-w-0 flex-1">
+                                      <div className="text-xs font-bold text-slate-900 line-clamp-1">
+                                        {prod.name}
+                                      </div>
+                                      <div className="text-[11px] text-slate-500 truncate">
+                                        Hãng <strong className="text-emerald-700">{prod.brand}</strong> · <span className="font-mono">{prod.sku}</span>
+                                      </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-1 shrink-0">
+                                      <button
+                                        type="button"
+                                        disabled={index === 0}
+                                        onClick={() => {
+                                          setPageOneDraftIds((prev) => {
+                                            if (index <= 0) return prev;
+                                            const copy = [...prev];
+                                            [copy[index - 1], copy[index]] = [copy[index], copy[index - 1]];
+                                            return copy;
+                                          });
+                                        }}
+                                        className="p-1.5 rounded-md bg-slate-100 hover:bg-emerald-100 text-slate-700 disabled:opacity-35"
+                                        title="Đưa lên 1 bậc"
+                                      >
+                                        <ArrowUp className="w-3.5 h-3.5" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        disabled={index === pageOneDraftIds.length - 1}
+                                        onClick={() => {
+                                          setPageOneDraftIds((prev) => {
+                                            if (index >= prev.length - 1) return prev;
+                                            const copy = [...prev];
+                                            [copy[index + 1], copy[index]] = [copy[index], copy[index + 1]];
+                                            return copy;
+                                          });
+                                        }}
+                                        className="p-1.5 rounded-md bg-slate-100 hover:bg-emerald-100 text-slate-700 disabled:opacity-35"
+                                        title="Đưa xuống 1 bậc"
+                                      >
+                                        <ArrowDown className="w-3.5 h-3.5" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setPageOneDraftIds((prev) => prev.filter((id) => id !== prod.id));
+                                        }}
+                                        className="p-1.5 rounded-md bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white transition-colors"
+                                        title="Bỏ khỏi Top 10"
+                                      >
+                                        <X className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Right Column: Product Picker from Inventory */}
+                        <div className="lg:col-span-6 bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col">
+                          <div className="mb-3">
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 mb-2">
+                              Chọn Sản Phẩm Từ Kho ({products.length} SP)
+                            </h4>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              <div className="relative">
+                                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                                <input
+                                  type="text"
+                                  value={pageOnePickerSearch}
+                                  onChange={(e) => setPageOnePickerSearch(e.target.value)}
+                                  placeholder="Tìm tên SP, SKU, hãng..."
+                                  className="w-full pl-8 pr-7 py-2 text-xs bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-emerald-600"
+                                />
+                                {pageOnePickerSearch && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setPageOnePickerSearch('')}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 hover:text-slate-700"
+                                  >
+                                    X
+                                  </button>
+                                )}
+                              </div>
+
+                              <select
+                                value={pageOnePickerCategory}
+                                onChange={(e) => setPageOnePickerCategory(e.target.value)}
+                                className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg"
+                              >
+                                <option value="all">Tất cả danh mục</option>
+                                {categories.map((c) => (
+                                  <option key={c.id} value={c.id}>
+                                    {c.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+                            {products
+                              .filter((p) => {
+                                const matchCat =
+                                  pageOnePickerCategory === 'all' || p.category === pageOnePickerCategory;
+                                const q = pageOnePickerSearch.toLowerCase().trim();
+                                const matchQ =
+                                  !q ||
+                                  (p.name || '').toLowerCase().includes(q) ||
+                                  (p.sku || '').toLowerCase().includes(q) ||
+                                  (p.brand || '').toLowerCase().includes(q);
+                                return matchCat && matchQ;
+                              })
+                              .map((p) => {
+                                const selectedIdx = pageOneDraftIds.indexOf(p.id);
+                                const isSelected = selectedIdx >= 0;
+                                const isFull = !isSelected && pageOneDraftIds.length >= 10;
+                                const thumbUrl =
+                                  (Array.isArray(p.images) && p.images[0]) || p.imageUrl;
+
+                                return (
+                                  <div
+                                    key={p.id}
+                                    className={`p-2.5 rounded-xl border bg-white flex items-center gap-2.5 transition-colors ${
+                                      isSelected
+                                        ? 'border-emerald-400 bg-emerald-50/40'
+                                        : 'border-slate-200 hover:border-emerald-300'
+                                    }`}
+                                  >
+                                    <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                                      {thumbUrl ? (
+                                        <img
+                                          src={thumbUrl}
+                                          alt={p.name}
+                                          className="w-full h-full object-contain p-0.5"
+                                        />
+                                      ) : (
+                                        <Package className="w-4 h-4 text-slate-400" />
+                                      )}
+                                    </div>
+
+                                    <div className="min-w-0 flex-1">
+                                      <div className="text-xs font-bold text-slate-900 line-clamp-1">
+                                        {p.name}
+                                      </div>
+                                      <div className="text-[11px] text-slate-500 truncate">
+                                        <span className="text-emerald-700 font-semibold">{p.brand}</span> · <span className="font-mono">{p.sku}</span>
+                                      </div>
+                                    </div>
+
+                                    {isSelected ? (
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          setPageOneDraftIds((prev) => prev.filter((id) => id !== p.id))
+                                        }
+                                        className="px-2.5 py-1.5 text-[11px] font-bold text-emerald-900 bg-emerald-100 hover:bg-rose-100 hover:text-rose-700 rounded-lg shrink-0 transition-colors"
+                                        title="Nhấn để bỏ khỏi Top 10"
+                                      >
+                                        Vị trí #{selectedIdx + 1} ×
+                                      </button>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        disabled={isFull}
+                                        onClick={() => {
+                                          setPageOneDraftIds((prev) =>
+                                            prev.length >= 10 || prev.includes(p.id)
+                                              ? prev
+                                              : [...prev, p.id]
+                                          );
+                                        }}
+                                        className="px-2.5 py-1.5 text-[11px] font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 rounded-lg shrink-0 transition-colors"
+                                        title={
+                                          isFull
+                                            ? 'Đã đủ tối đa 10 sản phẩm'
+                                            : `Thêm vào vị trí #${pageOneDraftIds.length + 1}`
+                                        }
+                                      >
+                                        {isFull ? 'Đã đủ 10' : `+ Chọn (#${pageOneDraftIds.length + 1})`}
+                                      </button>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Save Action Bar */}
+                      <div className="pt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                        <span className="text-xs text-slate-600">
+                          Đã chọn <strong className="text-emerald-800">{pageOneDraftIds.length}/10</strong> sản phẩm ưu tiên hiển thị trên <strong>Trang 1</strong> khi mở web.
+                        </span>
+
+                        <div className="flex flex-wrap items-center gap-2.5">
+                          <button
+                            type="button"
+                            onClick={() => setIsManagingPageOneOrder(false)}
+                            className="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-200 hover:bg-slate-300 rounded-lg"
+                          >
+                            Hủy
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isSyncingCloud}
+                            onClick={async () => {
+                              const ok = await savePageOneProductOrder(pageOneDraftIds);
+                              if (ok) {
+                                showNotice(
+                                  `Đã lưu & đồng bộ ${pageOneDraftIds.length} sản phẩm đầu tiên trên Trang 1 lên Vercel Blob!`
+                                );
+                                setIsManagingPageOneOrder(false);
+                              } else {
+                                showNotice('Đã cập nhật thứ tự Trang 1 trên máy hiện tại!');
+                                setIsManagingPageOneOrder(false);
+                              }
+                            }}
+                            className="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 rounded-lg shadow-xs flex items-center gap-1.5"
+                          >
+                            <Save className="w-4 h-4" />
+                            <span>
+                              {isSyncingCloud
+                                ? 'Đang lưu & đồng bộ...'
+                                : 'Lưu Thứ Tự 10 SP Trang 1 & Đồng Bộ Web'}
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   ) : (
                     /* Products List View with Fast Stock Update & Search */
                     <div>
@@ -1725,12 +2131,12 @@ export const AdminModal: React.FC = () => {
                             Danh Sách Thiết Bị &amp; Tồn Kho Thực Tế
                           </h3>
                           <p className="text-xs text-slate-500">
-                            Cập nhật nhanh số lượng tồn kho hoặc bấm Sửa để thêm nhiều hình ảnh cho sản phẩm:
+                            Cập nhật nhanh số lượng tồn kho, ghim Top 10 Trang 1 hoặc bấm Sửa để thêm nhiều ảnh:
                           </p>
                         </div>
 
                         <div className="flex flex-wrap items-center gap-2.5">
-                          <div className="relative w-56">
+                          <div className="relative w-52">
                             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                             <input
                               type="text"
@@ -1749,6 +2155,23 @@ export const AdminModal: React.FC = () => {
                               </button>
                             )}
                           </div>
+
+                          <button
+                            type="button"
+                            onClick={handleOpenPageOneOrderManager}
+                            className="px-3.5 py-2 bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 text-xs font-bold rounded-lg shadow-xs flex items-center gap-1.5"
+                          >
+                            <ListOrdered className="w-4 h-4 text-amber-700" />
+                            <span>
+                              Sắp Xếp 10 SP Trang 1 (
+                              {
+                                products.filter(
+                                  (p) => typeof p.pinOrder === 'number' && p.pinOrder >= 1 && p.pinOrder <= 10
+                                ).length
+                              }
+                              /10)
+                            </span>
+                          </button>
 
                           <button
                             type="button"
@@ -1785,8 +2208,17 @@ export const AdminModal: React.FC = () => {
                                 return (
                                   <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
                                     <td className="py-3 px-4">
-                                      <div className="font-mono text-[11px] font-bold text-emerald-700">
-                                        {p.sku}
+                                      <div className="flex items-center gap-1.5 flex-wrap">
+                                        <span className="font-mono text-[11px] font-bold text-emerald-700">
+                                          {p.sku}
+                                        </span>
+                                        {typeof p.pinOrder === 'number' &&
+                                          p.pinOrder >= 1 &&
+                                          p.pinOrder <= 10 && (
+                                            <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-extrabold">
+                                              Top #{p.pinOrder} Trang 1
+                                            </span>
+                                          )}
                                       </div>
                                       <div className="font-semibold text-slate-900 line-clamp-1 max-w-xs">
                                         {p.name}
@@ -1855,6 +2287,39 @@ export const AdminModal: React.FC = () => {
 
                                     <td className="py-3 px-4 text-right">
                                       <div className="flex items-center justify-end gap-1.5">
+                                        <button
+                                          type="button"
+                                          onClick={async () => {
+                                            const res = await togglePinProductToPageOne(p.id);
+                                            showNotice(res.message);
+                                          }}
+                                          className={`px-2 py-1 text-xs font-semibold border rounded-md transition-colors flex items-center gap-1 ${
+                                            typeof p.pinOrder === 'number' &&
+                                            p.pinOrder >= 1 &&
+                                            p.pinOrder <= 10
+                                              ? 'text-amber-900 bg-amber-100 border-amber-300 hover:bg-amber-200'
+                                              : 'text-slate-600 bg-white border-slate-200 hover:bg-amber-50 hover:text-amber-800 hover:border-amber-300'
+                                          }`}
+                                          title={
+                                            typeof p.pinOrder === 'number'
+                                              ? `Đang ở Top #${p.pinOrder} Trang 1 — bấm để gỡ`
+                                              : 'Đưa nhanh lên Trang 1 (Top 10)'
+                                          }
+                                        >
+                                          {typeof p.pinOrder === 'number' &&
+                                          p.pinOrder >= 1 &&
+                                          p.pinOrder <= 10 ? (
+                                            <>
+                                              <PinOff className="w-3.5 h-3.5" />
+                                              <span>Bỏ #{p.pinOrder}</span>
+                                            </>
+                                          ) : (
+                                            <>
+                                              <Pin className="w-3.5 h-3.5" />
+                                              <span>Ghim T1</span>
+                                            </>
+                                          )}
+                                        </button>
                                         <button
                                           type="button"
                                           onClick={() => handleOpenEdit(p)}
