@@ -86,11 +86,11 @@ export const ProductSvgThumbnail: React.FC<ProductSvgThumbnailProps> = ({
 
           {/* Silicon cell shimmer badge */}
           <rect x="75" y="250" width="105" height="24" rx="4" fill="#047857" />
-          <text x="127" y="266" textAnchor="middle" fill="#ffffff" fontSize="11" fontWeight="700" fontFamily="sans-serif">
+          <text x="127" y="266" textAnchor="middle" fill="#ffffff" fontSize="11" fontWeight="700" fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
             N-TYPE TOPCon
           </text>
           <rect x="220" y="250" width="105" height="24" rx="4" fill="#0f766e" />
-          <text x="272" y="266" textAnchor="middle" fill="#ffffff" fontSize="11" fontWeight="700" fontFamily="sans-serif">
+          <text x="272" y="266" textAnchor="middle" fill="#ffffff" fontSize="11" fontWeight="700" fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
             TIER 1 SOLAR
           </text>
         </svg>
@@ -115,13 +115,13 @@ export const ProductSvgThumbnail: React.FC<ProductSvgThumbnailProps> = ({
 
           {/* LCD Screen */}
           <rect x="140" y="70" width="120" height="65" rx="6" fill="#0f172a" stroke="#10b981" strokeWidth="1.5" />
-          <text x="200" y="92" textAnchor="middle" fill="#10b981" fontSize="12" fontWeight="700" fontFamily="monospace">
+          <text x="200" y="92" textAnchor="middle" fill="#10b981" fontSize="12" fontWeight="700" fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
             5.24 kW
           </text>
-          <text x="200" y="108" textAnchor="middle" fill="#38bdf8" fontSize="9" fontFamily="monospace">
+          <text x="200" y="108" textAnchor="middle" fill="#38bdf8" fontSize="9" fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
             PV: 5.6kW | BAT: 98%
           </text>
-          <text x="200" y="122" textAnchor="middle" fill="#a7f3d0" fontSize="8" fontFamily="monospace">
+          <text x="200" y="122" textAnchor="middle" fill="#a7f3d0" fontSize="8" fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
             HYBRID ON-GRID / ESS
           </text>
 
@@ -181,7 +181,7 @@ export const ProductSvgThumbnail: React.FC<ProductSvgThumbnailProps> = ({
 
           {/* Breaker switch & comm ports */}
           <rect x="175" y="175" width="50" height="20" rx="3" fill="#334155" />
-          <text x="200" y="189" textAnchor="middle" fill="#38bdf8" fontSize="8" fontFamily="monospace">CAN / RS485</text>
+          <text x="200" y="189" textAnchor="middle" fill="#38bdf8" fontSize="8" fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">CAN / RS485</text>
 
           {/* Cycle count text */}
           <text x="200" y="222" textAnchor="middle" fill="#94a3b8" fontSize="9">
@@ -212,10 +212,10 @@ export const ProductSvgThumbnail: React.FC<ProductSvgThumbnailProps> = ({
 
           {/* Digital LED Multimeter */}
           <rect x="120" y="105" width="150" height="75" rx="5" fill="#090d16" stroke="#0284c7" strokeWidth="1.5" />
-          <text x="130" y="125" fill="#38bdf8" fontSize="10" fontFamily="monospace">VOLTAGE: 382.4 V</text>
-          <text x="130" y="142" fill="#38bdf8" fontSize="10" fontFamily="monospace">CURRENT: 64.8 A</text>
-          <text x="130" y="159" fill="#10b981" fontSize="11" fontWeight="700" fontFamily="monospace">COS PHI: 0.985</text>
-          <text x="130" y="174" fill="#f59e0b" fontSize="10" fontWeight="700" fontFamily="monospace">TIẾT KIỆM: -18.2%</text>
+          <text x="130" y="125" fill="#38bdf8" fontSize="10" fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">VOLTAGE: 382.4 V</text>
+          <text x="130" y="142" fill="#38bdf8" fontSize="10" fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">CURRENT: 64.8 A</text>
+          <text x="130" y="159" fill="#10b981" fontSize="11" fontWeight="700" fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">COS PHI: 0.985</text>
+          <text x="130" y="174" fill="#f59e0b" fontSize="10" fontWeight="700" fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">TIẾT KIỆM: -18.2%</text>
 
           {/* Heat dissipation vents */}
           <line x1="110" y1="195" x2="280" y2="195" stroke="#475569" strokeWidth="2" />
