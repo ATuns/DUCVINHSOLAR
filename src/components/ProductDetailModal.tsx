@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { ProductSvgThumbnail } from './ProductSvgThumbnail';
 import { MultiImageInput } from './MultiImageInput';
+import { normalizeImageUrl } from '../utils/imageUrl';
 import {
   X,
   CheckCircle,
@@ -52,15 +53,18 @@ export const ProductDetailModal: React.FC = () => {
 
   if (!selectedProduct) return null;
 
-  const productImages: string[] =
+  const productImages: string[] = (
     Array.isArray(selectedProduct.images) && selectedProduct.images.length > 0
       ? selectedProduct.images.filter(Boolean)
       : selectedProduct.imageUrl
       ? [selectedProduct.imageUrl]
-      : [];
+      : []
+  ).map((u) => normalizeImageUrl(u));
 
   const currentImageUrl =
-    productImages[activeImageIdx] || productImages[0] || selectedProduct.imageUrl;
+    productImages[activeImageIdx] ||
+    productImages[0] ||
+    (selectedProduct.imageUrl ? normalizeImageUrl(selectedProduct.imageUrl) : undefined);
 
   const handleUpdateImagesInline = async (newImgs: string[]) => {
     const prevLen = productImages.length;

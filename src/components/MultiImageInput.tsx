@@ -12,6 +12,11 @@ import {
   CheckCircle2,
   X
 } from 'lucide-react';
+import {
+  extractGoogleDriveFileId,
+  getGoogleDriveFallbackUrl,
+  normalizeImageUrl
+} from '../utils/imageUrl';
 
 interface MultiImageInputProps {
   images: string[];
@@ -333,9 +338,12 @@ export const MultiImageInput: React.FC<MultiImageInputProps> = ({
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [brokenIndices, setBrokenIndices] = useState<Record<string, boolean>>({});
+  const [fallbackSrcMap, setFallbackSrcMap] = useState<Record<string, string>>({});
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const safeImages = Array.isArray(images) ? images.filter(Boolean) : [];
+  const safeImages = Array.isArray(images)
+    ? images.map((u) => normalizeImageUrl(u)).filter(Boolean)
+    : [];
   const latestImagesRef = useRef<string[]>(safeImages);
   latestImagesRef.current = safeImages;
 
@@ -356,15 +364,29 @@ export const MultiImageInput: React.FC<MultiImageInputProps> = ({
     setUploadSuccess(null);
 
     // Support pasting multiple links separated by commas or newlines
-    const urls = raw
+    const rawUrls = raw
       .split(/[\n,]+/)
       .map((s) => s.trim())
       .filter(Boolean);
 
-    if (urls.length > 0) {
-      onChange([...latestImagesRef.current, ...urls]);
+    let driveCount = 0;
+    const normalizedUrls = rawUrls.map((u) => {
+      if (extractGoogleDriveFileId(u)) {
+        driveCount += 1;
+      }
+      return normalizeImageUrl(u);
+    });
+
+    if (normalizedUrls.length > 0) {
+      onChange([...latestImagesRef.current, ...normalizedUrls]);
       setUrlInput('');
-      setUploadSuccess(`Đã thêm ${urls.length} đường dẫn ảnh.`);
+      if (driveCount > 0) {
+        setUploadSuccess(
+          `Đã tự động chuyển đổi ${driveCount} link Google Drive sang dạng hiển thị ảnh trực tiếp! (Lưu ý: file trên Drive phải bật chia sẻ "Bất kỳ ai có đường liên kết").`
+        );
+      } else {
+        setUploadSuccess(`Đã thêm ${normalizedUrls.length} đường dẫn ảnh.`);
+      }
     }
   };
 
@@ -563,7 +585,7 @@ export const MultiImageInput: React.FC<MultiImageInputProps> = ({
                   handleAddUrl();
                 }
               }}
-              placeholder="Dán link ảnh (https://...) rồi nhấn Thêm Link"
+              placeholder="Dán link ảnh (https://... hoặc link Google Drive) rồi nhấn Thêm Link"
               className="w-full pl-8 pr-2.5 py-2.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:border-emerald-600 focus:outline-hidden"
             />
           </div>
@@ -649,12 +671,19 @@ export const MultiImageInput: React.FC<MultiImageInputProps> = ({
                   </div>
                 ) : (
                   <img
-                    src={imgSrc}
+                    src={fallbackSrcMap[imgKey] || imgSrc}
                     alt={`Ảnh ${idx + 1}`}
+                    referrerPolicy="no-referrer"
                     className="w-full h-full object-contain bg-white p-1"
-                    onError={() =>
-                      setBrokenIndices((prev) => ({ ...prev, [imgKey]: true }))
-                    }
+                    onError={() => {
+                      const currentDisplayed = fallbackSrcMap[imgKey] || imgSrc;
+                      const driveFallback = getGoogleDriveFallbackUrl(currentDisplayed);
+                      if (driveFallback && driveFallback !== currentDisplayed) {
+                        setFallbackSrcMap((prev) => ({ ...prev, [imgKey]: driveFallback }));
+                        return;
+                      }
+                      setBrokenIndices((prev) => ({ ...prev, [imgKey]: true }));
+                    }}
                   />
                 )}
 

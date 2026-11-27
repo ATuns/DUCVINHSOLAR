@@ -1,4 +1,5 @@
 import React from 'react';
+import { getGoogleDriveFallbackUrl, normalizeImageUrl } from '../utils/imageUrl';
 
 interface ProductSvgThumbnailProps {
   type: 'panel' | 'inverter' | 'battery' | 'optimizer' | 'streetlight' | 'custom';
@@ -15,22 +16,32 @@ export const ProductSvgThumbnail: React.FC<ProductSvgThumbnailProps> = ({
   className = 'w-full h-full',
   fit = 'contain'
 }) => {
+  const normalizedUrl = imageUrl ? normalizeImageUrl(imageUrl) : '';
+  const [resolvedSrc, setResolvedSrc] = React.useState(normalizedUrl);
   // If a valid image URL is supplied, attempt to display it with fallback
   const [imgError, setImgError] = React.useState(false);
 
   React.useEffect(() => {
+    setResolvedSrc(normalizedUrl);
     setImgError(false);
-  }, [imageUrl]);
+  }, [normalizedUrl]);
 
-  if (imageUrl && !imgError) {
+  if (resolvedSrc && !imgError) {
     const fitClass = fit === 'contain' ? 'object-contain' : 'object-cover';
     return (
       <img
-        src={imageUrl}
+        src={resolvedSrc}
         alt={name}
         className={`${className} ${fitClass}`}
         referrerPolicy="no-referrer"
-        onError={() => setImgError(true)}
+        onError={() => {
+          const driveFallback = getGoogleDriveFallbackUrl(resolvedSrc);
+          if (driveFallback && driveFallback !== resolvedSrc) {
+            setResolvedSrc(driveFallback);
+            return;
+          }
+          setImgError(true);
+        }}
       />
     );
   }
