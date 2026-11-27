@@ -6,8 +6,7 @@ export type SitePageType =
   | 'projects'
   | 'blog'
   | 'company'
-  | 'contact'
-  | 'sitemap';
+  | 'contact';
 
 export const SITE_ORIGIN = 'https://www.solarducvinh.com';
 
@@ -74,15 +73,6 @@ export const MAIN_SITE_ROUTES: Record<SitePageType, RouteMetaInfo> = {
     title: 'Liên Hệ & Nhận Báo Giá Điện Năng Lượng Mặt Trời – Hotline/Zalo 0938.288.876 | Đức Vinh Solar',
     description:
       'Liên hệ kho tổng Đức Vinh Solar tại Hóc Môn, TP.HCM qua Hotline/Zalo 0938.288.876 để nhận tư vấn kỹ thuật, khảo sát tận nơi và báo giá vật tư điện mặt trời.'
-  },
-  sitemap: {
-    page: 'sitemap',
-    path: '/so-do-trang-web',
-    label: 'Sơ Đồ Trang Web (Sitemap)',
-    shortLabel: 'Sitemap',
-    title: 'Sơ Đồ Trang Web (Sitemap) – Danh Sách Toàn Bộ Trang & Danh Mục | Đức Vinh Solar',
-    description:
-      'Sơ đồ trang web (HTML & XML Sitemap) tổng hợp toàn bộ đường dẫn trang chuyên biệt, danh mục thiết bị điện mặt trời, thương hiệu, dự án và bài viết tại Đức Vinh Solar.'
   }
 };
 
@@ -292,11 +282,6 @@ export function parseSiteLocation(pathname: string, search: string = ''): Parsed
   // 6. Contact & Quote Page (/lien-he-bao-gia, /lien-he, /bao-gia)
   if (first === 'lien-he-bao-gia' || first === 'lien-he' || first === 'bao-gia') {
     return { page: 'contact' };
-  }
-
-  // 7. HTML Sitemap Page (/so-do-trang-web, /sitemap)
-  if (first === 'so-do-trang-web' || first === 'sitemap' || first === 'so-do-web') {
-    return { page: 'sitemap' };
   }
 
   // Unknown single-segment slug might be a custom category slug created by Admin

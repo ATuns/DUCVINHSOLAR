@@ -12,14 +12,12 @@ import { Footer } from './components/Footer';
 import { ProductDetailModal } from './components/ProductDetailModal';
 import { AdminModal } from './components/AdminModal';
 import { FloatingContact } from './components/FloatingContact';
-import { SitemapPage } from './components/SitemapPage';
 
 const MainPageRouter: React.FC = () => {
   const { currentPage } = useApp();
 
   return (
     <main className="flex-1 relative z-10 pt-[4.25rem] sm:pt-[5rem]">
-
       {currentPage === 'home' && (
         <>
           <ProductCatalog />
@@ -45,8 +43,6 @@ const MainPageRouter: React.FC = () => {
       )}
 
       {currentPage === 'contact' && <ContactSection />}
-
-      {currentPage === 'sitemap' && <SitemapPage />}
     </main>
   );
 };

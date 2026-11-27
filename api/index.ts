@@ -670,8 +670,7 @@ export default async function apiHandler(req: any, res: any) {
         { loc: `${siteOrigin}/du-an-tieu-bieu`, priority: '0.85', changefreq: 'weekly' },
         { loc: `${siteOrigin}/blog-bai-viet`, priority: '0.85', changefreq: 'weekly' },
         { loc: `${siteOrigin}/gioi-thieu-cong-ty`, priority: '0.80', changefreq: 'monthly' },
-        { loc: `${siteOrigin}/lien-he-bao-gia`, priority: '0.85', changefreq: 'monthly' },
-        { loc: `${siteOrigin}/so-do-trang-web`, priority: '0.70', changefreq: 'weekly' }
+        { loc: `${siteOrigin}/lien-he-bao-gia`, priority: '0.85', changefreq: 'monthly' }
       ];
 
       const seenLocs = new Set<string>(entries.map((e) => e.loc));

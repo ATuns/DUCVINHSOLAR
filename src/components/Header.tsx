@@ -117,7 +117,7 @@ export const Header: React.FC = () => {
   }, [categories, brands, products]);
 
   const handleNavPage = (
-    page: 'home' | 'products' | 'projects' | 'blog' | 'company' | 'contact' | 'sitemap'
+    page: 'home' | 'products' | 'projects' | 'blog' | 'company' | 'contact'
   ) => {
     setMobileMenuOpen(false);
     setIsProductMenuHovered(false);
@@ -676,20 +676,6 @@ export const Header: React.FC = () => {
                 }`}
               >
                 Liên Hệ &amp; Báo Giá
-              </a>
-              <a
-                href="/so-do-trang-web"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavPage('sitemap');
-                }}
-                className={`text-left px-3 py-2.5 text-sm font-medium rounded-md transition-colors ${
-                  currentPage === 'sitemap'
-                    ? 'bg-emerald-50 text-emerald-800 font-bold'
-                    : 'text-slate-800 hover:bg-emerald-50 hover:text-emerald-700'
-                }`}
-              >
-                Sơ Đồ Trang Web (Sitemap)
               </a>
 
               <div className="pt-3 border-t border-slate-100 flex items-center justify-end">

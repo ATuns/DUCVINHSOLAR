@@ -102,7 +102,7 @@ export const Footer: React.FC = () => {
           {/* Column 3: Navigation Links */}
           <div className="lg:col-span-2 space-y-3 min-w-0">
             <h4 className="text-xs font-bold uppercase tracking-wider text-white">
-              Các Trang &amp; Sitemap
+              Khám Phá &amp; Dịch Vụ
             </h4>
             <ul className="space-y-2 text-emerald-100/80">
               <li>
@@ -163,28 +163,6 @@ export const Footer: React.FC = () => {
                   className="hover:text-emerald-300 transition-colors text-left block"
                 >
                   Liên Hệ &amp; Báo Giá
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/so-do-trang-web"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigateToPage('sitemap');
-                  }}
-                  className="text-emerald-300 hover:text-white font-semibold transition-colors text-left block"
-                >
-                  Sơ Đồ Trang Web (Sitemap)
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/sitemap.xml"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-emerald-300/90 hover:text-white font-mono text-[11px] transition-colors block"
-                >
-                  XML Sitemap (/sitemap.xml)
                 </a>
               </li>
             </ul>
