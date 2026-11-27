@@ -2,7 +2,7 @@
   "version": "3.4-ducvinhsolar-private-blob",
   "storeName": "ducvinhsolar",
   "storeId": "store_gzvmZDzXfVh8EDzC",
-  "updatedAt": "2026-11-17T10:41:23.883Z",
+  "updatedAt": "2026-11-27T07:16:46.134Z",
   "categories": [
     {
       "id": "solar-panels",
@@ -8524,9 +8524,9 @@
       "warrantyYears": 2,
       "origin": "CHINT Chính Hãng",
       "featured": false,
-      "imageUrl": "https://thietbidienphunghoang.com/wp-content/uploads/2018/10/aptomat-4-pha-125a.jpg",
+      "imageUrl": "https://drive.google.com/u/0/drive-viewer/AKGpihZfLEOTcOdoILg66BVKQaZPrf8xnp5JPlL3Hteqp2_neishFMMA3aYeNbwldLuTN2X-5cFOFJxL7g9Tp_Y6FebpM6IZtsQ9LLg=s1600-rw-v1?auditContext=forDisplay",
       "images": [
-        "https://thietbidienphunghoang.com/wp-content/uploads/2018/10/aptomat-4-pha-125a.jpg"
+        "https://drive.google.com/u/0/drive-viewer/AKGpihZfLEOTcOdoILg66BVKQaZPrf8xnp5JPlL3Hteqp2_neishFMMA3aYeNbwldLuTN2X-5cFOFJxL7g9Tp_Y6FebpM6IZtsQ9LLg=s1600-rw-v1?auditContext=forDisplay"
       ],
       "svgType": "optimizer",
       "specs": [
@@ -8555,7 +8555,7 @@
         "Cắt tổng AC cho tủ điện Solar 3 pha 30kW–60kW"
       ],
       "status": "in-stock",
-      "updatedAt": "2026-11-17"
+      "updatedAt": "2026-11-27"
     },
     {
       "id": "prod-dv-acc-052",

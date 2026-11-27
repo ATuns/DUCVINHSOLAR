@@ -38,11 +38,16 @@ export const ProductDetailModal: React.FC = () => {
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [showImageManager, setShowImageManager] = useState(false);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
+  const [imageSaveState, setImageSaveState] = useState<{
+    status: 'idle' | 'saving' | 'saved' | 'error';
+    message?: string;
+  }>({ status: 'idle' });
 
   useEffect(() => {
     setActiveImageIdx(0);
     setShowImageManager(false);
     setIsZoomOpen(false);
+    setImageSaveState({ status: 'idle' });
   }, [selectedProduct?.id]);
 
   if (!selectedProduct) return null;
@@ -57,13 +62,31 @@ export const ProductDetailModal: React.FC = () => {
   const currentImageUrl =
     productImages[activeImageIdx] || productImages[0] || selectedProduct.imageUrl;
 
-  const handleUpdateImagesInline = (newImgs: string[]) => {
-    updateProduct(selectedProduct.id, {
+  const handleUpdateImagesInline = async (newImgs: string[]) => {
+    const prevLen = productImages.length;
+    setImageSaveState({ status: 'saving', message: 'Đang lưu hình ảnh sản phẩm lên máy chủ...' });
+
+    if (newImgs.length > prevLen) {
+      setActiveImageIdx(newImgs.length - 1);
+    } else if (activeImageIdx >= newImgs.length) {
+      setActiveImageIdx(Math.max(0, newImgs.length - 1));
+    }
+
+    const res = await updateProduct(selectedProduct.id, {
       images: newImgs,
       imageUrl: newImgs[0] || undefined
     });
-    if (activeImageIdx >= newImgs.length) {
-      setActiveImageIdx(Math.max(0, newImgs.length - 1));
+
+    if (res.ok) {
+      setImageSaveState({
+        status: 'saved',
+        message: 'Đã lưu hình ảnh sản phẩm lên máy chủ thành công!'
+      });
+    } else {
+      setImageSaveState({
+        status: 'error',
+        message: `Không thể lưu lên máy chủ: ${res.error || 'Vui lòng thử lại.'}`
+      });
     }
   };
 
@@ -154,13 +177,26 @@ export const ProductDetailModal: React.FC = () => {
           <div className="overflow-y-auto p-4 sm:p-7 space-y-6 sm:space-y-8">
             {/* Admin Inline Multi-Image Uploader */}
             {isAdmin && showImageManager && (
-              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-300">
+              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 space-y-2.5">
                 <MultiImageInput
                   images={productImages}
                   onChange={handleUpdateImagesInline}
                   label={`Quản Lý Hình Ảnh Sản Phẩm: ${selectedProduct.name}`}
-                  helperText="Tải nhiều ảnh từ máy tính / điện thoại hoặc dán link ảnh. Thay đổi được lưu tự động ngay lập tức."
+                  helperText="Tải nhiều ảnh từ máy tính / điện thoại, kéo thả hoặc dán (Ctrl+V). Thay đổi được lưu tự động lên máy chủ ngay lập tức."
                 />
+                {imageSaveState.status !== 'idle' && (
+                  <div
+                    className={`px-3 py-2 rounded-lg text-xs font-semibold ${
+                      imageSaveState.status === 'saving'
+                        ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                        : imageSaveState.status === 'saved'
+                        ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                        : 'bg-rose-50 text-rose-700 border border-rose-200'
+                    }`}
+                  >
+                    {imageSaveState.message}
+                  </div>
+                )}
               </div>
             )}
 

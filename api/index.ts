@@ -42,6 +42,14 @@ let lastBlobFetchAt = 0;
 let runtimeConfiguredToken = '';
 const CACHE_TTL_MS = 2000;
 
+// Serialize state mutations inside a single Node process so concurrent POSTs never clobber each other
+let stateWriteQueue: Promise<unknown> = Promise.resolve();
+function withStateWriteLock<T>(task: () => Promise<T>): Promise<T> {
+  const run = stateWriteQueue.then(task, task);
+  stateWriteQueue = run.catch(() => {});
+  return run;
+}
+
 export function getStoreId(): string {
   return (
     (process.env.DUCVINHSOLAR_STORE_ID || '').trim() ||
@@ -454,14 +462,36 @@ async function writeDatabaseState(nextState: BlobDatabaseState): Promise<BlobDat
   return normalized;
 }
 
+function normalizeItemImages<T extends Record<string, any>>(item: T): T {
+  if (!item || typeof item !== 'object') return item;
+  if (Array.isArray(item.images)) {
+    const cleanImages = item.images.filter(
+      (img: any) => typeof img === 'string' && img.trim().length > 0
+    );
+    return {
+      ...item,
+      images: cleanImages,
+      imageUrl: cleanImages[0] || ''
+    };
+  }
+  return item;
+}
+
 function upsertById<T extends { id: string }>(items: T[], item: T, prependNew = false): T[] {
-  const idx = items.findIndex((existing) => existing.id === item.id);
+  const normalizedItem = normalizeItemImages(item as Record<string, any>) as T;
+  const idx = items.findIndex((existing) => existing.id === normalizedItem.id);
   if (idx >= 0) {
     const updated = [...items];
-    updated[idx] = { ...updated[idx], ...item };
+    const merged: any = { ...updated[idx], ...normalizedItem };
+    const normalizedImages = (normalizedItem as Record<string, any>).images;
+    if (Array.isArray(normalizedImages)) {
+      merged.images = normalizedImages;
+      merged.imageUrl = normalizedImages[0] || undefined;
+    }
+    updated[idx] = merged;
     return updated;
   }
-  return prependNew ? [item, ...items] : [...items, item];
+  return prependNew ? [normalizedItem, ...items] : [...items, normalizedItem];
 }
 
 function recordDeletedId(state: BlobDatabaseState, id: string) {
@@ -475,7 +505,41 @@ function clearDeletedId(state: BlobDatabaseState, id: string) {
   state.deletedIds = state.deletedIds.filter((existing) => existing !== id);
 }
 
+async function readRawBodyBuffer(req: any): Promise<Buffer> {
+  if (Buffer.isBuffer(req.body)) {
+    return req.body;
+  }
+  if (req.body instanceof Uint8Array) {
+    return Buffer.from(req.body);
+  }
+  if (typeof req.body === 'string') {
+    return Buffer.from(req.body, 'utf-8');
+  }
+  if (req.readableEnded) {
+    return Buffer.alloc(0);
+  }
+  return new Promise((resolve) => {
+    const chunks: Buffer[] = [];
+    req.on('data', (chunk: any) => {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    });
+    req.on('end', () => {
+      resolve(chunks.length > 0 ? Buffer.concat(chunks) : Buffer.alloc(0));
+    });
+    req.on('error', () => resolve(Buffer.alloc(0)));
+  });
+}
+
 async function parseJsonBody(req: any): Promise<any> {
+  if (Buffer.isBuffer(req.body)) {
+    const text = req.body.toString('utf-8').trim();
+    if (!text) return {};
+    try {
+      return JSON.parse(text);
+    } catch {
+      return {};
+    }
+  }
   if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
     return req.body;
   }
@@ -486,24 +550,47 @@ async function parseJsonBody(req: any): Promise<any> {
       return {};
     }
   }
-  return new Promise((resolve) => {
-    let raw = '';
-    req.on('data', (chunk: any) => {
-      raw += chunk.toString();
-    });
-    req.on('end', () => {
-      if (!raw.trim()) {
-        resolve({});
-        return;
-      }
-      try {
-        resolve(JSON.parse(raw));
-      } catch {
-        resolve({});
-      }
-    });
-    req.on('error', () => resolve({}));
-  });
+  if (req.readableEnded) {
+    return {};
+  }
+  const buf = await readRawBodyBuffer(req);
+  const raw = buf.toString('utf-8').trim();
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return {};
+  }
+}
+
+function sanitizeUploadFilename(rawFilename: string, contentType: string): string {
+  const extFromType: Record<string, string> = {
+    'image/jpeg': '.jpg',
+    'image/jpg': '.jpg',
+    'image/png': '.png',
+    'image/webp': '.webp',
+    'image/gif': '.gif',
+    'image/svg+xml': '.svg',
+    'image/avif': '.avif',
+    'image/bmp': '.bmp'
+  };
+  const fallbackExt = extFromType[contentType.toLowerCase()] || '.jpg';
+  const stripped = (rawFilename || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[đĐ]/g, 'd');
+
+  const dotIdx = stripped.lastIndexOf('.');
+  const rawBase = dotIdx > 0 ? stripped.slice(0, dotIdx) : stripped;
+  const rawExt = dotIdx > 0 ? stripped.slice(dotIdx).toLowerCase() : '';
+  const safeBase =
+    rawBase
+      .replace(/[^a-zA-Z0-9_-]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 60) || 'product-img';
+  const safeExt = /^\.[a-z0-9]{2,5}$/.test(rawExt) ? rawExt : fallbackExt;
+  return `${safeBase}${safeExt}`;
 }
 
 function sendJson(res: any, statusCode: number, payload: any) {
@@ -574,8 +661,8 @@ export default async function apiHandler(req: any, res: any) {
       });
     }
 
-    // 3. GET /api/blob/media -> Serve private Vercel Blob media using `get(pathname, { access: 'private', storeId })`
-    if (method === 'GET' && pathname === '/api/blob/media') {
+    // 3. GET/HEAD /api/blob/media -> Serve private Vercel Blob media using `get(pathname, { access: 'private', storeId })`
+    if ((method === 'GET' || method === 'HEAD') && pathname === '/api/blob/media') {
       const targetPathname = urlObj.searchParams.get('pathname') || '';
       const targetUrl = urlObj.searchParams.get('url') || '';
       const lookup = targetPathname || targetUrl;
@@ -593,56 +680,122 @@ export default async function apiHandler(req: any, res: any) {
       const arrayBuf = await new Response(result.stream).arrayBuffer();
       const buffer = Buffer.from(arrayBuf);
       res.statusCode = 200;
-      res.setHeader('Cache-Control', 'private, no-cache');
+      res.setHeader('Cache-Control', 'private, max-age=86400');
       res.setHeader('Content-Type', result.blob.contentType || 'application/octet-stream');
+      res.setHeader('Content-Length', String(buffer.length));
       res.setHeader('X-Content-Type-Options', 'nosniff');
-      return res.end(buffer);
+      return method === 'HEAD' ? res.end() : res.end(buffer);
     }
 
-    // 4. POST /api/blob/upload -> Upload image file to private Vercel Blob Store `store_gzvmZDzXfVh8EDzC`
+    // 4. POST /api/blob/upload -> Upload image file (raw binary OR JSON dataUrl) to private Vercel Blob Store
     if (method === 'POST' && pathname === '/api/blob/upload') {
-      const body = await parseJsonBody(req);
-      const dataUrl = typeof body.dataUrl === 'string' ? body.dataUrl : '';
-      const rawFilename =
-        typeof body.filename === 'string' ? body.filename : `image-${Date.now()}.jpg`;
-      const safeFilename = rawFilename.replace(/[^a-zA-Z0-9._-]/g, '-');
+      const reqContentType = String(req.headers?.['content-type'] || '').toLowerCase();
+      const isBinaryUpload =
+        reqContentType.startsWith('image/') ||
+        reqContentType.startsWith('application/octet-stream');
 
-      if (!dataUrl) {
-        return sendJson(res, 400, { ok: false, error: 'Missing dataUrl' });
-      }
+      let buffer: Buffer | null = null;
+      let contentType = 'image/jpeg';
+      let rawFilename = `image-${Date.now()}.jpg`;
 
-      if (dataUrl.startsWith('data:')) {
-        const matches = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
-        if (matches) {
-          const contentType = matches[1] || 'image/jpeg';
-          const base64Data = matches[2];
-          const buffer = Buffer.from(base64Data, 'base64');
-          const blobPath = `${STORE_NAME}/media/${Date.now()}-${safeFilename}`;
-
-          const uploaded = await putPrivateBlob(blobPath, buffer, {
-            addRandomSuffix: true,
-            contentType
+      if (isBinaryUpload) {
+        const rawBuf = await readRawBodyBuffer(req);
+        if (!rawBuf || rawBuf.length === 0) {
+          return sendJson(res, 400, {
+            ok: false,
+            error: 'Dữ liệu ảnh trống. Vui lòng thử chọn lại ảnh.'
           });
+        }
+        buffer = rawBuf;
+        const headerType = reqContentType.split(';')[0].trim();
+        const queryType = (urlObj.searchParams.get('contentType') || '').trim().toLowerCase();
+        contentType =
+          headerType.startsWith('image/')
+            ? headerType
+            : queryType.startsWith('image/')
+            ? queryType
+            : 'image/jpeg';
+        const headerName = String(req.headers?.['x-filename'] || '');
+        const queryName = urlObj.searchParams.get('filename') || '';
+        rawFilename = decodeURIComponent(queryName || headerName || rawFilename);
+      } else {
+        const body = await parseJsonBody(req);
+        const dataUrl = typeof body.dataUrl === 'string' ? body.dataUrl.trim() : '';
+        rawFilename =
+          typeof body.filename === 'string' && body.filename.trim()
+            ? body.filename.trim()
+            : rawFilename;
 
-          const browserUrl = `/api/blob/media?pathname=${encodeURIComponent(uploaded.pathname)}`;
+        if (!dataUrl) {
+          return sendJson(res, 400, {
+            ok: false,
+            error: 'Thiếu dữ liệu ảnh (dataUrl) khi tải lên.'
+          });
+        }
 
+        if (dataUrl.startsWith('data:')) {
+          const matches = dataUrl.match(/^data:([^;,]+)(?:;[^,]*)?;base64,([\s\S]+)$/);
+          if (!matches) {
+            return sendJson(res, 400, {
+              ok: false,
+              error: 'Định dạng dữ liệu ảnh base64 không hợp lệ.'
+            });
+          }
+          contentType =
+            matches[1]?.trim() ||
+            (typeof body.contentType === 'string' && body.contentType.trim()) ||
+            'image/jpeg';
+          const base64Data = matches[2].replace(/\s+/g, '');
+          buffer = Buffer.from(base64Data, 'base64');
+        } else if (/^https?:\/\//i.test(dataUrl)) {
           return sendJson(res, 200, {
             ok: true,
             storeName: STORE_NAME,
-            storeId: getStoreId(),
-            storeAccess: 'private',
-            url: browserUrl,
-            rawBlobUrl: uploaded.url,
-            pathname: uploaded.pathname,
+            url: dataUrl,
             storageMode: 'vercel-blob'
+          });
+        } else {
+          return sendJson(res, 400, {
+            ok: false,
+            error: 'Dữ liệu ảnh không đúng định dạng.'
           });
         }
       }
 
+      if (!buffer || buffer.length === 0) {
+        return sendJson(res, 400, {
+          ok: false,
+          error: 'Không giải mã được nội dung tệp ảnh.'
+        });
+      }
+
+      if (buffer.length > 12 * 1024 * 1024) {
+        return sendJson(res, 413, {
+          ok: false,
+          error: 'Ảnh quá lớn (vượt quá 12MB). Vui lòng chọn ảnh dung lượng nhỏ hơn.'
+        });
+      }
+
+      const safeFilename = sanitizeUploadFilename(rawFilename, contentType);
+      const blobPath = `${STORE_NAME}/media/${Date.now()}-${safeFilename}`;
+
+      const uploaded = await putPrivateBlob(blobPath, buffer, {
+        addRandomSuffix: true,
+        contentType
+      });
+
+      const browserUrl = `/api/blob/media?pathname=${encodeURIComponent(uploaded.pathname)}`;
+
       return sendJson(res, 200, {
         ok: true,
         storeName: STORE_NAME,
-        url: dataUrl,
+        storeId: getStoreId(),
+        storeAccess: 'private',
+        url: browserUrl,
+        rawBlobUrl: uploaded.url,
+        pathname: uploaded.pathname,
+        size: buffer.length,
+        contentType,
         storageMode: 'vercel-blob'
       });
     }
@@ -745,18 +898,22 @@ export default async function apiHandler(req: any, res: any) {
     if (method === 'POST' && pathname === '/api/categories') {
       const item = await parseJsonBody(req);
       if (!item || !item.id) return sendJson(res, 400, { ok: false, error: 'Invalid category' });
-      const current = await readDatabaseState();
-      clearDeletedId(current, item.id);
-      current.categories = upsertById(current.categories, item, false);
-      const saved = await writeDatabaseState(current);
+      const saved = await withStateWriteLock(async () => {
+        const current = await readDatabaseState(true);
+        clearDeletedId(current, item.id);
+        current.categories = upsertById(current.categories, item, false);
+        return writeDatabaseState(current);
+      });
       return sendJson(res, 200, { ok: true, updatedAt: saved.updatedAt });
     }
     if (method === 'DELETE' && pathname.startsWith('/api/categories/')) {
       const id = decodeURIComponent(pathname.replace('/api/categories/', ''));
-      const current = await readDatabaseState();
-      recordDeletedId(current, id);
-      current.categories = current.categories.filter((c) => c.id !== id);
-      const saved = await writeDatabaseState(current);
+      const saved = await withStateWriteLock(async () => {
+        const current = await readDatabaseState(true);
+        recordDeletedId(current, id);
+        current.categories = current.categories.filter((c) => c.id !== id);
+        return writeDatabaseState(current);
+      });
       return sendJson(res, 200, { ok: true, updatedAt: saved.updatedAt });
     }
 
@@ -764,18 +921,22 @@ export default async function apiHandler(req: any, res: any) {
     if (method === 'POST' && pathname === '/api/brands') {
       const item = await parseJsonBody(req);
       if (!item || !item.id) return sendJson(res, 400, { ok: false, error: 'Invalid brand' });
-      const current = await readDatabaseState();
-      clearDeletedId(current, item.id);
-      current.brands = upsertById(current.brands, item, false);
-      const saved = await writeDatabaseState(current);
+      const saved = await withStateWriteLock(async () => {
+        const current = await readDatabaseState(true);
+        clearDeletedId(current, item.id);
+        current.brands = upsertById(current.brands, item, false);
+        return writeDatabaseState(current);
+      });
       return sendJson(res, 200, { ok: true, updatedAt: saved.updatedAt });
     }
     if (method === 'DELETE' && pathname.startsWith('/api/brands/')) {
       const id = decodeURIComponent(pathname.replace('/api/brands/', ''));
-      const current = await readDatabaseState();
-      recordDeletedId(current, id);
-      current.brands = current.brands.filter((b) => b.id !== id);
-      const saved = await writeDatabaseState(current);
+      const saved = await withStateWriteLock(async () => {
+        const current = await readDatabaseState(true);
+        recordDeletedId(current, id);
+        current.brands = current.brands.filter((b) => b.id !== id);
+        return writeDatabaseState(current);
+      });
       return sendJson(res, 200, { ok: true, updatedAt: saved.updatedAt });
     }
 
@@ -783,18 +944,22 @@ export default async function apiHandler(req: any, res: any) {
     if (method === 'POST' && pathname === '/api/products') {
       const item = await parseJsonBody(req);
       if (!item || !item.id) return sendJson(res, 400, { ok: false, error: 'Invalid product' });
-      const current = await readDatabaseState();
-      clearDeletedId(current, item.id);
-      current.products = upsertById(current.products, item, true);
-      const saved = await writeDatabaseState(current);
+      const saved = await withStateWriteLock(async () => {
+        const current = await readDatabaseState(true);
+        clearDeletedId(current, item.id);
+        current.products = upsertById(current.products, item, true);
+        return writeDatabaseState(current);
+      });
       return sendJson(res, 200, { ok: true, updatedAt: saved.updatedAt });
     }
     if (method === 'DELETE' && pathname.startsWith('/api/products/')) {
       const id = decodeURIComponent(pathname.replace('/api/products/', ''));
-      const current = await readDatabaseState();
-      recordDeletedId(current, id);
-      current.products = current.products.filter((p) => p.id !== id);
-      const saved = await writeDatabaseState(current);
+      const saved = await withStateWriteLock(async () => {
+        const current = await readDatabaseState(true);
+        recordDeletedId(current, id);
+        current.products = current.products.filter((p) => p.id !== id);
+        return writeDatabaseState(current);
+      });
       return sendJson(res, 200, { ok: true, updatedAt: saved.updatedAt });
     }
 
@@ -802,18 +967,22 @@ export default async function apiHandler(req: any, res: any) {
     if (method === 'POST' && pathname === '/api/projects') {
       const item = await parseJsonBody(req);
       if (!item || !item.id) return sendJson(res, 400, { ok: false, error: 'Invalid project' });
-      const current = await readDatabaseState();
-      clearDeletedId(current, item.id);
-      current.projects = upsertById(current.projects, item, true);
-      const saved = await writeDatabaseState(current);
+      const saved = await withStateWriteLock(async () => {
+        const current = await readDatabaseState(true);
+        clearDeletedId(current, item.id);
+        current.projects = upsertById(current.projects, item, true);
+        return writeDatabaseState(current);
+      });
       return sendJson(res, 200, { ok: true, updatedAt: saved.updatedAt });
     }
     if (method === 'DELETE' && pathname.startsWith('/api/projects/')) {
       const id = decodeURIComponent(pathname.replace('/api/projects/', ''));
-      const current = await readDatabaseState();
-      recordDeletedId(current, id);
-      current.projects = current.projects.filter((p) => p.id !== id);
-      const saved = await writeDatabaseState(current);
+      const saved = await withStateWriteLock(async () => {
+        const current = await readDatabaseState(true);
+        recordDeletedId(current, id);
+        current.projects = current.projects.filter((p) => p.id !== id);
+        return writeDatabaseState(current);
+      });
       return sendJson(res, 200, { ok: true, updatedAt: saved.updatedAt });
     }
 
@@ -821,27 +990,33 @@ export default async function apiHandler(req: any, res: any) {
     if (method === 'POST' && pathname === '/api/blog-posts') {
       const item = await parseJsonBody(req);
       if (!item || !item.id) return sendJson(res, 400, { ok: false, error: 'Invalid blog post' });
-      const current = await readDatabaseState();
-      clearDeletedId(current, item.id);
-      current.blogPosts = upsertById(current.blogPosts, item, true);
-      const saved = await writeDatabaseState(current);
+      const saved = await withStateWriteLock(async () => {
+        const current = await readDatabaseState(true);
+        clearDeletedId(current, item.id);
+        current.blogPosts = upsertById(current.blogPosts, item, true);
+        return writeDatabaseState(current);
+      });
       return sendJson(res, 200, { ok: true, updatedAt: saved.updatedAt });
     }
     if (method === 'DELETE' && pathname.startsWith('/api/blog-posts/')) {
       const id = decodeURIComponent(pathname.replace('/api/blog-posts/', ''));
-      const current = await readDatabaseState();
-      recordDeletedId(current, id);
-      current.blogPosts = current.blogPosts.filter((b) => b.id !== id);
-      const saved = await writeDatabaseState(current);
+      const saved = await withStateWriteLock(async () => {
+        const current = await readDatabaseState(true);
+        recordDeletedId(current, id);
+        current.blogPosts = current.blogPosts.filter((b) => b.id !== id);
+        return writeDatabaseState(current);
+      });
       return sendJson(res, 200, { ok: true, updatedAt: saved.updatedAt });
     }
 
     // 12. Company Info update
     if (method === 'POST' && pathname === '/api/company-info') {
       const info = await parseJsonBody(req);
-      const current = await readDatabaseState();
-      current.companyInfo = info;
-      const saved = await writeDatabaseState(current);
+      const saved = await withStateWriteLock(async () => {
+        const current = await readDatabaseState(true);
+        current.companyInfo = info;
+        return writeDatabaseState(current);
+      });
       return sendJson(res, 200, { ok: true, updatedAt: saved.updatedAt });
     }
 
@@ -849,9 +1024,11 @@ export default async function apiHandler(req: any, res: any) {
     if (method === 'POST' && pathname === '/api/inquiries') {
       const item = await parseJsonBody(req);
       if (!item || !item.id) return sendJson(res, 400, { ok: false, error: 'Invalid inquiry' });
-      const current = await readDatabaseState();
-      current.inquiries = upsertById(current.inquiries, item, true);
-      const saved = await writeDatabaseState(current);
+      const saved = await withStateWriteLock(async () => {
+        const current = await readDatabaseState(true);
+        current.inquiries = upsertById(current.inquiries, item, true);
+        return writeDatabaseState(current);
+      });
       return sendJson(res, 200, { ok: true, updatedAt: saved.updatedAt });
     }
 

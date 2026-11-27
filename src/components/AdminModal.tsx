@@ -195,6 +195,8 @@ export const AdminModal: React.FC = () => {
   const [formWarranty, setFormWarranty] = useState<number>(12);
   const [formOrigin, setFormOrigin] = useState('Chính hãng');
   const [formImages, setFormImages] = useState<string[]>([]);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [isSavingProduct, setIsSavingProduct] = useState(false);
   const [formSvgType, setFormSvgType] = useState<Product['svgType']>('panel');
   const [formSpecsText, setFormSpecsText] = useState<string>(
     'Công suất: 580 Wp\nHiệu suất: 22.5%\nChuẩn bảo vệ: IP68'
@@ -377,9 +379,9 @@ export const AdminModal: React.FC = () => {
     setFormSpecsText('Công suất: 580 Wp\nHiệu suất: 22.5%\nChuẩn bảo vệ: IP68');
   };
 
-  const handleSaveProduct = (e: React.FormEvent) => {
+  const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formName.trim() || !formSku.trim()) return;
+    if (!formName.trim() || !formSku.trim() || isUploadingImages || isSavingProduct) return;
 
     const status: Product['status'] =
       formStock <= 0 ? 'order-only' : formStock < 10 ? 'low-stock' : 'in-stock';
@@ -387,50 +389,63 @@ export const AdminModal: React.FC = () => {
     const cleanImages = formImages.filter(Boolean);
     const parsedSpecs = parseMultilineSpecs(formSpecsText);
 
-    if (isAddingNew) {
-      addProduct({
-        sku: formSku,
-        name: formName,
-        category: formCategory,
-        brand: formBrand,
-        shortDesc: formShortDesc,
-        fullDesc: formFullDesc || formShortDesc,
-        stock: formStock,
-        unit: formUnit,
-        warrantyYears: formWarranty,
-        origin: formOrigin,
-        images: cleanImages,
-        imageUrl: cleanImages[0] || undefined,
-        svgType: formSvgType,
-        specs: parsedSpecs,
-        highlights: ['Sản phẩm chính hãng Đức Vinh Solar', 'Bảo hành đầy đủ'],
-        applications: ['Dân dụng và công nghiệp'],
-        status
-      });
-      showNotice(`Đã thêm sản phẩm "${formName}" thành công!`);
-    } else if (editingProduct) {
-      updateProduct(editingProduct.id, {
-        sku: formSku,
-        name: formName,
-        category: formCategory,
-        brand: formBrand,
-        shortDesc: formShortDesc,
-        fullDesc: formFullDesc,
-        stock: formStock,
-        unit: formUnit,
-        warrantyYears: formWarranty,
-        origin: formOrigin,
-        images: cleanImages,
-        imageUrl: cleanImages[0] || undefined,
-        svgType: formSvgType,
-        specs: parsedSpecs,
-        status
-      });
-      showNotice(`Đã cập nhật sản phẩm "${formName}"!`);
-    }
+    setIsSavingProduct(true);
+    try {
+      if (isAddingNew) {
+        const result = await addProduct({
+          sku: formSku,
+          name: formName,
+          category: formCategory,
+          brand: formBrand,
+          shortDesc: formShortDesc,
+          fullDesc: formFullDesc || formShortDesc,
+          stock: formStock,
+          unit: formUnit,
+          warrantyYears: formWarranty,
+          origin: formOrigin,
+          images: cleanImages,
+          imageUrl: cleanImages[0] || undefined,
+          svgType: formSvgType,
+          specs: parsedSpecs,
+          highlights: ['Sản phẩm chính hãng Đức Vinh Solar', 'Bảo hành đầy đủ'],
+          applications: ['Dân dụng và công nghiệp'],
+          status
+        });
+        showNotice(
+          result.ok
+            ? `Đã thêm sản phẩm "${formName}" và lưu lên máy chủ thành công!`
+            : `Đã thêm sản phẩm cục bộ, nhưng lỗi đồng bộ máy chủ: ${result.error || 'Vui lòng thử lại'}`
+        );
+      } else if (editingProduct) {
+        const result = await updateProduct(editingProduct.id, {
+          sku: formSku,
+          name: formName,
+          category: formCategory,
+          brand: formBrand,
+          shortDesc: formShortDesc,
+          fullDesc: formFullDesc,
+          stock: formStock,
+          unit: formUnit,
+          warrantyYears: formWarranty,
+          origin: formOrigin,
+          images: cleanImages,
+          imageUrl: cleanImages[0] || undefined,
+          svgType: formSvgType,
+          specs: parsedSpecs,
+          status
+        });
+        showNotice(
+          result.ok
+            ? `Đã cập nhật sản phẩm "${formName}" thành công!`
+            : `Đã cập nhật cục bộ, nhưng lỗi đồng bộ máy chủ: ${result.error || 'Vui lòng thử lại'}`
+        );
+      }
 
-    setEditingProduct(null);
-    setIsAddingNew(false);
+      setEditingProduct(null);
+      setIsAddingNew(false);
+    } finally {
+      setIsSavingProduct(false);
+    }
   };
 
   // Project CRUD Handlers in Admin Modal
@@ -1659,8 +1674,9 @@ export const AdminModal: React.FC = () => {
                         <MultiImageInput
                           images={formImages}
                           onChange={setFormImages}
+                          onUploadingChange={setIsUploadingImages}
                           label="Hình Ảnh Sản Phẩm (Thêm nhiều ảnh từ File máy tính / điện thoại hoặc Link)"
-                          helperText="Bạn có thể chọn nhiều file ảnh cùng lúc từ máy hoặc dán nhiều đường dẫn link ảnh. Ảnh đầu tiên sẽ là ảnh đại diện chính."
+                          helperText="Bạn có thể chọn nhiều file ảnh cùng lúc từ máy, kéo thả hoặc dán (Ctrl+V). Ảnh đầu tiên sẽ là ảnh đại diện chính."
                         />
 
                         <div>
@@ -1753,10 +1769,21 @@ export const AdminModal: React.FC = () => {
                           </button>
                           <button
                             type="submit"
-                            className="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-md flex items-center gap-1.5"
+                            disabled={isUploadingImages || isSavingProduct}
+                            className={`px-5 py-2 text-xs font-bold text-white rounded-md flex items-center gap-1.5 transition-colors ${
+                              isUploadingImages || isSavingProduct
+                                ? 'bg-emerald-400 cursor-not-allowed'
+                                : 'bg-emerald-600 hover:bg-emerald-700'
+                            }`}
                           >
                             <Save className="w-4 h-4" />
-                            <span>Lưu Sản Phẩm</span>
+                            <span>
+                              {isUploadingImages
+                                ? 'Đang tải ảnh lên...'
+                                : isSavingProduct
+                                ? 'Đang lưu...'
+                                : 'Lưu Sản Phẩm'}
+                            </span>
                           </button>
                         </div>
                       </form>
@@ -2545,6 +2572,7 @@ export const AdminModal: React.FC = () => {
                         <MultiImageInput
                           images={projImages}
                           onChange={setProjImages}
+                          onUploadingChange={setIsUploadingImages}
                           label="Hình Ảnh Thực Tế Dự Án (Tải nhiều file từ máy hoặc dán Link)"
                           helperText="Bạn có thể chọn nhiều ảnh công trình từ máy tính / điện thoại hoặc dán nhiều đường dẫn link ảnh."
                         />
@@ -2562,10 +2590,15 @@ export const AdminModal: React.FC = () => {
                           </button>
                           <button
                             type="submit"
-                            className="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-md flex items-center gap-1.5"
+                            disabled={isUploadingImages}
+                            className={`px-5 py-2 text-xs font-bold text-white rounded-md flex items-center gap-1.5 ${
+                              isUploadingImages
+                                ? 'bg-emerald-400 cursor-not-allowed'
+                                : 'bg-emerald-600 hover:bg-emerald-700'
+                            }`}
                           >
                             <Save className="w-4 h-4" />
-                            <span>Lưu Dự Án</span>
+                            <span>{isUploadingImages ? 'Đang tải ảnh...' : 'Lưu Dự Án'}</span>
                           </button>
                         </div>
                       </form>
@@ -2802,6 +2835,7 @@ export const AdminModal: React.FC = () => {
                         <MultiImageInput
                           images={blogImages}
                           onChange={setBlogImages}
+                          onUploadingChange={setIsUploadingImages}
                           label="Hình Ảnh Bài Viết Blog (Tải nhiều ảnh từ máy hoặc dán Link)"
                           helperText="Bạn có thể tải ảnh từ máy tính / điện thoại hoặc dán đường dẫn link ảnh minh họa cho bài viết."
                         />
@@ -2819,10 +2853,15 @@ export const AdminModal: React.FC = () => {
                           </button>
                           <button
                             type="submit"
-                            className="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-md flex items-center gap-1.5"
+                            disabled={isUploadingImages}
+                            className={`px-5 py-2 text-xs font-bold text-white rounded-md flex items-center gap-1.5 ${
+                              isUploadingImages
+                                ? 'bg-emerald-400 cursor-not-allowed'
+                                : 'bg-emerald-600 hover:bg-emerald-700'
+                            }`}
                           >
                             <Save className="w-4 h-4" />
-                            <span>Lưu Bài Viết</span>
+                            <span>{isUploadingImages ? 'Đang tải ảnh...' : 'Lưu Bài Viết'}</span>
                           </button>
                         </div>
                       </form>

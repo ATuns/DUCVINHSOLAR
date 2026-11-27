@@ -79,8 +79,13 @@ interface AppContextType {
   deleteBrandByName: (name: string, categoryId?: string, onConfirmed?: () => void) => void;
 
   // Product Management
-  addProduct: (product: Omit<Product, 'id' | 'updatedAt'>) => void;
-  updateProduct: (id: string, product: Partial<Product>) => void;
+  addProduct: (
+    product: Omit<Product, 'id' | 'updatedAt'>
+  ) => Promise<{ ok: boolean; error?: string }>;
+  updateProduct: (
+    id: string,
+    product: Partial<Product>
+  ) => Promise<{ ok: boolean; error?: string }>;
   deleteProduct: (id: string, onConfirmed?: () => void) => void;
   updateProductStock: (id: string, newStock: number) => void;
   savePageOneProductOrder: (orderedIds: string[]) => Promise<boolean>;
@@ -456,29 +461,77 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAdminPageOneOrderRequested(false);
   };
 
+  const isMountedRef = useRef(true);
+  const lastRemoteUpdatedAtRef = useRef<string>('');
+  const pendingWritesRef = useRef<number>(0);
+  const writeGenRef = useRef<number>(0);
+  const lastWriteCompletedAtRef = useRef<number>(0);
+  const productsRef = useRef<Product[]>(products);
+  productsRef.current = products;
+
   // Helper functions to communicate with Vercel Blob Store `ducvinhsolar` (/api/*)
-  const postToBlobApi = async (endpoint: string, body: unknown) => {
+  const postToBlobApi = async (
+    endpoint: string,
+    body: unknown
+  ): Promise<{ ok: boolean; updatedAt?: string; error?: string }> => {
+    pendingWritesRef.current += 1;
+    writeGenRef.current += 1;
     try {
-      await fetch(endpoint, {
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
-    } catch (err) {
+      const payload = await res.json().catch(() => null);
+      if (!res.ok || (payload && payload.ok === false)) {
+        const errMsg =
+          (payload && typeof payload.error === 'string' && payload.error) ||
+          `Lỗi máy chủ (${res.status})`;
+        console.warn(`Vercel Blob API sync error (${endpoint}):`, errMsg);
+        return { ok: false, error: errMsg };
+      }
+      if (payload && typeof payload.updatedAt === 'string' && payload.updatedAt) {
+        lastRemoteUpdatedAtRef.current = payload.updatedAt;
+      }
+      return { ok: true, updatedAt: payload?.updatedAt };
+    } catch (err: any) {
+      const errMsg = err?.message || 'Không thể kết nối máy chủ lưu trữ';
       console.warn(`Vercel Blob API sync warning (${endpoint}):`, err);
+      return { ok: false, error: errMsg };
+    } finally {
+      pendingWritesRef.current = Math.max(0, pendingWritesRef.current - 1);
+      lastWriteCompletedAtRef.current = Date.now();
     }
   };
 
-  const deleteFromBlobApi = async (endpoint: string) => {
+  const deleteFromBlobApi = async (
+    endpoint: string
+  ): Promise<{ ok: boolean; updatedAt?: string; error?: string }> => {
+    pendingWritesRef.current += 1;
+    writeGenRef.current += 1;
     try {
-      await fetch(endpoint, { method: 'DELETE' });
-    } catch (err) {
+      const res = await fetch(endpoint, { method: 'DELETE' });
+      const payload = await res.json().catch(() => null);
+      if (!res.ok || (payload && payload.ok === false)) {
+        const errMsg =
+          (payload && typeof payload.error === 'string' && payload.error) ||
+          `Lỗi máy chủ (${res.status})`;
+        console.warn(`Vercel Blob API delete error (${endpoint}):`, errMsg);
+        return { ok: false, error: errMsg };
+      }
+      if (payload && typeof payload.updatedAt === 'string' && payload.updatedAt) {
+        lastRemoteUpdatedAtRef.current = payload.updatedAt;
+      }
+      return { ok: true, updatedAt: payload?.updatedAt };
+    } catch (err: any) {
+      const errMsg = err?.message || 'Không thể kết nối máy chủ lưu trữ';
       console.warn(`Vercel Blob API delete warning (${endpoint}):`, err);
+      return { ok: false, error: errMsg };
+    } finally {
+      pendingWritesRef.current = Math.max(0, pendingWritesRef.current - 1);
+      lastWriteCompletedAtRef.current = Date.now();
     }
   };
-
-  const isMountedRef = useRef(true);
-  const lastRemoteUpdatedAtRef = useRef<string>('');
 
   // Sync with Vercel Blob Store `ducvinhsolar` on startup and tab focus
   useEffect(() => {
@@ -486,10 +539,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     let cancelled = false;
 
     const fetchAndSyncFromBlob = async (isInitial = false) => {
+      // Never overwrite in-flight or just-completed local mutations (e.g. closing OS file picker triggers window.focus)
+      if (!isInitial) {
+        if (pendingWritesRef.current > 0) return;
+        if (Date.now() - lastWriteCompletedAtRef.current < 4000) return;
+      }
+      const genAtStart = writeGenRef.current;
+
       try {
         const res = await fetch('/api/state', { cache: 'no-store' });
         if (!res.ok) return;
         const blobData = await res.json();
+
+        // Discard stale remote response if a local write began while /api/state was in flight
+        if (!isInitial && (pendingWritesRef.current > 0 || writeGenRef.current !== genAtStart)) {
+          return;
+        }
 
         if (!cancelled) {
           setBlobConnected(Boolean(blobData.blobConnected));
@@ -837,7 +902,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Product Operations
-  const addProduct = (prodData: Omit<Product, 'id' | 'updatedAt'>) => {
+  const addProduct = async (
+    prodData: Omit<Product, 'id' | 'updatedAt'>
+  ): Promise<{ ok: boolean; error?: string }> => {
     const cleanImages = Array.isArray(prodData.images)
       ? prodData.images.filter(Boolean)
       : prodData.imageUrl
@@ -846,12 +913,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newProduct: Product = {
       ...prodData,
       images: cleanImages,
-      imageUrl: cleanImages[0] || prodData.imageUrl,
+      imageUrl: cleanImages[0] || prodData.imageUrl || undefined,
       id: `prod-${Date.now()}`,
       updatedAt: new Date().toISOString().split('T')[0]
     };
-    setProducts((prev) => [newProduct, ...prev]);
-    void postToBlobApi('/api/products', newProduct);
+    setProducts((prev) => {
+      const next = [newProduct, ...prev];
+      productsRef.current = next;
+      return next;
+    });
 
     const trimmedBrand = (prodData.brand || '').trim();
     if (trimmedBrand) {
@@ -868,12 +938,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
       }
     }
+
+    return await postToBlobApi('/api/products', {
+      ...newProduct,
+      imageUrl: cleanImages[0] || ''
+    });
   };
 
-  const updateProduct = (id: string, updates: Partial<Product>) => {
-    const existingIdx = products.findIndex((p) => p.id === id);
-    const existingProd = existingIdx >= 0 ? products[existingIdx] : undefined;
-    if (!existingProd) return;
+  const updateProduct = async (
+    id: string,
+    updates: Partial<Product>
+  ): Promise<{ ok: boolean; error?: string }> => {
+    const currentList = productsRef.current;
+    const existingIdx = currentList.findIndex((p) => p.id === id);
+    const existingProd = existingIdx >= 0 ? currentList[existingIdx] : undefined;
+    if (!existingProd) {
+      return { ok: false, error: 'Không tìm thấy sản phẩm cần cập nhật.' };
+    }
 
     const nextImages = Array.isArray(updates.images)
       ? updates.images.filter(Boolean)
@@ -891,12 +972,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       updatedAt: new Date().toISOString().split('T')[0]
     };
 
-    setProducts((prev) => prev.map((p) => (p.id === id ? updatedObj : p)));
-    if (selectedProduct?.id === id) {
-      setSelectedProduct(updatedObj);
-    }
-
-    void postToBlobApi('/api/products', updatedObj);
+    setProducts((prev) => {
+      const next = prev.map((p) => (p.id === id ? updatedObj : p));
+      productsRef.current = next;
+      return next;
+    });
+    setSelectedProduct((prevSelected) =>
+      prevSelected?.id === id ? updatedObj : prevSelected
+    );
 
     const trimmedBrand = (updatedObj.brand || '').trim();
     if (trimmedBrand) {
@@ -913,6 +996,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
       }
     }
+
+    return await postToBlobApi('/api/products', {
+      ...updatedObj,
+      imageUrl: nextImages[0] || ''
+    });
   };
 
   const deleteProduct = (id: string, onConfirmed?: () => void) => {
