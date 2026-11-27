@@ -1,6 +1,6 @@
 import React from 'react';
 import { MotionConfig, motion } from 'motion/react';
-import { AppProvider } from './context/AppContext';
+import { AppProvider, useApp } from './context/AppContext';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { ProductCatalog } from './components/ProductCatalog';
@@ -12,13 +12,53 @@ import { Footer } from './components/Footer';
 import { ProductDetailModal } from './components/ProductDetailModal';
 import { AdminModal } from './components/AdminModal';
 import { FloatingContact } from './components/FloatingContact';
+import { PageBreadcrumbBar } from './components/PageBreadcrumbBar';
+import { SitemapPage } from './components/SitemapPage';
+
+const MainPageRouter: React.FC = () => {
+  const { currentPage } = useApp();
+
+  return (
+    <main className="flex-1 relative z-10 pt-[4.25rem] sm:pt-[5rem]">
+      <PageBreadcrumbBar />
+
+      {currentPage === 'home' && (
+        <>
+          <ProductCatalog />
+          <Hero />
+          <ProjectShowcase />
+          <BlogSection />
+          <CompanyProfile />
+          <ContactSection />
+        </>
+      )}
+
+      {currentPage === 'products' && <ProductCatalog />}
+
+      {currentPage === 'projects' && <ProjectShowcase />}
+
+      {currentPage === 'blog' && <BlogSection />}
+
+      {currentPage === 'company' && (
+        <>
+          <CompanyProfile />
+          <Hero />
+        </>
+      )}
+
+      {currentPage === 'contact' && <ContactSection />}
+
+      {currentPage === 'sitemap' && <SitemapPage />}
+    </main>
+  );
+};
 
 export default function App() {
   return (
     <MotionConfig reducedMotion="user">
       <AppProvider>
         <div className="relative min-h-screen flex flex-col bg-gradient-to-br from-slate-50/95 via-emerald-50/35 to-sky-50/45 text-slate-800 antialiased font-sans selection:bg-emerald-500 selection:text-white">
-          {/* Ambient Luminous Bubble Orbs in Background for Glassmorphism Depth (Lighter & More Blurred) */}
+          {/* Ambient Luminous Bubble Orbs in Background for Glassmorphism Depth */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -32,41 +72,23 @@ export default function App() {
             <div className="animate-orb-reverse absolute -bottom-36 right-1/3 w-[28rem] h-[28rem] rounded-full bg-emerald-300/15 blur-[130px]" />
           </motion.div>
 
-        {/* Navigation Bar (Direct child: div#root > div > header) */}
-        <Header />
+          {/* Navigation Bar */}
+          <Header />
 
-        {/* Main Content Area (padded for fixed floating header) */}
-        <main className="flex-1 relative z-10 pt-[4.25rem] sm:pt-[5rem]">
-          {/* Product Catalog First - Immediately visible on page load */}
-          <ProductCatalog />
+          {/* Route-Aware Standalone or Home Content */}
+          <MainPageRouter />
 
-          {/* Hero & Ecosystem Overview Section */}
-          <Hero />
+          {/* Corporate Footer */}
+          <div className="relative z-10">
+            <Footer />
+          </div>
 
-          {/* Real-World Projects Showcase */}
-          <ProjectShowcase />
+          {/* Floating Quick Action Widget */}
+          <FloatingContact />
 
-          {/* Blog & Solar Knowledge Horizontal Carousel (Right after Featured Projects) */}
-          <BlogSection />
-
-          {/* Corporate Profile & Legal Transparency */}
-          <CompanyProfile />
-
-          {/* Contact, Hotline, Map & Inquiry Form */}
-          <ContactSection />
-        </main>
-
-        {/* Corporate Footer */}
-        <div className="relative z-10">
-          <Footer />
-        </div>
-
-        {/* Floating Quick Action Widget */}
-        <FloatingContact />
-
-        {/* Modals & Overlays */}
-        <ProductDetailModal />
-        <AdminModal />
+          {/* Modals & Overlays */}
+          <ProductDetailModal />
+          <AdminModal />
         </div>
       </AppProvider>
     </MotionConfig>

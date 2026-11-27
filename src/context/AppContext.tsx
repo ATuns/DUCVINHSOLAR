@@ -16,6 +16,15 @@ import {
   INITIAL_BRANDS,
   INITIAL_BLOG_POSTS
 } from '../data/initialData';
+import {
+  MAIN_SITE_ROUTES,
+  SITE_ORIGIN,
+  SitePageType,
+  buildProductCatalogPath,
+  findCategoryBySlug,
+  parseSiteLocation,
+  toUrlSlug
+} from '../utils/siteRoutes';
 
 export type AdminTabType =
   | 'inventory'
@@ -45,12 +54,18 @@ interface AppContextType {
   storageMode: 'vercel-blob' | 'git-snapshot-sync';
   selectedCategory: 'all' | string;
   selectedBrand: string;
+  currentPage: SitePageType;
 
   // Actions
   setSelectedProduct: (p: Product | null) => void;
   setSelectedCategory: (cat: 'all' | string) => void;
   setSelectedBrand: (brand: string) => void;
-  selectCatalogFilter: (category: 'all' | string, brand?: string) => void;
+  selectCatalogFilter: (
+    category: 'all' | string,
+    brand?: string,
+    openStandalonePage?: boolean
+  ) => void;
+  navigateToPage: (page: SitePageType, customPath?: string) => void;
   openQuoteModal: (product?: Product | null) => void;
   closeQuoteModal: () => void;
   setIsAdminModalOpen: (open: boolean) => void;
@@ -345,11 +360,137 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [storageMode, setStorageMode] = useState<'vercel-blob' | 'git-snapshot-sync'>('git-snapshot-sync');
   const [selectedCategory, setSelectedCategory] = useState<'all' | string>('all');
   const [selectedBrand, setSelectedBrand] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState<SitePageType>(() => {
+    if (typeof window === 'undefined') return 'home';
+    return parseSiteLocation(window.location.pathname, window.location.search).page;
+  });
 
-  const selectCatalogFilter = (category: 'all' | string, brand: string = 'all') => {
+  // Resolve URL pathname/search into currentPage + selectedCategory + selectedBrand
+  const applyUrlLocation = (pathname: string, search: string, catList: CategoryItem[], brandList: BrandItem[]) => {
+    const parsed = parseSiteLocation(pathname, search);
+    setCurrentPage(parsed.page);
+
+    if (parsed.page === 'products') {
+      let resolvedCatId: 'all' | string = 'all';
+      if (parsed.categorySlug) {
+        const matchedCat = findCategoryBySlug(parsed.categorySlug, catList);
+        if (matchedCat) {
+          resolvedCatId = matchedCat.id;
+        }
+      }
+      setSelectedCategory(resolvedCatId);
+
+      let resolvedBrand = 'all';
+      const targetBrandRaw = parsed.queryBrand || parsed.brandSlug;
+      if (targetBrandRaw) {
+        const targetSlug = toUrlSlug(targetBrandRaw);
+        const matchedBrand = brandList.find(
+          (b) =>
+            (resolvedCatId === 'all' || b.categoryId === resolvedCatId) &&
+            (toUrlSlug(b.name) === targetSlug ||
+              b.name.trim().toLowerCase() === targetBrandRaw.trim().toLowerCase())
+        );
+        resolvedBrand = matchedBrand ? matchedBrand.name : targetBrandRaw;
+      }
+      setSelectedBrand(resolvedBrand);
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    applyUrlLocation(window.location.pathname, window.location.search, categories, brands);
+
+    const handlePopState = () => {
+      applyUrlLocation(window.location.pathname, window.location.search, categories, brands);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [categories, brands]);
+
+  const navigateToPage = (page: SitePageType, customPath?: string) => {
+    const routeMeta = MAIN_SITE_ROUTES[page] || MAIN_SITE_ROUTES.home;
+    const targetPath = customPath || routeMeta.path;
+    setCurrentPage(page);
+    if (typeof window !== 'undefined') {
+      const currentFull = window.location.pathname + window.location.search;
+      if (currentFull !== targetPath) {
+        window.history.pushState({ page }, '', targetPath);
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const selectCatalogFilter = (
+    category: 'all' | string,
+    brand: string = 'all',
+    openStandalonePage: boolean = false
+  ) => {
     setSelectedCategory(category);
     setSelectedBrand(brand);
+
+    if (openStandalonePage || currentPage === 'products') {
+      const targetPath = buildProductCatalogPath(category, brand, categories);
+      setCurrentPage('products');
+      if (typeof window !== 'undefined') {
+        const currentFull = window.location.pathname + window.location.search;
+        if (currentFull !== targetPath) {
+          window.history.pushState({ page: 'products', category, brand }, '', targetPath);
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
   };
+
+  // Dynamically update document title, meta description, OpenGraph tags, and canonical URL for SEO
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+
+    const baseMeta = MAIN_SITE_ROUTES[currentPage] || MAIN_SITE_ROUTES.home;
+    let pageTitle = baseMeta.title;
+    let pageDesc = baseMeta.description;
+    let canonicalPath = baseMeta.path;
+
+    if (currentPage === 'products') {
+      canonicalPath = buildProductCatalogPath(selectedCategory, selectedBrand, categories);
+      const activeCat =
+        selectedCategory !== 'all'
+          ? categories.find((c) => c.id === selectedCategory)
+          : undefined;
+
+      if (activeCat && selectedBrand !== 'all') {
+        pageTitle = `${activeCat.label} Hãng ${selectedBrand} Chính Hãng | Đức Vinh Solar`;
+        pageDesc = `Phân phối ${activeCat.label} thương hiệu ${selectedBrand} chính hãng, đầy đủ CO/CQ, bảo hành uy tín tại kho tổng Đức Vinh Solar TP.HCM.`;
+      } else if (activeCat) {
+        pageTitle = `${activeCat.label} Chính Hãng – Giá Sỉ & Lẻ Tốt Nhất | Đức Vinh Solar`;
+        pageDesc = `Danh mục ${activeCat.label} (${activeCat.desc || 'chính hãng Tier 1'}) tại Đức Vinh Solar. Sẵn kho Hóc Môn, TP.HCM – Giao hàng hỏa tốc.`;
+      }
+    }
+
+    document.title = pageTitle;
+
+    const setMetaContent = (selector: string, content: string) => {
+      const el = document.querySelector(selector);
+      if (el) el.setAttribute('content', content);
+    };
+
+    const fullCanonicalUrl = `${SITE_ORIGIN}${canonicalPath === '/' ? '' : canonicalPath}`;
+    setMetaContent('meta[name="description"]', pageDesc);
+    setMetaContent('meta[property="og:title"]', pageTitle);
+    setMetaContent('meta[property="og:description"]', pageDesc);
+    setMetaContent('meta[property="og:url"]', fullCanonicalUrl);
+    setMetaContent('meta[name="twitter:title"]', pageTitle);
+    setMetaContent('meta[name="twitter:description"]', pageDesc);
+
+    let canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonicalLink) {
+      canonicalLink = document.createElement('link');
+      canonicalLink.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonicalLink);
+    }
+    canonicalLink.setAttribute('href', fullCanonicalUrl);
+  }, [currentPage, selectedCategory, selectedBrand, categories]);
 
   // Activate Admin Modal only via keyboard shortcut: "Ctrl + X + 1"
   useEffect(() => {
@@ -1764,10 +1905,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         storageMode,
         selectedCategory,
         selectedBrand,
+        currentPage,
         setSelectedProduct,
         setSelectedCategory,
         setSelectedBrand,
         selectCatalogFilter,
+        navigateToPage,
         openQuoteModal,
         closeQuoteModal,
         setIsAdminModalOpen,

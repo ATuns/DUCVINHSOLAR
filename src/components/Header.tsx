@@ -41,7 +41,9 @@ export const Header: React.FC = () => {
     products,
     selectedCategory,
     selectedBrand,
+    currentPage,
     selectCatalogFilter,
+    navigateToPage,
     isAdmin,
     logoutAdmin,
     setIsAdminModalOpen
@@ -114,27 +116,20 @@ export const Header: React.FC = () => {
     return map;
   }, [categories, brands, products]);
 
-  const scrollTo = (id: string) => {
+  const handleNavPage = (
+    page: 'home' | 'products' | 'projects' | 'blog' | 'company' | 'contact' | 'sitemap'
+  ) => {
     setMobileMenuOpen(false);
     setIsProductMenuHovered(false);
     setHoveredCategoryId(null);
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+    navigateToPage(page);
   };
 
   const handleSelectFromNav = (categoryId: 'all' | string, brandName: string = 'all') => {
-    selectCatalogFilter(categoryId, brandName);
+    selectCatalogFilter(categoryId, brandName, true);
     setIsProductMenuHovered(false);
     setHoveredCategoryId(null);
     setMobileMenuOpen(false);
-    setTimeout(() => {
-      const element = document.getElementById('products-section');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 30);
   };
 
   return (
@@ -150,10 +145,10 @@ export const Header: React.FC = () => {
           {/* Zone 1: Brand title wordmark */}
           <div className="flex items-center gap-2.5 min-w-0 shrink-0">
             <a
-              href="#"
+              href="/"
               onClick={(e) => {
                 e.preventDefault();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                handleNavPage('home');
               }}
               className="group flex items-center gap-2 sm:gap-2.5 text-emerald-800 hover:text-emerald-950 transition-colors min-w-0"
             >
@@ -220,8 +215,8 @@ export const Header: React.FC = () => {
                 }}
                 aria-expanded={isProductMenuHovered}
                 className={`flex items-center gap-1 transition-colors whitespace-nowrap shrink-0 py-1 font-semibold ${
-                  isProductMenuHovered || selectedCategory !== 'all'
-                    ? 'text-emerald-700'
+                  isProductMenuHovered || currentPage === 'products' || selectedCategory !== 'all'
+                    ? 'text-emerald-700 font-bold'
                     : 'text-slate-700 hover:text-emerald-700'
                 }`}
               >
@@ -423,30 +418,62 @@ export const Header: React.FC = () => {
               </AnimatePresence>
             </div>
 
-            <button
-              onClick={() => scrollTo('projects-section')}
-              className="hover:text-emerald-700 transition-colors whitespace-nowrap shrink-0 py-1"
+            <a
+              href="/du-an-tieu-bieu"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavPage('projects');
+              }}
+              className={`transition-colors whitespace-nowrap shrink-0 py-1 ${
+                currentPage === 'projects'
+                  ? 'text-emerald-700 font-bold'
+                  : 'hover:text-emerald-700'
+              }`}
             >
               Dự Án Tiêu Biểu
-            </button>
-            <button
-              onClick={() => scrollTo('blog-section')}
-              className="hover:text-emerald-700 transition-colors whitespace-nowrap shrink-0 py-1"
+            </a>
+            <a
+              href="/blog-bai-viet"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavPage('blog');
+              }}
+              className={`transition-colors whitespace-nowrap shrink-0 py-1 ${
+                currentPage === 'blog'
+                  ? 'text-emerald-700 font-bold'
+                  : 'hover:text-emerald-700'
+              }`}
             >
               Blog Bài Viết
-            </button>
-            <button
-              onClick={() => scrollTo('company-section')}
-              className="hover:text-emerald-700 transition-colors whitespace-nowrap shrink-0 py-1"
+            </a>
+            <a
+              href="/gioi-thieu-cong-ty"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavPage('company');
+              }}
+              className={`transition-colors whitespace-nowrap shrink-0 py-1 ${
+                currentPage === 'company'
+                  ? 'text-emerald-700 font-bold'
+                  : 'hover:text-emerald-700'
+              }`}
             >
               Giới Thiệu Công Ty
-            </button>
-            <button
-              onClick={() => scrollTo('contact-section')}
-              className="hover:text-emerald-700 transition-colors whitespace-nowrap shrink-0 py-1"
+            </a>
+            <a
+              href="/lien-he-bao-gia"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavPage('contact');
+              }}
+              className={`transition-colors whitespace-nowrap shrink-0 py-1 ${
+                currentPage === 'contact'
+                  ? 'text-emerald-700 font-bold'
+                  : 'hover:text-emerald-700'
+              }`}
             >
               Liên Hệ &amp; Báo Giá
-            </button>
+            </a>
           </nav>
 
           {/* Zone 3: Admin control (only visible after Admin is activated) & Mobile menu trigger */}
@@ -580,30 +607,90 @@ export const Header: React.FC = () => {
                 )}
               </div>
 
-              <button
-                onClick={() => scrollTo('projects-section')}
-                className="text-left px-3 py-2.5 text-sm font-medium text-slate-800 hover:bg-emerald-50 hover:text-emerald-700 rounded-md transition-colors"
+              <a
+                href="/"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavPage('home');
+                }}
+                className={`text-left px-3 py-2.5 text-sm font-medium rounded-md transition-colors ${
+                  currentPage === 'home'
+                    ? 'bg-emerald-50 text-emerald-800 font-bold'
+                    : 'text-slate-800 hover:bg-emerald-50 hover:text-emerald-700'
+                }`}
+              >
+                Trang Chủ
+              </a>
+              <a
+                href="/du-an-tieu-bieu"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavPage('projects');
+                }}
+                className={`text-left px-3 py-2.5 text-sm font-medium rounded-md transition-colors ${
+                  currentPage === 'projects'
+                    ? 'bg-emerald-50 text-emerald-800 font-bold'
+                    : 'text-slate-800 hover:bg-emerald-50 hover:text-emerald-700'
+                }`}
               >
                 Dự Án Tiêu Biểu
-              </button>
-              <button
-                onClick={() => scrollTo('blog-section')}
-                className="text-left px-3 py-2.5 text-sm font-medium text-slate-800 hover:bg-emerald-50 hover:text-emerald-700 rounded-md transition-colors"
+              </a>
+              <a
+                href="/blog-bai-viet"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavPage('blog');
+                }}
+                className={`text-left px-3 py-2.5 text-sm font-medium rounded-md transition-colors ${
+                  currentPage === 'blog'
+                    ? 'bg-emerald-50 text-emerald-800 font-bold'
+                    : 'text-slate-800 hover:bg-emerald-50 hover:text-emerald-700'
+                }`}
               >
                 Blog Bài Viết
-              </button>
-              <button
-                onClick={() => scrollTo('company-section')}
-                className="text-left px-3 py-2.5 text-sm font-medium text-slate-800 hover:bg-emerald-50 hover:text-emerald-700 rounded-md transition-colors"
+              </a>
+              <a
+                href="/gioi-thieu-cong-ty"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavPage('company');
+                }}
+                className={`text-left px-3 py-2.5 text-sm font-medium rounded-md transition-colors ${
+                  currentPage === 'company'
+                    ? 'bg-emerald-50 text-emerald-800 font-bold'
+                    : 'text-slate-800 hover:bg-emerald-50 hover:text-emerald-700'
+                }`}
               >
                 Giới Thiệu Công Ty
-              </button>
-              <button
-                onClick={() => scrollTo('contact-section')}
-                className="text-left px-3 py-2.5 text-sm font-medium text-slate-800 hover:bg-emerald-50 hover:text-emerald-700 rounded-md transition-colors"
+              </a>
+              <a
+                href="/lien-he-bao-gia"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavPage('contact');
+                }}
+                className={`text-left px-3 py-2.5 text-sm font-medium rounded-md transition-colors ${
+                  currentPage === 'contact'
+                    ? 'bg-emerald-50 text-emerald-800 font-bold'
+                    : 'text-slate-800 hover:bg-emerald-50 hover:text-emerald-700'
+                }`}
               >
                 Liên Hệ &amp; Báo Giá
-              </button>
+              </a>
+              <a
+                href="/so-do-trang-web"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavPage('sitemap');
+                }}
+                className={`text-left px-3 py-2.5 text-sm font-medium rounded-md transition-colors ${
+                  currentPage === 'sitemap'
+                    ? 'bg-emerald-50 text-emerald-800 font-bold'
+                    : 'text-slate-800 hover:bg-emerald-50 hover:text-emerald-700'
+                }`}
+              >
+                Sơ Đồ Trang Web (Sitemap)
+              </a>
 
               <div className="pt-3 border-t border-slate-100 flex items-center justify-end">
                 <a

@@ -63,6 +63,7 @@ export const ProductCatalog: React.FC = () => {
     setSelectedCategory,
     selectedBrand,
     setSelectedBrand,
+    selectCatalogFilter,
     setSelectedProduct,
     isAdmin,
     openAdminTab,
@@ -307,8 +308,7 @@ export const ProductCatalog: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    setSelectedCategory('all');
-                    setSelectedBrand('all');
+                    selectCatalogFilter('all', 'all');
                     setSearchQuery('');
                     setInStockOnly(false);
                     setProductPage(1);

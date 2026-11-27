@@ -5,16 +5,14 @@ import { Zap, ShieldCheck, CheckCircle2, ArrowRight, Sparkles } from 'lucide-rea
 import { ScrollReveal, EXPO_EASE } from './MotionPrimitives';
 
 export const Hero: React.FC = () => {
-  const { companyInfo } = useApp();
+  const { companyInfo, selectCatalogFilter, navigateToPage } = useApp();
 
   const scrollToProducts = () => {
-    const el = document.getElementById('products-section');
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    selectCatalogFilter('all', 'all', true);
   };
 
   const scrollToProjects = () => {
-    const el = document.getElementById('projects-section');
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    navigateToPage('projects');
   };
 
   return (

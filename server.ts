@@ -15,8 +15,8 @@ async function startServer() {
   app.use(express.json({ limit: '25mb' }));
   app.use(express.raw({ type: ['image/*', 'application/octet-stream'], limit: '15mb' }));
 
-  // Mount Vercel Blob API routes
-  app.all('/api/*', async (req, res) => {
+  // Mount SEO sitemap.xml & robots.txt + Vercel Blob API routes
+  app.all(['/sitemap.xml', '/robots.txt', '/api/*'], async (req, res) => {
     await apiHandler(req, res);
   });
 

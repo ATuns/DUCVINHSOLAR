@@ -3,16 +3,10 @@ import { motion } from 'motion/react';
 import { useApp } from '../context/AppContext';
 import { Sun, Phone, MapPin, Mail, ShieldCheck, Lock, Heart } from 'lucide-react';
 import { EXPO_EASE } from './MotionPrimitives';
+import { buildProductCatalogPath } from '../utils/siteRoutes';
 
 export const Footer: React.FC = () => {
-  const { companyInfo, setIsAdminModalOpen, isAdmin } = useApp();
-
-  const scrollTo = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  const { companyInfo, categories, selectCatalogFilter, navigateToPage } = useApp();
 
   return (
     <motion.footer
@@ -74,57 +68,123 @@ export const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-2 text-emerald-100/80">
               <li>
-                <button onClick={() => scrollTo('products-section')} className="hover:text-emerald-300 transition-colors text-left">
-                  Tấm Pin Năng Lượng Mặt Trời
-                </button>
+                <a
+                  href="/san-pham-solar"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    selectCatalogFilter('all', 'all', true);
+                  }}
+                  className="hover:text-emerald-300 transition-colors text-left block font-semibold text-white"
+                >
+                  Tất Cả Sản Phẩm Solar
+                </a>
               </li>
-              <li>
-                <button onClick={() => scrollTo('products-section')} className="hover:text-emerald-300 transition-colors text-left">
-                  Biến Tần Inverter Hybrid
-                </button>
-              </li>
-              <li>
-                <button onClick={() => scrollTo('products-section')} className="hover:text-emerald-300 transition-colors text-left">
-                  Pin Lưu Trữ Lithium LiFePO4
-                </button>
-              </li>
-              <li>
-                <button onClick={() => scrollTo('products-section')} className="hover:text-emerald-300 transition-colors text-left">
-                  Đèn Đường Năng Lượng Mặt Trời
-                </button>
-              </li>
+              {categories.map((cat) => {
+                const catPath = buildProductCatalogPath(cat.id, 'all', categories);
+                return (
+                  <li key={cat.id}>
+                    <a
+                      href={catPath}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        selectCatalogFilter(cat.id, 'all', true);
+                      }}
+                      className="hover:text-emerald-300 transition-colors text-left block"
+                    >
+                      {cat.label}
+                    </a>
+                  </li>
+                );
+              })}
             </ul>
           </div>
 
           {/* Column 3: Navigation Links */}
           <div className="lg:col-span-2 space-y-3 min-w-0">
             <h4 className="text-xs font-bold uppercase tracking-wider text-white">
-              Khám Phá &amp; Dịch Vụ
+              Các Trang &amp; Sitemap
             </h4>
             <ul className="space-y-2 text-emerald-100/80">
               <li>
-                <button onClick={() => scrollTo('projects-section')} className="hover:text-emerald-300 transition-colors text-left">
-                  Dự Án Áp Mái Tiêu Biểu
-                </button>
-              </li>
-              <li>
-                <button onClick={() => scrollTo('company-section')} className="hover:text-emerald-300 transition-colors text-left">
-                  Hồ Sơ Doanh Nghiệp
-                </button>
-              </li>
-              <li>
-                <button onClick={() => scrollTo('contact-section')} className="hover:text-emerald-300 transition-colors text-left">
-                  Đăng Ký Khảo Sát Tận Nơi
-                </button>
+                <a
+                  href="/"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigateToPage('home');
+                  }}
+                  className="hover:text-emerald-300 transition-colors text-left block"
+                >
+                  Trang Chủ Đức Vinh Solar
+                </a>
               </li>
               <li>
                 <a
-                  href={`https://zalo.me/${companyInfo.hotlineZalo}`}
+                  href="/du-an-tieu-bieu"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigateToPage('projects');
+                  }}
+                  className="hover:text-emerald-300 transition-colors text-left block"
+                >
+                  Dự Án Áp Mái Tiêu Biểu
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/blog-bai-viet"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigateToPage('blog');
+                  }}
+                  className="hover:text-emerald-300 transition-colors text-left block"
+                >
+                  Blog Bài Viết Kỹ Thuật
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/gioi-thieu-cong-ty"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigateToPage('company');
+                  }}
+                  className="hover:text-emerald-300 transition-colors text-left block"
+                >
+                  Giới Thiệu Công Ty
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/lien-he-bao-gia"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigateToPage('contact');
+                  }}
+                  className="hover:text-emerald-300 transition-colors text-left block"
+                >
+                  Liên Hệ &amp; Báo Giá
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/so-do-trang-web"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigateToPage('sitemap');
+                  }}
+                  className="text-emerald-300 hover:text-white font-semibold transition-colors text-left block"
+                >
+                  Sơ Đồ Trang Web (Sitemap)
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/sitemap.xml"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-emerald-300 transition-colors block"
+                  className="text-emerald-300/90 hover:text-white font-mono text-[11px] transition-colors block"
                 >
-                  Tư Vấn Kỹ Thuật Zalo
+                  XML Sitemap (/sitemap.xml)
                 </a>
               </li>
             </ul>

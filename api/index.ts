@@ -604,6 +604,33 @@ function sendJson(res: any, statusCode: number, payload: any) {
   res.end(JSON.stringify(payload));
 }
 
+function toSitemapSlug(text: string): string {
+  return (text || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+const BUILTIN_SITEMAP_CAT_SLUGS: Record<string, string> = {
+  'solar-panels': 'tam-pin-mat-troi',
+  inverters: 'bien-tan-inverter',
+  'energy-storage': 'pin-luu-tru-ess',
+  'solar-lights': 'den-nang-luong'
+};
+
+function escapeXml(str: string): string {
+  return (str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
 export default async function apiHandler(req: any, res: any) {
   try {
     const method = (req.method || 'GET').toUpperCase();
@@ -612,6 +639,91 @@ export default async function apiHandler(req: any, res: any) {
     const pathname = urlObj.pathname.startsWith('/api')
       ? urlObj.pathname
       : `/api${urlObj.pathname.startsWith('/') ? '' : '/'}${urlObj.pathname}`;
+
+    // 0a. GET /robots.txt or /api/robots.txt
+    if ((method === 'GET' || method === 'HEAD') && pathname === '/api/robots.txt') {
+      const siteOrigin = 'https://www.solarducvinh.com';
+      const robotsTxt = [
+        'User-agent: *',
+        'Allow: /',
+        'Disallow: /api/',
+        'Allow: /api/blob/media',
+        '',
+        `Sitemap: ${siteOrigin}/sitemap.xml`,
+        ''
+      ].join('\n');
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      return method === 'HEAD' ? res.end() : res.end(robotsTxt);
+    }
+
+    // 0b. GET /sitemap.xml or /api/sitemap.xml -> Dynamic XML Sitemap for Google Search Console
+    if ((method === 'GET' || method === 'HEAD') && pathname === '/api/sitemap.xml') {
+      const state = await readDatabaseState(false);
+      const siteOrigin = 'https://www.solarducvinh.com';
+      const lastmodDate = (state.updatedAt || new Date().toISOString()).split('T')[0];
+
+      const entries: Array<{ loc: string; priority: string; changefreq: string }> = [
+        { loc: `${siteOrigin}/`, priority: '1.0', changefreq: 'daily' },
+        { loc: `${siteOrigin}/san-pham-solar`, priority: '0.95', changefreq: 'daily' },
+        { loc: `${siteOrigin}/du-an-tieu-bieu`, priority: '0.85', changefreq: 'weekly' },
+        { loc: `${siteOrigin}/blog-bai-viet`, priority: '0.85', changefreq: 'weekly' },
+        { loc: `${siteOrigin}/gioi-thieu-cong-ty`, priority: '0.80', changefreq: 'monthly' },
+        { loc: `${siteOrigin}/lien-he-bao-gia`, priority: '0.85', changefreq: 'monthly' },
+        { loc: `${siteOrigin}/so-do-trang-web`, priority: '0.70', changefreq: 'weekly' }
+      ];
+
+      const seenLocs = new Set<string>(entries.map((e) => e.loc));
+      const categories = Array.isArray(state.categories) ? state.categories : [];
+      const brands = Array.isArray(state.brands) ? state.brands : [];
+
+      for (const cat of categories) {
+        if (!cat || !cat.id) continue;
+        const catSlug =
+          BUILTIN_SITEMAP_CAT_SLUGS[cat.id] ||
+          toSitemapSlug(cat.label || '') ||
+          toSitemapSlug(cat.id);
+        if (!catSlug) continue;
+
+        const catUrl = `${siteOrigin}/san-pham-solar/${catSlug}`;
+        if (!seenLocs.has(catUrl)) {
+          seenLocs.add(catUrl);
+          entries.push({ loc: catUrl, priority: '0.90', changefreq: 'daily' });
+        }
+
+        const catBrands = brands.filter((b: any) => b && b.categoryId === cat.id);
+        for (const br of catBrands) {
+          const brSlug = toSitemapSlug(br.name || '');
+          if (!brSlug) continue;
+          const brUrl = `${siteOrigin}/san-pham-solar/${catSlug}/${brSlug}`;
+          if (!seenLocs.has(brUrl)) {
+            seenLocs.add(brUrl);
+            entries.push({ loc: brUrl, priority: '0.80', changefreq: 'weekly' });
+          }
+        }
+      }
+
+      const xmlLines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+        ...entries.map(
+          (e) =>
+            `  <url>\n    <loc>${escapeXml(e.loc)}</loc>\n    <lastmod>${escapeXml(
+              lastmodDate
+            )}</lastmod>\n    <changefreq>${e.changefreq}</changefreq>\n    <priority>${
+              e.priority
+            }</priority>\n  </url>`
+        ),
+        '</urlset>'
+      ];
+
+      const xmlPayload = xmlLines.join('\n');
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=1800');
+      return method === 'HEAD' ? res.end() : res.end(xmlPayload);
+    }
 
     // 1. GET /api/state -> Return full database state from Vercel Blob store `store_gzvmZDzXfVh8EDzC`
     if (method === 'GET' && pathname === '/api/state') {
