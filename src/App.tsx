@@ -12,7 +12,6 @@ import { Footer } from './components/Footer';
 import { ProductDetailModal } from './components/ProductDetailModal';
 import { AdminModal } from './components/AdminModal';
 import { FloatingContact } from './components/FloatingContact';
-import { PageBreadcrumbBar } from './components/PageBreadcrumbBar';
 import { SitemapPage } from './components/SitemapPage';
 
 const MainPageRouter: React.FC = () => {
@@ -20,7 +19,6 @@ const MainPageRouter: React.FC = () => {
 
   return (
     <main className="flex-1 relative z-10 pt-[4.25rem] sm:pt-[5rem]">
-      <PageBreadcrumbBar />
 
       {currentPage === 'home' && (
         <>
