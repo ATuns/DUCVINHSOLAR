@@ -2,7 +2,7 @@
   "version": "3.4-ducvinhsolar-private-blob",
   "storeName": "ducvinhsolar",
   "storeId": "store_gzvmZDzXfVh8EDzC",
-  "updatedAt": "2026-11-27T07:16:46.134Z",
+  "updatedAt": "2026-11-27T07:54:50.027Z",
   "categories": [
     {
       "id": "solar-panels",
@@ -8386,9 +8386,12 @@
       "warrantyYears": 2,
       "origin": "Hàng Nhập Khẩu",
       "featured": false,
-      "imageUrl": "https://bizweb.dktcdn.net/100/414/235/products/ats-125a-n-2.jpg?v=1694503173573",
+      "imageUrl": "https://lh3.googleusercontent.com/d/1gPHT5DQwgXp5l-q38hwuCeiVLSIRvVq_=w1600",
       "images": [
-        "https://bizweb.dktcdn.net/100/414/235/products/ats-125a-n-2.jpg?v=1694503173573"
+        "https://lh3.googleusercontent.com/d/1gPHT5DQwgXp5l-q38hwuCeiVLSIRvVq_=w1600",
+        "https://lh3.googleusercontent.com/d/1u5XrDhunCZr6shc0u8AbJUY_1tplgn0Q=w1600",
+        "https://lh3.googleusercontent.com/d/1MwXXBxo_U8SXCcN6lNgvUTLlrJvEL6p6=w1600",
+        "https://lh3.googleusercontent.com/d/1nftbcN7QWGGuzNVQKo4vuZHiFvxL3Irs=w1600"
       ],
       "svgType": "optimizer",
       "specs": [
@@ -8417,7 +8420,7 @@
         "Tủ điện Solar Hybrid 1 pha hộ gia đình & văn phòng"
       ],
       "status": "in-stock",
-      "updatedAt": "2026-11-17"
+      "updatedAt": "2026-11-27"
     },
     {
       "id": "prod-dv-acc-049",
@@ -8524,9 +8527,11 @@
       "warrantyYears": 2,
       "origin": "CHINT Chính Hãng",
       "featured": false,
-      "imageUrl": "https://drive.google.com/u/0/drive-viewer/AKGpihZfLEOTcOdoILg66BVKQaZPrf8xnp5JPlL3Hteqp2_neishFMMA3aYeNbwldLuTN2X-5cFOFJxL7g9Tp_Y6FebpM6IZtsQ9LLg=s1600-rw-v1?auditContext=forDisplay",
       "images": [
-        "https://drive.google.com/u/0/drive-viewer/AKGpihZfLEOTcOdoILg66BVKQaZPrf8xnp5JPlL3Hteqp2_neishFMMA3aYeNbwldLuTN2X-5cFOFJxL7g9Tp_Y6FebpM6IZtsQ9LLg=s1600-rw-v1?auditContext=forDisplay"
+        "https://lh3.googleusercontent.com/d/1GLpcYG9pT-BPVr4XWFKooSWoOeI6OB7h=w1600",
+        "https://lh3.googleusercontent.com/d/1-o5YBXUrJydQg4zlUJTZaSO2lDJcM0PN=w1600",
+        "https://lh3.googleusercontent.com/d/1WZ5GOOPxQKlpapl9LZdcEm1oV2I40ULS=w1600",
+        "https://lh3.googleusercontent.com/d/1V4q48CJw_FcOnWrT4j_n_3BXOA85hAA5=w1600"
       ],
       "svgType": "optimizer",
       "specs": [
@@ -8555,7 +8560,8 @@
         "Cắt tổng AC cho tủ điện Solar 3 pha 30kW–60kW"
       ],
       "status": "in-stock",
-      "updatedAt": "2026-11-27"
+      "updatedAt": "2026-11-27",
+      "imageUrl": "https://lh3.googleusercontent.com/d/1GLpcYG9pT-BPVr4XWFKooSWoOeI6OB7h=w1600"
     },
     {
       "id": "prod-dv-acc-052",
@@ -8570,9 +8576,13 @@
       "warrantyYears": 2,
       "origin": "CHINT Chính Hãng",
       "featured": false,
-      "imageUrl": "https://bizweb.dktcdn.net/thumb/1024x1024/100/301/098/products/23059-chint-mcb-nxb-63-3p-c63.jpg?v=1687486231063",
+      "imageUrl": "https://lh3.googleusercontent.com/d/1oa990krTJ08IAyJwftQZ-CQL2hK5vWYh=w1600",
       "images": [
-        "https://bizweb.dktcdn.net/thumb/1024x1024/100/301/098/products/23059-chint-mcb-nxb-63-3p-c63.jpg?v=1687486231063"
+        "https://lh3.googleusercontent.com/d/1oa990krTJ08IAyJwftQZ-CQL2hK5vWYh=w1600",
+        "https://lh3.googleusercontent.com/d/1aSqFzeOfIKHsZ7aShfw-VQFpU7pyldln=w1600",
+        "https://lh3.googleusercontent.com/d/1Y-j--_MjnU2o2QMG_4xxhSN3lRIGOGMh=w1600",
+        "https://lh3.googleusercontent.com/d/1O5kMn9WoECc_wYEW9uwTScGipoK76jFd=w1600",
+        "https://lh3.googleusercontent.com/d/1gVBY8vdQY5INXCN19IvjApmcipFkAvtg=w1600"
       ],
       "svgType": "optimizer",
       "specs": [
@@ -8601,7 +8611,7 @@
         "Đóng cắt bảo vệ đầu ra AC Inverter 3 pha 20–30kW"
       ],
       "status": "in-stock",
-      "updatedAt": "2026-11-17"
+      "updatedAt": "2026-11-27"
     },
     {
       "id": "prod-dv-acc-053",
@@ -8616,9 +8626,12 @@
       "warrantyYears": 2,
       "origin": "CHINT Chính Hãng",
       "featured": false,
-      "imageUrl": "https://bizweb.dktcdn.net/thumb/grande/100/301/098/products/nxb-125-3p-c100-aptomat-chint-mcb-3-pha-100a-10ka.png?v=1681469893773",
+      "imageUrl": "https://lh3.googleusercontent.com/d/1q2ulW4_ai86j7IVaSPz3QNwuyCY3MDGD=w1600",
       "images": [
-        "https://bizweb.dktcdn.net/thumb/grande/100/301/098/products/nxb-125-3p-c100-aptomat-chint-mcb-3-pha-100a-10ka.png?v=1681469893773"
+        "https://lh3.googleusercontent.com/d/1q2ulW4_ai86j7IVaSPz3QNwuyCY3MDGD=w1600",
+        "https://lh3.googleusercontent.com/d/1AQhIiOdTv4u-eQuzbXrlDorv2PmQPrc3=w1600",
+        "https://lh3.googleusercontent.com/d/1zVNE_UdGnT5-lt-aJAQhhdKpH85JpieU=w1600",
+        "https://lh3.googleusercontent.com/d/19A7v3OXXaJ__DhayIDcN6kJ9vQHYBOOa=w1600"
       ],
       "svgType": "optimizer",
       "specs": [
@@ -8647,7 +8660,7 @@
         "Tủ AC tổng Inverter 40kW–50kW và tủ biến tần bơm"
       ],
       "status": "in-stock",
-      "updatedAt": "2026-11-17"
+      "updatedAt": "2026-11-27"
     },
     {
       "id": "prod-dv-acc-054",
@@ -8662,8 +8675,13 @@
       "warrantyYears": 2,
       "origin": "CHINT Chính Hãng",
       "featured": false,
-      "imageUrl": "/api/blob/media?pathname=ducvinhsolar%2Fmedia%2F1794904287067-dv-acc-mcb_chint_125-h0rhcybM8skovmAnZyFAs15Es9HHxi.jpg",
-      "images": [],
+      "imageUrl": "https://lh3.googleusercontent.com/d/1tmdkH16RBvLpUzIdwbL3YWCwvS9t12ye=w1600",
+      "images": [
+        "https://lh3.googleusercontent.com/d/1tmdkH16RBvLpUzIdwbL3YWCwvS9t12ye=w1600",
+        "https://lh3.googleusercontent.com/d/1gHssPMx2GMImT15un9Q0l2ubtP7lDF5d=w1600",
+        "https://lh3.googleusercontent.com/d/1ySR6vEXpYrkOnIisKBMFEOorKzY2swdh=w1600",
+        "https://lh3.googleusercontent.com/d/1gX0A2M9MY64UoiuTdvB1Sd0cFLOfxbrN=w1600"
+      ],
       "svgType": "optimizer",
       "specs": [
         {
@@ -8691,7 +8709,7 @@
         "CB tổng đầu vào/ra AC cho tủ Hybrid 1 pha 8kW–12kW"
       ],
       "status": "in-stock",
-      "updatedAt": "2026-11-17"
+      "updatedAt": "2026-11-27"
     },
     {
       "id": "prod-dv-acc-055",
@@ -8706,9 +8724,13 @@
       "warrantyYears": 2,
       "origin": "CHINT Chính Hãng",
       "featured": false,
-      "imageUrl": "https://codienhaiau.com/wp-content/uploads/2022/10/MCB-Chint-NXB-63-2P.jpg",
+      "imageUrl": "https://lh3.googleusercontent.com/d/1hghyLe4BAHDPUlLXTrFX1_g7WAzPK3YI=w1600",
       "images": [
-        "https://codienhaiau.com/wp-content/uploads/2022/10/MCB-Chint-NXB-63-2P.jpg"
+        "https://lh3.googleusercontent.com/d/1hghyLe4BAHDPUlLXTrFX1_g7WAzPK3YI=w1600",
+        "https://lh3.googleusercontent.com/d/1hNRBm52m0gRjkDjHrSC7roKmnv9n3cFs=w1600",
+        "https://lh3.googleusercontent.com/d/1xSCtGMFePPijw_bElDrm5fl81mewbJhg=w1600",
+        "https://lh3.googleusercontent.com/d/1wWZO2gKskmbUAiwjk9--9SecGEpvve-0=w1600",
+        "https://lh3.googleusercontent.com/d/1xPgI5qROTtmUUSo7LA074hGINDW3j1Um=w1600"
       ],
       "svgType": "inverter",
       "specs": [
@@ -8737,7 +8759,7 @@
         "Tủ điện hòa lưới & lưu trữ 1 pha dân dụng"
       ],
       "status": "in-stock",
-      "updatedAt": "2026-11-17"
+      "updatedAt": "2026-11-27"
     },
     {
       "id": "prod-dv-acc-056",
@@ -8798,9 +8820,12 @@
       "warrantyYears": 2,
       "origin": "Hãng SOL-ES",
       "featured": false,
-      "imageUrl": "https://grabcad.com/screenshots/pics/b8e4162c765a932cdf5437c94ff105e6/large.png",
+      "imageUrl": "https://lh3.googleusercontent.com/d/1Wocg8u8S43J_LYkaaNuG3Is7NILDZYCg=w1600",
       "images": [
-        "https://grabcad.com/screenshots/pics/b8e4162c765a932cdf5437c94ff105e6/large.png"
+        "https://lh3.googleusercontent.com/d/1Wocg8u8S43J_LYkaaNuG3Is7NILDZYCg=w1600",
+        "https://lh3.googleusercontent.com/d/1_VBTKj4QnG6NmoPa9oSWOatfxlpz5ndL=w1600",
+        "https://lh3.googleusercontent.com/d/1FeaE51pto5LKDEfJKC8VkQO1mTIZlUQ7=w1600",
+        "https://lh3.googleusercontent.com/d/1mW_3MBoWvY39TUgufB2_PpjMZCyjLJB0=w1600"
       ],
       "svgType": "optimizer",
       "specs": [
@@ -8829,7 +8854,7 @@
         "Bảo vệ String PV điện áp cao 600V–1000VDC"
       ],
       "status": "in-stock",
-      "updatedAt": "2026-11-17"
+      "updatedAt": "2026-11-27"
     },
     {
       "id": "prod-dv-acc-058",
@@ -8844,9 +8869,12 @@
       "warrantyYears": 2,
       "origin": "Hãng SOL-ES",
       "featured": false,
-      "imageUrl": "https://grabcad.com/screenshots/pics/b8e4162c765a932cdf5437c94ff105e6/large.png",
+      "imageUrl": "https://lh3.googleusercontent.com/d/16d3bWl0NLYxKbZzFeRJ2vA4VkW8aLelB=w1600",
       "images": [
-        "https://grabcad.com/screenshots/pics/b8e4162c765a932cdf5437c94ff105e6/large.png"
+        "https://lh3.googleusercontent.com/d/16d3bWl0NLYxKbZzFeRJ2vA4VkW8aLelB=w1600",
+        "https://lh3.googleusercontent.com/d/1eYzffqr4gt7BA-SODijd-fbjqggTVm6v=w1600",
+        "https://lh3.googleusercontent.com/d/10tbKZeosrMzoAxaiFlfpSZyv3GwqSWor=w1600",
+        "https://lh3.googleusercontent.com/d/1H2q3WBcLn5vzpYVs50uEhUtAKPKPwpRv=w1600"
       ],
       "svgType": "optimizer",
       "specs": [
@@ -8875,7 +8903,7 @@
         "Bảo vệ đầu vào DC tủ combiner và tủ solar hòa lưới"
       ],
       "status": "in-stock",
-      "updatedAt": "2026-11-17"
+      "updatedAt": "2026-11-27"
     },
     {
       "id": "prod-dv-acc-059",
@@ -8890,9 +8918,12 @@
       "warrantyYears": 2,
       "origin": "Hãng Leader",
       "featured": false,
-      "imageUrl": "/api/blob/media?pathname=ducvinhsolar%2Fmedia%2F1794904289395-dv-acc-spd_dc_leader-rM7lCCqFt4dac0iluJySqp1x7r3yQC.jpg",
+      "imageUrl": "https://lh3.googleusercontent.com/d/1pdh0b9IByJnQ9Qng5cs-_qZ5La8P6sZc=w1600",
       "images": [
-        "/api/blob/media?pathname=ducvinhsolar%2Fmedia%2F1794904289395-dv-acc-spd_dc_leader-rM7lCCqFt4dac0iluJySqp1x7r3yQC.jpg"
+        "https://lh3.googleusercontent.com/d/1pdh0b9IByJnQ9Qng5cs-_qZ5La8P6sZc=w1600",
+        "https://lh3.googleusercontent.com/d/1F8INYx3jtQAfMnTlW1_fP2ssJfcZbhc9=w1600",
+        "https://lh3.googleusercontent.com/d/1F6EBqlp4dK7TM5Bum31Mq41tRtuzAV04=w1600",
+        "https://lh3.googleusercontent.com/d/1J7MptLB-P1bKZ4UltfPkf6gSIhBL-idx=w1600"
       ],
       "svgType": "optimizer",
       "specs": [
@@ -8921,7 +8952,7 @@
         "Hệ thống PV ngoài trời khu vực có mật độ sét cao"
       ],
       "status": "in-stock",
-      "updatedAt": "2026-11-17T08:31:35.640Z"
+      "updatedAt": "2026-11-27"
     },
     {
       "id": "prod-dv-acc-060",
@@ -8936,9 +8967,12 @@
       "warrantyYears": 2,
       "origin": "Hãng LW",
       "featured": false,
-      "imageUrl": "https://down-vn.img.susercontent.com/file/vn-11134207-820l4-mennluf2l4hv00",
+      "imageUrl": "https://lh3.googleusercontent.com/d/1c47CA_p8R0p3oJgghs4cLvr-7dWEIkPM=w1600",
       "images": [
-        "https://down-vn.img.susercontent.com/file/vn-11134207-820l4-mennluf2l4hv00"
+        "https://lh3.googleusercontent.com/d/1c47CA_p8R0p3oJgghs4cLvr-7dWEIkPM=w1600",
+        "https://lh3.googleusercontent.com/d/1IQK45vDMjZQBus2Tuf8xSC2yoPNhRqfW=w1600",
+        "https://lh3.googleusercontent.com/d/1y_xN31-4y8XYLbydTjDP5VYaETRC3mAY=w1600",
+        "https://lh3.googleusercontent.com/d/1N6dv3Mof9SuguYMw8PABLz9p-h12WXGV=w1600"
       ],
       "svgType": "optimizer",
       "specs": [
@@ -8967,7 +9001,7 @@
         "Tủ điện tổng AC 3 pha Solar & trạm biến áp xưởng"
       ],
       "status": "in-stock",
-      "updatedAt": "2026-11-17"
+      "updatedAt": "2026-11-27"
     },
     {
       "id": "prod-dv-acc-061",

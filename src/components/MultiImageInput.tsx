@@ -356,9 +356,9 @@ export const MultiImageInput: React.FC<MultiImageInputProps> = ({
     onUploadingChange?.(uploading);
   };
 
-  const handleAddUrl = () => {
+  const handleAddUrl = async () => {
     const raw = urlInput.trim();
-    if (!raw) return;
+    if (!raw || isUploading) return;
 
     setUploadError(null);
     setUploadSuccess(null);
@@ -369,24 +369,77 @@ export const MultiImageInput: React.FC<MultiImageInputProps> = ({
       .map((s) => s.trim())
       .filter(Boolean);
 
-    let driveCount = 0;
-    const normalizedUrls = rawUrls.map((u) => {
-      if (extractGoogleDriveFileId(u)) {
-        driveCount += 1;
-      }
-      return normalizeImageUrl(u);
-    });
+    if (rawUrls.length === 0) return;
 
-    if (normalizedUrls.length > 0) {
-      onChange([...latestImagesRef.current, ...normalizedUrls]);
+    const hasDriveLinks = rawUrls.some((u) => Boolean(extractGoogleDriveFileId(u)));
+    if (!hasDriveLinks) {
+      onChange([...latestImagesRef.current, ...rawUrls]);
       setUrlInput('');
-      if (driveCount > 0) {
-        setUploadSuccess(
-          `Đã tự động chuyển đổi ${driveCount} link Google Drive sang dạng hiển thị ảnh trực tiếp! (Lưu ý: file trên Drive phải bật chia sẻ "Bất kỳ ai có đường liên kết").`
+      setUploadSuccess(`Đã thêm ${rawUrls.length} đường dẫn ảnh.`);
+      return;
+    }
+
+    // For Google Drive links, verify public access and import permanently onto our server
+    // so images work on ALL phones and browsers (even without Google sign-in!)
+    setUploadingState(true);
+    const importedUrls: string[] = [];
+    const errors: string[] = [];
+    let importedDriveCount = 0;
+
+    try {
+      for (let i = 0; i < rawUrls.length; i++) {
+        const u = rawUrls[i];
+        const driveId = extractGoogleDriveFileId(u);
+        if (!driveId) {
+          importedUrls.push(u);
+          continue;
+        }
+        setUploadProgress(
+          rawUrls.length > 1
+            ? `Đang kiểm tra & tải ảnh Drive ${i + 1}/${rawUrls.length} lên máy chủ...`
+            : 'Đang kiểm tra quyền chia sẻ & tải ảnh Google Drive lên máy chủ...'
         );
-      } else {
-        setUploadSuccess(`Đã thêm ${normalizedUrls.length} đường dẫn ảnh.`);
+        try {
+          const res = await fetch('/api/blob/import-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: u })
+          });
+          const payload = await res.json().catch(() => null);
+          if (res.ok && payload && payload.ok && typeof payload.url === 'string') {
+            importedUrls.push(payload.url);
+            importedDriveCount += 1;
+          } else {
+            errors.push(
+              (payload && typeof payload.error === 'string' && payload.error) ||
+                'Không tải được ảnh Google Drive này. Hãy bật chia sẻ "Bất kỳ ai có đường liên kết".'
+            );
+          }
+        } catch (err: any) {
+          errors.push(err?.message || 'Lỗi kết nối khi nhập ảnh từ Google Drive.');
+        }
       }
+
+      if (importedUrls.length > 0) {
+        onChange([...latestImagesRef.current, ...importedUrls]);
+        if (errors.length === 0) {
+          setUrlInput('');
+        }
+        setUploadSuccess(
+          importedDriveCount > 0
+            ? `Đã tải ${importedDriveCount} ảnh từ Google Drive lưu trực tiếp lên máy chủ web! Mọi điện thoại và trình duyệt đều xem được.`
+            : `Đã thêm ${importedUrls.length} đường dẫn ảnh.`
+        );
+      }
+
+      if (errors.length > 0) {
+        // Deduplicate identical private-drive warnings when user pastes multiple links from the same private folder
+        const uniqueErrors = Array.from(new Set(errors));
+        setUploadError(uniqueErrors.join(' '));
+      }
+    } finally {
+      setUploadProgress('');
+      setUploadingState(false);
     }
   };
 
@@ -591,11 +644,20 @@ export const MultiImageInput: React.FC<MultiImageInputProps> = ({
           </div>
           <button
             type="button"
-            onClick={handleAddUrl}
-            className="px-3 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shrink-0 flex items-center gap-1 transition-colors"
+            disabled={isUploading}
+            onClick={() => void handleAddUrl()}
+            className={`px-3 py-2.5 text-white text-xs font-bold rounded-lg shrink-0 flex items-center gap-1 transition-colors ${
+              isUploading
+                ? 'bg-emerald-400 cursor-wait'
+                : 'bg-emerald-600 hover:bg-emerald-700'
+            }`}
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Thêm Link</span>
+            {isUploading ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Plus className="w-3.5 h-3.5" />
+            )}
+            <span>{isUploading ? 'Đang tải...' : 'Thêm Link'}</span>
           </button>
         </div>
       </div>

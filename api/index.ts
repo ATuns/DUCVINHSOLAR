@@ -800,6 +800,132 @@ export default async function apiHandler(req: any, res: any) {
       });
     }
 
+    // 4b. POST /api/blob/import-url -> Validate & mirror Google Drive (or public URL) image into private Vercel Blob
+    if (method === 'POST' && pathname === '/api/blob/import-url') {
+      const body = await parseJsonBody(req);
+      const rawUrl = typeof body.url === 'string' ? body.url.trim() : '';
+      if (!rawUrl || !/^https?:\/\//i.test(rawUrl)) {
+        return sendJson(res, 400, {
+          ok: false,
+          error: 'Đường dẫn ảnh không hợp lệ (cần bắt đầu bằng http:// hoặc https://).'
+        });
+      }
+
+      // Basic SSRF protection: reject localhost / private network hosts
+      let parsedUrl: URL;
+      try {
+        parsedUrl = new URL(rawUrl);
+      } catch {
+        return sendJson(res, 400, { ok: false, error: 'Đường dẫn URL không đúng định dạng.' });
+      }
+      const host = parsedUrl.hostname.toLowerCase();
+      if (
+        host === 'localhost' ||
+        host === '0.0.0.0' ||
+        host === '::1' ||
+        host.endsWith('.local') ||
+        /^127\./.test(host) ||
+        /^10\./.test(host) ||
+        /^192\.168\./.test(host) ||
+        /^169\.254\./.test(host) ||
+        /^172\.(1[6-9]|2\d|3[0-1])\./.test(host)
+      ) {
+        return sendJson(res, 400, { ok: false, error: 'Không hỗ trợ đường dẫn mạng nội bộ.' });
+      }
+
+      // Detect Google Drive file ID if present
+      let driveId: string | null = null;
+      const mPath = rawUrl.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]{10,})/i);
+      const mLh3 = rawUrl.match(/lh3\.googleusercontent\.com\/d\/([a-zA-Z0-9_-]{10,})/i);
+      if (mPath?.[1]) driveId = mPath[1];
+      else if (mLh3?.[1]) driveId = mLh3[1];
+      else if (/drive\.google\.com|docs\.google\.com/i.test(rawUrl)) {
+        const idParam = parsedUrl.searchParams.get('id');
+        if (idParam && /^[a-zA-Z0-9_-]{10,}$/.test(idParam)) driveId = idParam;
+      }
+
+      const candidates = driveId
+        ? [
+            `https://lh3.googleusercontent.com/d/${driveId}=w1600`,
+            `https://drive.usercontent.google.com/download?id=${driveId}&export=download&confirm=t`,
+            `https://drive.google.com/thumbnail?id=${driveId}&sz=w1600`
+          ]
+        : [rawUrl];
+
+      let fetchedBuffer: Buffer | null = null;
+      let fetchedType = 'image/jpeg';
+      let sawGoogleLogin = false;
+
+      for (const candidateUrl of candidates) {
+        try {
+          const resp = await fetch(candidateUrl, {
+            redirect: 'follow',
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (compatible; DucVinhSolarBot/1.0)'
+            }
+          });
+          const finalUrl = resp.url || '';
+          const ct = (resp.headers.get('content-type') || '').toLowerCase();
+          if (finalUrl.includes('accounts.google.com')) {
+            sawGoogleLogin = true;
+            continue;
+          }
+          if (!resp.ok) continue;
+          if (!ct.startsWith('image/')) {
+            if (driveId && ct.includes('text/html')) {
+              sawGoogleLogin = true;
+            }
+            continue;
+          }
+          const arrBuf = await resp.arrayBuffer();
+          const buf = Buffer.from(arrBuf);
+          if (buf.length > 0 && buf.length <= 12 * 1024 * 1024) {
+            fetchedBuffer = buf;
+            fetchedType = ct.split(';')[0].trim() || 'image/jpeg';
+            break;
+          }
+        } catch {
+          // try next candidate
+        }
+      }
+
+      if (!fetchedBuffer) {
+        if (driveId && sawGoogleLogin) {
+          return sendJson(res, 403, {
+            ok: false,
+            isPrivateDrive: true,
+            error:
+              'Ảnh Google Drive này đang ở chế độ Riêng tư (Hạn chế) nên máy khác và điện thoại sẽ KHÔNG thấy được. Hãy mở thư mục/ảnh trên Google Drive -> Chia sẻ -> chọn "Bất kỳ ai có đường liên kết" (Người xem) rồi dán lại link!'
+          });
+        }
+        return sendJson(res, 400, {
+          ok: false,
+          error: driveId
+            ? 'Không tải được ảnh từ link Google Drive này. Vui lòng kiểm tra file đã bật chia sẻ công khai ("Bất kỳ ai có đường liên kết") chưa.'
+            : 'Không tải được ảnh hợp lệ từ đường dẫn này.'
+        });
+      }
+
+      const baseName = driveId ? `gdrive-${driveId.slice(0, 16)}` : `imported-${Date.now()}`;
+      const safeFilename = sanitizeUploadFilename(baseName, fetchedType);
+      const blobPath = `${STORE_NAME}/media/${Date.now()}-${safeFilename}`;
+
+      const uploaded = await putPrivateBlob(blobPath, fetchedBuffer, {
+        addRandomSuffix: true,
+        contentType: fetchedType
+      });
+
+      const browserUrl = `/api/blob/media?pathname=${encodeURIComponent(uploaded.pathname)}`;
+      return sendJson(res, 200, {
+        ok: true,
+        url: browserUrl,
+        pathname: uploaded.pathname,
+        size: fetchedBuffer.length,
+        contentType: fetchedType,
+        importedFromDrive: Boolean(driveId)
+      });
+    }
+
     // 5. POST /api/seed -> Safe seed that NEVER overwrites an existing Vercel Blob store
     if (method === 'POST' && pathname === '/api/seed') {
       const current = await readDatabaseState(true);
