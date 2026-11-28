@@ -135,13 +135,17 @@ export const Header: React.FC = () => {
   return (
     <>
       {/* Main Header styled as Apple Liquid Glass / Frosted Bubble with SolaX Brand Accents */}
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-        className="apple-glass-menu fixed top-2 sm:top-3 left-0 right-0 z-50 mx-auto max-w-7xl w-[calc(100%-1rem)] sm:w-[calc(100%-2rem)] lg:w-[calc(100%-2.5rem)] rounded-full"
-      >
-        <div className="px-3.5 sm:px-6 lg:px-7 h-14 sm:h-16 lg:h-[68px] flex items-center justify-between gap-2 sm:gap-4 lg:gap-5">
+      <header className="group/header fixed top-2 sm:top-3 left-0 right-0 z-50 mx-auto max-w-7xl w-[calc(100%-1rem)] sm:w-[calc(100%-2rem)] lg:w-[calc(100%-2.5rem)] rounded-full">
+        {/* Dedicated Apple Frosted Glass Background Layer (isolated from children & dropdowns so backdrop-filter never breaks in production browsers) */}
+        <div
+          aria-hidden="true"
+          className="apple-glass-menu absolute inset-0 rounded-full pointer-events-none -z-10 backdrop-blur-2xl backdrop-saturate-150"
+          style={{
+            backdropFilter: 'blur(28px) saturate(190%)',
+            WebkitBackdropFilter: 'blur(28px) saturate(190%)'
+          }}
+        />
+        <div className="relative z-10 px-3.5 sm:px-6 lg:px-7 h-14 sm:h-16 lg:h-[68px] flex items-center justify-between gap-2 sm:gap-4 lg:gap-5">
           {/* Zone 1: Brand title wordmark */}
           <div className="flex items-center gap-2.5 min-w-0 shrink-0">
             <a
@@ -708,7 +712,7 @@ export const Header: React.FC = () => {
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.header>
+      </header>
 
       {/* Subtle background overlay behind the mobile/tablet menu when open */}
       <AnimatePresence>

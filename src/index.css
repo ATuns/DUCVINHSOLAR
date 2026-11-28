@@ -113,35 +113,37 @@
 .apple-glass-menu {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.74) 0%,
-    rgba(255, 255, 255, 0.58) 50%,
-    rgba(254, 251, 243, 0.70) 100%
+    rgba(255, 255, 255, 0.78) 0%,
+    rgba(255, 255, 255, 0.66) 50%,
+    rgba(254, 251, 243, 0.75) 100%
   );
-  backdrop-filter: blur(28px) saturate(190%);
   -webkit-backdrop-filter: blur(28px) saturate(190%);
-  border: 1px solid rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.88);
   box-shadow:
-    0 0 0 1px rgba(28, 28, 28, 0.06),
+    0 0 0 1px rgba(28, 28, 28, 0.07),
     0 14px 36px -10px rgba(28, 28, 28, 0.12),
     0 4px 12px -2px rgba(28, 28, 28, 0.05),
     inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.98),
-    inset 0 -1px 1.5px 0 rgba(255, 255, 255, 0.55);
+    inset 0 -1px 1.5px 0 rgba(255, 255, 255, 0.6);
+  transform: translateZ(0);
   transition: background 260ms ease, box-shadow 260ms ease, border-color 260ms ease;
 }
 
+.group\/header:hover .apple-glass-menu,
 .apple-glass-menu:hover {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.84) 0%,
-    rgba(255, 255, 255, 0.68) 50%,
-    rgba(255, 248, 228, 0.78) 100%
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 255, 255, 0.72) 50%,
+    rgba(255, 248, 228, 0.80) 100%
   );
   box-shadow:
     0 0 0 1px rgba(255, 189, 0, 0.28),
     0 18px 42px -10px rgba(28, 28, 28, 0.14),
     0 6px 16px -3px rgba(255, 189, 0, 0.12),
     inset 0 1.5px 2px 0 rgba(255, 255, 255, 1),
-    inset 0 -1px 1.5px 0 rgba(255, 255, 255, 0.65);
+    inset 0 -1px 1.5px 0 rgba(255, 255, 255, 0.68);
 }
 
 .apple-glass-popover {
