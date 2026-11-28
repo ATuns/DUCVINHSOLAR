@@ -218,7 +218,7 @@ export const Header: React.FC = () => {
                 }}
                 aria-expanded={isProductMenuHovered}
                 className={`flex items-center gap-1 transition-colors whitespace-nowrap shrink-0 py-1.5 font-semibold ${
-                  isProductMenuHovered || currentPage === 'products' || selectedCategory !== 'all'
+                  isProductMenuHovered || currentPage === 'products'
                     ? 'text-[#FF7C00] font-bold'
                     : 'text-[#363636] hover:text-[#FF7C00]'
                 }`}

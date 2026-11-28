@@ -542,6 +542,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSelectedBlogPost(null);
     setSelectedProject(null);
     setSelectedProductState(null);
+    if (page !== 'products') {
+      setSelectedCategory('all');
+      setSelectedBrand('all');
+    }
     setCurrentPage(page);
     if (typeof window !== 'undefined') {
       const currentFull = window.location.pathname + window.location.search;
