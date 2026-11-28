@@ -480,6 +480,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const scrollToTopReliable = () => {
+    if (typeof window === 'undefined') return;
+    const performScroll = () => {
+      try {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+      } catch {
+        window.scrollTo(0, 0);
+      }
+      if (document.documentElement) {
+        document.documentElement.scrollTop = 0;
+      }
+      if (document.body) {
+        document.body.scrollTop = 0;
+      }
+    };
+    performScroll();
+    requestAnimationFrame(() => {
+      performScroll();
+      setTimeout(performScroll, 60);
+    });
+  };
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
     applyUrlLocation(
@@ -502,12 +524,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         projects,
         products
       );
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollToTopReliable();
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, [categories, brands, blogPosts, projects, products]);
+
+  // Ensure mobile and desktop browsers always scroll to top after React renders a new page, product, blog post, or project
+  useEffect(() => {
+    scrollToTopReliable();
+  }, [currentPage, selectedProduct?.id, selectedBlogPost?.id, selectedProject?.id]);
 
   const navigateToPage = (page: SitePageType, customPath?: string) => {
     const routeMeta = MAIN_SITE_ROUTES[page] || MAIN_SITE_ROUTES.home;
@@ -521,7 +548,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (currentFull !== targetPath) {
         window.history.pushState({ page }, '', targetPath);
       }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollToTopReliable();
     }
   };
 
@@ -537,7 +564,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (currentFull !== targetPath) {
           window.history.pushState({ page: 'products', productId: product.id }, '', targetPath);
         }
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        scrollToTopReliable();
       }
     } else {
       const targetPath =
@@ -549,7 +576,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (currentFull !== targetPath) {
           window.history.pushState({ page: currentPage }, '', targetPath);
         }
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        scrollToTopReliable();
       }
     }
   };
@@ -569,7 +596,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (currentFull !== targetPath) {
         window.history.pushState({ page: 'blog', blogPostId: post?.id }, '', targetPath);
       }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollToTopReliable();
     }
   };
 
@@ -584,7 +611,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (currentFull !== targetPath) {
         window.history.pushState({ page: 'projects', projectId: project?.id }, '', targetPath);
       }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollToTopReliable();
     }
   };
 
@@ -607,7 +634,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (currentFull !== targetPath) {
           window.history.pushState({ page: 'products', category, brand }, '', targetPath);
         }
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        scrollToTopReliable();
       }
     }
   };
