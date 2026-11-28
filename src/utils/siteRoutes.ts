@@ -178,6 +178,127 @@ export interface ParsedSiteLocation {
   categorySlug?: string;
   brandSlug?: string;
   queryBrand?: string;
+  blogPostSlug?: string;
+  projectSlug?: string;
+  productSlug?: string;
+}
+
+/**
+ * Build URL slug for a product
+ */
+export function getProductSlug(product: { id: string; name?: string; sku?: string }): string {
+  if (!product) return '';
+  const nameSlug = toUrlSlug(product.name || '');
+  const skuSlug = toUrlSlug(product.sku || '');
+  if (nameSlug && skuSlug && !nameSlug.endsWith(skuSlug)) {
+    return `${nameSlug}-${skuSlug}`;
+  }
+  return nameSlug || skuSlug || toUrlSlug(product.id);
+}
+
+/**
+ * Build canonical path for a specific product detail page
+ */
+export function buildProductDetailPath(product: { id: string; name?: string; sku?: string }): string {
+  const slug = getProductSlug(product);
+  return slug ? `/san-pham-solar/chi-tiet/${slug}` : '/san-pham-solar';
+}
+
+/**
+ * Find a product from a URL slug or ID
+ */
+export function findProductBySlug<T extends { id: string; name?: string; sku?: string }>(
+  slug: string,
+  products: T[]
+): T | undefined {
+  const cleanSlug = toUrlSlug(slug);
+  if (!cleanSlug) return undefined;
+
+  return (
+    products.find(
+      (p) =>
+        p.id === slug ||
+        toUrlSlug(p.id) === cleanSlug ||
+        getProductSlug(p) === cleanSlug ||
+        toUrlSlug(p.name || '') === cleanSlug ||
+        toUrlSlug(p.sku || '') === cleanSlug
+    ) ||
+    products.find(
+      (p) =>
+        getProductSlug(p).startsWith(cleanSlug) ||
+        cleanSlug.startsWith(getProductSlug(p))
+    )
+  );
+}
+
+/**
+ * Build URL slug for a blog post
+ */
+export function getBlogPostSlug(post: { id: string; title?: string }): string {
+  if (!post) return '';
+  const titleSlug = toUrlSlug(post.title || '');
+  return titleSlug || toUrlSlug(post.id);
+}
+
+/**
+ * Build canonical path for a specific blog post page
+ */
+export function buildBlogPostPath(post: { id: string; title?: string }): string {
+  const slug = getBlogPostSlug(post);
+  return slug ? `/blog-bai-viet/${slug}` : '/blog-bai-viet';
+}
+
+/**
+ * Find a blog post from a URL slug or ID
+ */
+export function findBlogPostBySlug<T extends { id: string; title?: string }>(
+  slug: string,
+  posts: T[]
+): T | undefined {
+  const cleanSlug = toUrlSlug(slug);
+  if (!cleanSlug) return undefined;
+
+  return posts.find(
+    (p) =>
+      p.id === slug ||
+      toUrlSlug(p.id) === cleanSlug ||
+      getBlogPostSlug(p) === cleanSlug
+  );
+}
+
+/**
+ * Build URL slug for a project
+ */
+export function getProjectSlug(project: { id: string; title?: string }): string {
+  if (!project) return '';
+  const titleSlug = toUrlSlug(project.title || '');
+  return titleSlug || toUrlSlug(project.id);
+}
+
+/**
+ * Build canonical path for a specific project page
+ */
+export function buildProjectPath(project: { id: string; title?: string }): string {
+  const slug = getProjectSlug(project);
+  return slug ? `/du-an-tieu-bieu/${slug}` : '/du-an-tieu-bieu';
+}
+
+/**
+ * Find a project from a URL slug or ID
+ */
+export function findProjectBySlug<T extends { id: string; title?: string }>(
+  slug: string,
+  projects: T[]
+): T | undefined {
+  const cleanSlug = toUrlSlug(slug);
+  if (!cleanSlug) return undefined;
+
+  return projects.find(
+    (p) =>
+      p.id === slug ||
+      toUrlSlug(p.id) === cleanSlug ||
+      getProjectSlug(p) === cleanSlug
+  );
 }
 
 /**
@@ -191,8 +312,15 @@ export function parseSiteLocation(pathname: string, search: string = ''): Parsed
   const searchParams = new URLSearchParams(search || '');
   const queryBrand = searchParams.get('hang') || searchParams.get('brand') || undefined;
   const queryCat = searchParams.get('danh-muc') || searchParams.get('category') || undefined;
+  const queryProd = searchParams.get('san-pham') || searchParams.get('product') || undefined;
 
   if (cleanPath === '/' || cleanPath === '/trang-chu' || cleanPath === '/index.html') {
+    if (queryProd) {
+      return {
+        page: 'products',
+        productSlug: queryProd
+      };
+    }
     if (queryCat || queryBrand) {
       return {
         page: 'products',
@@ -206,18 +334,32 @@ export function parseSiteLocation(pathname: string, search: string = ''): Parsed
   const segments = cleanPath.split('/').filter(Boolean);
   const first = segments[0] || '';
 
-  // 1. Product Catalog & Sub-routes (/san-pham-solar, /san-pham-solar/:categorySlug, /san-pham-solar/:categorySlug/:brandSlug)
+  if (first === 'chi-tiet-san-pham' && segments[1]) {
+    return {
+      page: 'products',
+      productSlug: segments[1]
+    };
+  }
+
+  // 1. Product Catalog & Sub-routes (/san-pham-solar, /san-pham-solar/chi-tiet/:productSlug, /san-pham-solar/:categorySlug, /san-pham-solar/:categorySlug/:brandSlug)
   if (
     first === 'san-pham-solar' ||
     first === 'san-pham' ||
     first === 'danh-muc-san-pham' ||
     first === 'thiet-bi-solar'
   ) {
+    if (segments[1] === 'chi-tiet' && segments[2]) {
+      return {
+        page: 'products',
+        productSlug: segments[2]
+      };
+    }
     return {
       page: 'products',
       categorySlug: segments[1] || queryCat,
       brandSlug: segments[2],
-      queryBrand
+      queryBrand,
+      productSlug: queryProd
     };
   }
 
@@ -254,19 +396,25 @@ export function parseSiteLocation(pathname: string, search: string = ''): Parsed
     };
   }
 
-  // 3. Projects Page (/du-an-tieu-bieu, /du-an, /cong-trinh)
+  // 3. Projects Page & Individual Project Page (/du-an-tieu-bieu, /du-an-tieu-bieu/:projectSlug)
   if (first === 'du-an-tieu-bieu' || first === 'du-an' || first === 'cong-trinh') {
-    return { page: 'projects' };
+    return {
+      page: 'projects',
+      projectSlug: segments[1] || undefined
+    };
   }
 
-  // 4. Blog Page (/blog-bai-viet, /blog, /tin-tuc, /bai-viet)
+  // 4. Blog Page & Individual Blog Post Page (/blog-bai-viet, /blog-bai-viet/:postSlug)
   if (
     first === 'blog-bai-viet' ||
     first === 'blog' ||
     first === 'tin-tuc' ||
     first === 'bai-viet'
   ) {
-    return { page: 'blog' };
+    return {
+      page: 'blog',
+      blogPostSlug: segments[1] || undefined
+    };
   }
 
   // 5. Company Profile Page (/gioi-thieu-cong-ty, /gioi-thieu, /ve-chung-toi)

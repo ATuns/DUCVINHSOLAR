@@ -3,28 +3,28 @@ import { Product, ProjectItem, CompanyInfo, CategoryItem, BrandItem, BlogPost } 
 export const INITIAL_CATEGORIES: CategoryItem[] = [
   {
     id: 'solar-panels',
-    label: 'Tấm Pin Mặt Trời',
-    shortLabel: 'Tấm Pin',
+    label: 'Tấm pin mặt trời',
+    shortLabel: 'Tấm pin',
     desc: 'Longi, Jinko, Canadian, JA...',
     iconName: 'Sun'
   },
   {
     id: 'inverters',
-    label: 'Biến Tần Inverter',
-    shortLabel: 'Biến Tần',
+    label: 'Biến tần Inverter',
+    shortLabel: 'Biến tần',
     desc: 'SolaX, Deye, Solis, Sungrow...',
     iconName: 'Cpu'
   },
   {
     id: 'energy-storage',
-    label: 'Pin Lưu Trữ ESS',
-    shortLabel: 'Lưu Trữ',
+    label: 'Pin lưu trữ ESS',
+    shortLabel: 'Lưu trữ',
     desc: 'SolaX, Deye, Dyness, LiFePO4...',
     iconName: 'BatteryCharging'
   },
   {
     id: 'solar-lights',
-    label: 'Đèn Năng Lượng',
+    label: 'Đèn năng lượng',
     shortLabel: 'Đèn Solar',
     desc: 'Đèn đường liền thể, đèn pha...',
     iconName: 'Lightbulb'

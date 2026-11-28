@@ -20,8 +20,14 @@ import {
   MAIN_SITE_ROUTES,
   SITE_ORIGIN,
   SitePageType,
+  buildBlogPostPath,
   buildProductCatalogPath,
+  buildProductDetailPath,
+  buildProjectPath,
+  findBlogPostBySlug,
   findCategoryBySlug,
+  findProductBySlug,
+  findProjectBySlug,
   parseSiteLocation,
   toUrlSlug
 } from '../utils/siteRoutes';
@@ -55,9 +61,14 @@ interface AppContextType {
   selectedCategory: 'all' | string;
   selectedBrand: string;
   currentPage: SitePageType;
+  selectedBlogPost: BlogPost | null;
+  selectedProject: ProjectItem | null;
+  theme: 'light' | 'dark';
 
   // Actions
+  toggleTheme: () => void;
   setSelectedProduct: (p: Product | null) => void;
+  openProductPage: (product: Product | null) => void;
   setSelectedCategory: (cat: 'all' | string) => void;
   setSelectedBrand: (brand: string) => void;
   selectCatalogFilter: (
@@ -66,6 +77,8 @@ interface AppContextType {
     openStandalonePage?: boolean
   ) => void;
   navigateToPage: (page: SitePageType, customPath?: string) => void;
+  openBlogPostPage: (post: BlogPost | null) => void;
+  openProjectPage: (project: ProjectItem | null) => void;
   openQuoteModal: (product?: Product | null) => void;
   closeQuoteModal: () => void;
   setIsAdminModalOpen: (open: boolean) => void;
@@ -349,7 +362,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   // Modals & Sync state
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProductState] = useState<Product | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const parsed = parseSiteLocation(window.location.pathname, window.location.search);
+    if (parsed.page === 'products' && parsed.productSlug) {
+      return findProductBySlug(parsed.productSlug, INITIAL_PRODUCTS) || null;
+    }
+    return null;
+  });
   const [quoteModalProduct, setQuoteModalProduct] = useState<Product | null>(null);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState<boolean>(false);
   const [adminActiveTab, setAdminActiveTab] = useState<AdminTabType>('inventory');
@@ -364,11 +384,75 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (typeof window === 'undefined') return 'home';
     return parseSiteLocation(window.location.pathname, window.location.search).page;
   });
+  const [selectedBlogPost, setSelectedBlogPost] = useState<BlogPost | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const parsed = parseSiteLocation(window.location.pathname, window.location.search);
+    if (parsed.page === 'blog' && parsed.blogPostSlug) {
+      return findBlogPostBySlug(parsed.blogPostSlug, INITIAL_BLOG_POSTS) || null;
+    }
+    return null;
+  });
+  const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const parsed = parseSiteLocation(window.location.pathname, window.location.search);
+    if (parsed.page === 'projects' && parsed.projectSlug) {
+      return findProjectBySlug(parsed.projectSlug, INITIAL_PROJECTS) || null;
+    }
+    return null;
+  });
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
-  // Resolve URL pathname/search into currentPage + selectedCategory + selectedBrand
-  const applyUrlLocation = (pathname: string, search: string, catList: CategoryItem[], brandList: BrandItem[]) => {
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    document.documentElement.classList.remove('dark');
+    try {
+      localStorage.setItem('dvs_theme', 'light');
+    } catch {
+      // ignore storage error
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme('light');
+  };
+
+  // Resolve URL pathname/search into currentPage + selectedCategory + selectedBrand + selectedBlogPost + selectedProject + selectedProduct
+  const applyUrlLocation = (
+    pathname: string,
+    search: string,
+    catList: CategoryItem[],
+    brandList: BrandItem[],
+    blogList: BlogPost[],
+    projectList: ProjectItem[],
+    productList: Product[]
+  ) => {
     const parsed = parseSiteLocation(pathname, search);
     setCurrentPage(parsed.page);
+
+    if (parsed.page === 'blog' && parsed.blogPostSlug) {
+      const matchedPost = findBlogPostBySlug(parsed.blogPostSlug, blogList);
+      setSelectedBlogPost(matchedPost || null);
+    } else {
+      setSelectedBlogPost(null);
+    }
+
+    if (parsed.page === 'projects' && parsed.projectSlug) {
+      const matchedProj = findProjectBySlug(parsed.projectSlug, projectList);
+      setSelectedProject(matchedProj || null);
+    } else {
+      setSelectedProject(null);
+    }
+
+    if (parsed.page === 'products' && parsed.productSlug) {
+      const matchedProd = findProductBySlug(parsed.productSlug, productList);
+      setSelectedProductState(matchedProd || null);
+      if (matchedProd) {
+        setSelectedCategory(matchedProd.category || 'all');
+      }
+      return;
+    } else {
+      setSelectedProductState(null);
+    }
 
     if (parsed.page === 'products') {
       let resolvedCatId: 'all' | string = 'all';
@@ -398,25 +482,107 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    applyUrlLocation(window.location.pathname, window.location.search, categories, brands);
+    applyUrlLocation(
+      window.location.pathname,
+      window.location.search,
+      categories,
+      brands,
+      blogPosts,
+      projects,
+      products
+    );
 
     const handlePopState = () => {
-      applyUrlLocation(window.location.pathname, window.location.search, categories, brands);
+      applyUrlLocation(
+        window.location.pathname,
+        window.location.search,
+        categories,
+        brands,
+        blogPosts,
+        projects,
+        products
+      );
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [categories, brands]);
+  }, [categories, brands, blogPosts, projects, products]);
 
   const navigateToPage = (page: SitePageType, customPath?: string) => {
     const routeMeta = MAIN_SITE_ROUTES[page] || MAIN_SITE_ROUTES.home;
     const targetPath = customPath || routeMeta.path;
+    setSelectedBlogPost(null);
+    setSelectedProject(null);
+    setSelectedProductState(null);
     setCurrentPage(page);
     if (typeof window !== 'undefined') {
       const currentFull = window.location.pathname + window.location.search;
       if (currentFull !== targetPath) {
         window.history.pushState({ page }, '', targetPath);
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const openProductPage = (product: Product | null) => {
+    setSelectedBlogPost(null);
+    setSelectedProject(null);
+    setSelectedProductState(product);
+    if (product) {
+      setCurrentPage('products');
+      const targetPath = buildProductDetailPath(product);
+      if (typeof window !== 'undefined') {
+        const currentFull = window.location.pathname + window.location.search;
+        if (currentFull !== targetPath) {
+          window.history.pushState({ page: 'products', productId: product.id }, '', targetPath);
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } else {
+      const targetPath =
+        currentPage === 'products'
+          ? buildProductCatalogPath(selectedCategory, selectedBrand, categories)
+          : (MAIN_SITE_ROUTES[currentPage] || MAIN_SITE_ROUTES.home).path;
+      if (typeof window !== 'undefined') {
+        const currentFull = window.location.pathname + window.location.search;
+        if (currentFull !== targetPath) {
+          window.history.pushState({ page: currentPage }, '', targetPath);
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+  };
+
+  const setSelectedProduct = (product: Product | null) => {
+    openProductPage(product);
+  };
+
+  const openBlogPostPage = (post: BlogPost | null) => {
+    setSelectedProject(null);
+    setSelectedProductState(null);
+    setSelectedBlogPost(post);
+    setCurrentPage('blog');
+    const targetPath = post ? buildBlogPostPath(post) : MAIN_SITE_ROUTES.blog.path;
+    if (typeof window !== 'undefined') {
+      const currentFull = window.location.pathname + window.location.search;
+      if (currentFull !== targetPath) {
+        window.history.pushState({ page: 'blog', blogPostId: post?.id }, '', targetPath);
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const openProjectPage = (project: ProjectItem | null) => {
+    setSelectedBlogPost(null);
+    setSelectedProductState(null);
+    setSelectedProject(project);
+    setCurrentPage('projects');
+    const targetPath = project ? buildProjectPath(project) : MAIN_SITE_ROUTES.projects.path;
+    if (typeof window !== 'undefined') {
+      const currentFull = window.location.pathname + window.location.search;
+      if (currentFull !== targetPath) {
+        window.history.pushState({ page: 'projects', projectId: project?.id }, '', targetPath);
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -429,9 +595,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ) => {
     setSelectedCategory(category);
     setSelectedBrand(brand);
+    setSelectedProductState(null);
 
     if (openStandalonePage || currentPage === 'products') {
       const targetPath = buildProductCatalogPath(category, brand, categories);
+      setSelectedBlogPost(null);
+      setSelectedProject(null);
       setCurrentPage('products');
       if (typeof window !== 'undefined') {
         const currentFull = window.location.pathname + window.location.search;
@@ -452,7 +621,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     let pageDesc = baseMeta.description;
     let canonicalPath = baseMeta.path;
 
-    if (currentPage === 'products') {
+    if (currentPage === 'products' && selectedProduct) {
+      canonicalPath = buildProductDetailPath(selectedProduct);
+      pageTitle = `${selectedProduct.name} (${selectedProduct.sku}) | Đức Vinh Solar`;
+      pageDesc =
+        selectedProduct.shortDesc ||
+        (selectedProduct.fullDesc || '').slice(0, 160) ||
+        baseMeta.description;
+    } else if (currentPage === 'products') {
       canonicalPath = buildProductCatalogPath(selectedCategory, selectedBrand, categories);
       const activeCat =
         selectedCategory !== 'all'
@@ -466,6 +642,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         pageTitle = `${activeCat.label} Chính Hãng – Giá Sỉ & Lẻ Tốt Nhất | Đức Vinh Solar`;
         pageDesc = `Danh mục ${activeCat.label} (${activeCat.desc || 'chính hãng Tier 1'}) tại Đức Vinh Solar. Sẵn kho Hóc Môn, TP.HCM – Giao hàng hỏa tốc.`;
       }
+    } else if (currentPage === 'blog' && selectedBlogPost) {
+      canonicalPath = buildBlogPostPath(selectedBlogPost);
+      pageTitle = `${selectedBlogPost.title} | Đức Vinh Solar`;
+      pageDesc =
+        selectedBlogPost.summary ||
+        (selectedBlogPost.content || '').slice(0, 160) ||
+        baseMeta.description;
+    } else if (currentPage === 'projects' && selectedProject) {
+      canonicalPath = buildProjectPath(selectedProject);
+      pageTitle = `${selectedProject.title} | Dự Án Đức Vinh Solar`;
+      pageDesc =
+        selectedProject.description ||
+        `${selectedProject.title} (${selectedProject.capacity}) tại ${selectedProject.location} – ${selectedProject.estimatedSaving}.` ||
+        baseMeta.description;
     }
 
     document.title = pageTitle;
@@ -490,7 +680,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       document.head.appendChild(canonicalLink);
     }
     canonicalLink.setAttribute('href', fullCanonicalUrl);
-  }, [currentPage, selectedCategory, selectedBrand, categories]);
+  }, [currentPage, selectedCategory, selectedBrand, categories, selectedBlogPost, selectedProject, selectedProduct]);
 
   // Activate Admin Modal only via keyboard shortcut: "Ctrl + X + 1"
   useEffect(() => {
@@ -726,7 +916,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
           if (Array.isArray(blobData.products)) {
             setProducts(blobData.products);
-            setSelectedProduct((prevSelected) => {
+            setSelectedProductState((prevSelected) => {
               if (!prevSelected) return null;
               return (
                 blobData.products.find((item: Product) => item.id === prevSelected.id) ||
@@ -1118,7 +1308,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       productsRef.current = next;
       return next;
     });
-    setSelectedProduct((prevSelected) =>
+    setSelectedProductState((prevSelected) =>
       prevSelected?.id === id ? updatedObj : prevSelected
     );
 
@@ -1193,7 +1383,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     setProducts(nextProducts);
-    setSelectedProduct((prev) => {
+    setSelectedProductState((prev) => {
       if (!prev) return null;
       return nextProducts.find((item) => item.id === prev.id) || prev;
     });
@@ -1308,6 +1498,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     setProjects((prev) => prev.map((p) => (p.id === id ? updatedProj : p)));
+    setSelectedProject((prevSelected) =>
+      prevSelected?.id === id ? updatedProj : prevSelected
+    );
     void postToBlobApi('/api/projects', updatedProj);
   };
 
@@ -1318,6 +1511,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       `Bạn chắc chắn muốn xóa dự án ${projLabel} hay không?`,
       async () => {
         setProjects((prev) => prev.filter((p) => p.id !== id));
+        setSelectedProject((prevSelected) =>
+          prevSelected?.id === id ? null : prevSelected
+        );
         if (onConfirmed) onConfirmed();
 
         void deleteFromBlobApi(`/api/projects/${encodeURIComponent(id)}`);
@@ -1363,6 +1559,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     setBlogPosts((prev) => prev.map((bp) => (bp.id === id ? updatedPost : bp)));
+    setSelectedBlogPost((prevSelected) =>
+      prevSelected?.id === id ? updatedPost : prevSelected
+    );
     void postToBlobApi('/api/blog-posts', updatedPost);
   };
 
@@ -1373,6 +1572,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       `Bạn chắc chắn muốn xóa bài viết ${postLabel} hay không?`,
       async () => {
         setBlogPosts((prev) => prev.filter((bp) => bp.id !== id));
+        setSelectedBlogPost((prevSelected) =>
+          prevSelected?.id === id ? null : prevSelected
+        );
         if (onConfirmed) onConfirmed();
 
         void deleteFromBlobApi(`/api/blog-posts/${encodeURIComponent(id)}`);
@@ -1906,11 +2108,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         selectedCategory,
         selectedBrand,
         currentPage,
+        selectedBlogPost,
+        selectedProject,
+        theme,
+        toggleTheme,
         setSelectedProduct,
+        openProductPage,
         setSelectedCategory,
         setSelectedBrand,
         selectCatalogFilter,
         navigateToPage,
+        openBlogPostPage,
+        openProjectPage,
         openQuoteModal,
         closeQuoteModal,
         setIsAdminModalOpen,

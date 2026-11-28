@@ -839,20 +839,20 @@ export const AdminModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200">
       <div
-        className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-5xl w-full max-h-[92vh] flex flex-col overflow-hidden relative"
+        className="bg-[#f4faff] dark:bg-[#0b2038] text-slate-800 dark:text-sky-50 rounded-2xl shadow-2xl border border-sky-200 dark:border-sky-800/70 max-w-5xl w-full max-h-[92vh] flex flex-col overflow-hidden relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-emerald-950 text-white">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-sky-200/30 dark:border-sky-800/70 bg-gradient-to-r from-[#0c4a6e] to-[#075985] dark:from-[#0a385c] dark:to-[#072a47] text-white">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold">
+            <div className="w-8 h-8 rounded-lg bg-sky-600 flex items-center justify-center text-white font-bold">
               <Lock className="w-4 h-4" />
             </div>
             <div>
               <h2 className="text-base font-bold font-heading">
                 Hệ Thống Quản Trị – Đức Vinh Solar
               </h2>
-              <p className="text-[11px] text-emerald-300">
+              <p className="text-[11px] text-sky-300">
                 {isAdmin ? 'Đang đăng nhập với quyền Quản trị viên (Admin)' : 'Xác thực tài khoản để truy cập'}
               </p>
             </div>
@@ -870,7 +870,7 @@ export const AdminModal: React.FC = () => {
                       showNotice('Đã đồng bộ toàn bộ Loại, Hãng, Sản phẩm & Dự án lên Đám mây cho tất cả các máy!');
                     }
                   }}
-                  className="px-3 py-1.5 text-xs font-bold text-emerald-100 bg-emerald-800 hover:bg-emerald-700 border border-emerald-600 rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-3 py-1.5 text-xs font-bold text-sky-100 bg-sky-700/80 hover:bg-sky-600 border border-sky-500/60 rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-50"
                   title="Đồng bộ toàn bộ dữ liệu hiện tại lên đám mây cho mọi thiết bị"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${isSyncingCloud ? 'animate-spin' : ''}`} />
@@ -898,12 +898,12 @@ export const AdminModal: React.FC = () => {
 
         {/* Inline Notification Banner */}
         {adminNotice && (
-          <div className="px-6 py-2.5 bg-emerald-600 text-white text-xs font-bold flex items-center justify-between">
+          <div className="px-6 py-2.5 bg-sky-600 text-white text-xs font-bold flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Check className="w-4 h-4" />
               <span>{adminNotice}</span>
             </div>
-            <button onClick={() => setAdminNotice(null)} className="text-emerald-100 hover:text-white">
+            <button onClick={() => setAdminNotice(null)} className="text-sky-100 hover:text-white">
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -912,19 +912,19 @@ export const AdminModal: React.FC = () => {
         {/* Content Body */}
         {!isAdmin ? (
           /* LOGIN VIEW */
-          <div className="p-8 max-w-md mx-auto w-full my-auto text-slate-800">
+          <div className="p-8 max-w-md mx-auto w-full my-auto text-slate-800 dark:text-slate-100">
             <div className="text-center mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-3">
+              <div className="w-12 h-12 rounded-2xl bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300 flex items-center justify-center mx-auto mb-3">
                 <Lock className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-bold">Đăng Nhập Quản Trị Kho</h3>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 Quản lý loại thiết bị, các hãng sản xuất, sản phẩm và số lượng tồn kho
               </p>
             </div>
 
             {loginError && (
-              <div className="mb-4 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2">
+              <div className="mb-4 p-3 rounded-lg bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/60 text-rose-700 dark:text-rose-200 text-xs flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{loginError}</span>
               </div>
@@ -932,7 +932,7 @@ export const AdminModal: React.FC = () => {
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
                   Tài Khoản Quản Trị (Admin)
                 </label>
                 <input
@@ -941,12 +941,12 @@ export const AdminModal: React.FC = () => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Admin"
-                  className="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:outline-hidden focus:border-emerald-600 focus:bg-white"
+                  className="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-hidden focus:border-sky-500 dark:focus:border-sky-400 focus:bg-white dark:focus:bg-slate-800"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
                   Mật Khẩu
                 </label>
                 <input
@@ -955,13 +955,13 @@ export const AdminModal: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Nhập mật khẩu"
-                  className="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:outline-hidden focus:border-emerald-600 focus:bg-white"
+                  className="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-hidden focus:border-sky-500 dark:focus:border-sky-400 focus:bg-white dark:focus:bg-slate-800"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs rounded-lg transition-colors shadow-xs"
+                className="w-full py-2.5 px-4 bg-sky-600 hover:bg-sky-700 active:bg-sky-800 dark:bg-sky-500 dark:hover:bg-sky-400 text-white dark:text-slate-950 font-bold text-xs rounded-lg transition-colors shadow-xs"
               >
                 Đăng Nhập Vào Quản Trị
               </button>
@@ -971,7 +971,7 @@ export const AdminModal: React.FC = () => {
           /* LOGGED IN ADMIN CONSOLE */
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Admin Tabs */}
-            <div className="flex items-center gap-2 px-6 pt-3 border-b border-slate-200 bg-slate-50 overflow-x-auto scrollbar-none">
+            <div className="flex items-center gap-2 px-6 pt-3 border-b border-sky-200 dark:border-sky-800/70 bg-[#e8f4ff] dark:bg-[#08192c] overflow-x-auto scrollbar-none">
               <button
                 onClick={() => {
                   setAdminActiveTab('categories-brands');
@@ -980,8 +980,8 @@ export const AdminModal: React.FC = () => {
                 }}
                 className={`px-4 py-2 text-xs font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                   adminActiveTab === 'categories-brands'
-                    ? 'border-emerald-600 text-emerald-800 bg-white'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
+                    ? 'border-sky-600 dark:border-sky-400 text-sky-800 dark:text-sky-200 bg-[#f4faff] dark:bg-[#0b2038]'
+                    : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                 }`}
               >
                 <Layers className="w-4 h-4" />
@@ -997,8 +997,8 @@ export const AdminModal: React.FC = () => {
                 }}
                 className={`px-4 py-2 text-xs font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                   adminActiveTab === 'inventory'
-                    ? 'border-emerald-600 text-emerald-800 bg-white'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
+                    ? 'border-sky-600 dark:border-sky-400 text-sky-800 dark:text-sky-200 bg-[#f4faff] dark:bg-[#0b2038]'
+                    : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                 }`}
               >
                 <Package className="w-4 h-4" />
@@ -1013,8 +1013,8 @@ export const AdminModal: React.FC = () => {
                 }}
                 className={`px-4 py-2 text-xs font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                   adminActiveTab === 'projects'
-                    ? 'border-emerald-600 text-emerald-800 bg-white'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
+                    ? 'border-sky-600 dark:border-sky-400 text-sky-800 dark:text-sky-200 bg-[#f4faff] dark:bg-[#0b2038]'
+                    : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                 }`}
               >
                 <Award className="w-4 h-4" />
@@ -1029,8 +1029,8 @@ export const AdminModal: React.FC = () => {
                 }}
                 className={`px-4 py-2 text-xs font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                   adminActiveTab === 'blog'
-                    ? 'border-emerald-600 text-emerald-800 bg-white'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
+                    ? 'border-sky-600 dark:border-sky-400 text-sky-800 dark:text-sky-200 bg-[#f4faff] dark:bg-[#0b2038]'
+                    : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                 }`}
               >
                 <BookOpen className="w-4 h-4" />
@@ -1045,8 +1045,8 @@ export const AdminModal: React.FC = () => {
                 }}
                 className={`px-4 py-2 text-xs font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                   adminActiveTab === 'inquiries'
-                    ? 'border-emerald-600 text-emerald-800 bg-white'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
+                    ? 'border-sky-600 dark:border-sky-400 text-sky-800 dark:text-sky-200 bg-[#f4faff] dark:bg-[#0b2038]'
+                    : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                 }`}
               >
                 <Users className="w-4 h-4" />
@@ -1061,8 +1061,8 @@ export const AdminModal: React.FC = () => {
                 }}
                 className={`px-4 py-2 text-xs font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                   adminActiveTab === 'company'
-                    ? 'border-emerald-600 text-emerald-800 bg-white'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
+                    ? 'border-sky-600 dark:border-sky-400 text-sky-800 dark:text-sky-200 bg-[#f4faff] dark:bg-[#0b2038]'
+                    : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                 }`}
               >
                 <Database className="w-4 h-4" />
@@ -1077,8 +1077,8 @@ export const AdminModal: React.FC = () => {
                 }}
                 className={`px-4 py-2 text-xs font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                   adminActiveTab === 'backup'
-                    ? 'border-emerald-600 text-emerald-800 bg-white'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
+                    ? 'border-sky-600 dark:border-sky-400 text-sky-800 dark:text-sky-200 bg-[#f4faff] dark:bg-[#0b2038]'
+                    : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                 }`}
               >
                 <Download className="w-4 h-4" />
@@ -1093,10 +1093,10 @@ export const AdminModal: React.FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                   {/* Left Column: Quản Lý Các Loại Thiết Bị (Categories) */}
                   <div className="lg:col-span-5 space-y-5">
-                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                    <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-xl p-4">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                          <Layers className="w-4 h-4 text-emerald-600" />
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50 flex items-center gap-1.5">
+                          <Layers className="w-4 h-4 text-sky-600 dark:text-sky-400" />
                           <span>{editingCategory ? 'Sửa Loại Thiết Bị' : 'Thêm Loại Thiết Bị Mới'}</span>
                         </h3>
                         {editingCategory && (
@@ -1107,7 +1107,7 @@ export const AdminModal: React.FC = () => {
                               setCatLabel('');
                               setCatDesc('');
                             }}
-                            className="text-xs text-slate-500 hover:text-slate-800"
+                            className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800"
                           >
                             Hủy sửa
                           </button>
@@ -1116,7 +1116,7 @@ export const AdminModal: React.FC = () => {
 
                       <form onSubmit={handleSubmitCategory} className="space-y-3">
                         <div>
-                          <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                             Tên Loại Thiết Bị *
                           </label>
                           <input
@@ -1125,12 +1125,12 @@ export const AdminModal: React.FC = () => {
                             value={catLabel}
                             onChange={(e) => setCatLabel(e.target.value)}
                             placeholder="VD: Tấm Pin Mặt Trời, Biến Tần, Phụ Kiện..."
-                            className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg"
+                            className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-lg"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                             Mô Tả Ngắn / Gợi Ý Hãng
                           </label>
                           <input
@@ -1138,18 +1138,18 @@ export const AdminModal: React.FC = () => {
                             value={catDesc}
                             onChange={(e) => setCatDesc(e.target.value)}
                             placeholder="VD: SolaX, Deye, Solis..."
-                            className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg"
+                            className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-lg"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                             Biểu Tượng Hiển Thị
                           </label>
                           <select
                             value={catIcon}
                             onChange={(e) => setCatIcon(e.target.value as CategoryIconName)}
-                            className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg"
+                            className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-lg"
                           >
                             <option value="Sun">Tấm Pin Mặt Trời (Sun)</option>
                             <option value="Cpu">Biến Tần Inverter (Cpu)</option>
@@ -1163,7 +1163,7 @@ export const AdminModal: React.FC = () => {
 
                         <button
                           type="submit"
-                          className="w-full py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition-colors shadow-xs"
+                          className="w-full py-2 px-4 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition-colors shadow-xs"
                         >
                           {editingCategory ? <Save className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
                           <span>{editingCategory ? 'Cập Nhật Loại Thiết Bị' : 'Thêm Loại Thiết Bị'}</span>
@@ -1174,11 +1174,11 @@ export const AdminModal: React.FC = () => {
                     {/* List of existing categories (Paginated 5 per page) */}
                     <div>
                       <div className="flex items-center justify-between mb-2.5">
-                        <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                        <h4 className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">
                           Danh Sách Các Loại Hiện Có ({categories.length})
                         </h4>
                         {categories.length > ADMIN_CATEGORIES_PER_PAGE && (
-                          <span className="text-[11px] font-semibold text-emerald-700">
+                          <span className="text-[11px] font-semibold text-sky-700 dark:text-sky-300">
                             Trang {safeAdminCatPage}/{totalAdminCatPages}
                           </span>
                         )}
@@ -1190,14 +1190,14 @@ export const AdminModal: React.FC = () => {
                           return (
                             <div
                               key={cat.id}
-                              className="p-3 rounded-xl border border-slate-200 bg-white flex items-center justify-between gap-3 hover:border-emerald-400 transition-colors"
+                              className="p-3 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/90 flex items-center justify-between gap-3 hover:border-sky-400 transition-colors"
                             >
                               <div>
-                                <div className="text-xs font-bold text-slate-900">
+                                <div className="text-xs font-bold text-slate-900 dark:text-slate-50">
                                   {cat.label}
                                 </div>
-                                <div className="text-[11px] text-slate-500">
-                                  {cat.desc} · <strong className="text-emerald-700">{brandCount} hãng</strong> · <strong>{prodCount} SP</strong>
+                                <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                                  {cat.desc} · <strong className="text-sky-700 dark:text-sky-300">{brandCount} hãng</strong> · <strong>{prodCount} SP</strong>
                                 </div>
                               </div>
 
@@ -1205,7 +1205,7 @@ export const AdminModal: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => startEditCategory(cat)}
-                                  className="p-1.5 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-md transition-colors"
+                                  className="p-1.5 text-slate-600 dark:text-slate-300 hover:text-sky-700 dark:hover:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-900/40 rounded-md transition-colors"
                                   title="Sửa loại thiết bị"
                                 >
                                   <Edit2 className="w-3.5 h-3.5" />
@@ -1217,7 +1217,7 @@ export const AdminModal: React.FC = () => {
                                       showNotice(`Đã xóa loại thiết bị "${cat.label}"!`);
                                     });
                                   }}
-                                  className="px-2 py-1 text-xs font-semibold text-rose-600 hover:text-white hover:bg-rose-600 bg-rose-50 rounded-md transition-colors flex items-center gap-1"
+                                  className="px-2 py-1 text-xs font-semibold text-rose-600 hover:text-white hover:bg-rose-600 bg-rose-50 dark:bg-rose-950/40 rounded-md transition-colors flex items-center gap-1"
                                   title="Xóa loại thiết bị"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
@@ -1230,8 +1230,8 @@ export const AdminModal: React.FC = () => {
                       </div>
 
                       {categories.length > ADMIN_CATEGORIES_PER_PAGE && (
-                        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200">
-                          <span className="text-[11px] text-slate-500">
+                        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700/80">
+                          <span className="text-[11px] text-slate-500 dark:text-slate-400">
                             Trang {safeAdminCatPage} / {totalAdminCatPages}
                           </span>
                           <div className="flex flex-wrap items-center gap-1">
@@ -1239,7 +1239,7 @@ export const AdminModal: React.FC = () => {
                               type="button"
                               disabled={safeAdminCatPage <= 1}
                               onClick={() => setAdminCatPage(p => Math.max(1, p - 1))}
-                              className="px-2 py-1 text-[11px] font-bold rounded border border-slate-200 bg-white text-slate-700 disabled:opacity-40 flex items-center gap-0.5"
+                              className="px-2 py-1 text-[11px] font-bold rounded border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 disabled:opacity-40 flex items-center gap-0.5"
                             >
                               <ChevronLeft className="w-3 h-3" />
                               <span>Trang trước</span>
@@ -1259,8 +1259,8 @@ export const AdminModal: React.FC = () => {
                                   onClick={() => setAdminCatPage(item)}
                                   className={`w-6 h-6 rounded text-[11px] font-bold ${
                                     safeAdminCatPage === item
-                                      ? 'bg-emerald-600 text-white'
-                                      : 'bg-white text-slate-700 border border-slate-200'
+                                      ? 'bg-sky-600 text-white'
+                                      : 'bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700/80'
                                   }`}
                                 >
                                   {item}
@@ -1271,7 +1271,7 @@ export const AdminModal: React.FC = () => {
                               type="button"
                               disabled={safeAdminCatPage >= totalAdminCatPages}
                               onClick={() => setAdminCatPage(p => Math.min(totalAdminCatPages, p + 1))}
-                              className="px-2 py-1 text-[11px] font-bold rounded border border-slate-200 bg-white text-slate-700 disabled:opacity-40 flex items-center gap-0.5"
+                              className="px-2 py-1 text-[11px] font-bold rounded border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 disabled:opacity-40 flex items-center gap-0.5"
                             >
                               <span>Trang sau</span>
                               <ChevronRight className="w-3 h-3" />
@@ -1284,10 +1284,10 @@ export const AdminModal: React.FC = () => {
 
                   {/* Right Column: Quản Lý Các Hãng Sản Xuất (Brands) */}
                   <div className="lg:col-span-7 space-y-5">
-                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                    <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-xl p-4">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                          <Building2 className="w-4 h-4 text-emerald-600" />
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50 flex items-center gap-1.5">
+                          <Building2 className="w-4 h-4 text-sky-600 dark:text-sky-400" />
                           <span>{editingBrand ? `Sửa Hãng: ${editingBrand.name}` : 'Thêm Hãng Sản Xuất Mới'}</span>
                         </h3>
                         {editingBrand && (
@@ -1297,7 +1297,7 @@ export const AdminModal: React.FC = () => {
                               setEditingBrand(null);
                               setBrandName('');
                             }}
-                            className="text-xs text-slate-500 hover:text-slate-800"
+                            className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800"
                           >
                             Hủy sửa
                           </button>
@@ -1306,7 +1306,7 @@ export const AdminModal: React.FC = () => {
 
                       <form onSubmit={handleSubmitBrand} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
-                          <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                             Tên Hãng Sản Xuất *
                           </label>
                           <input
@@ -1315,18 +1315,18 @@ export const AdminModal: React.FC = () => {
                             value={brandName}
                             onChange={(e) => setBrandName(e.target.value)}
                             placeholder="VD: SolaX, Deye, Solis..."
-                            className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg"
+                            className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-lg"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                             Thuộc Loại Thiết Bị *
                           </label>
                           <select
                             value={brandCategoryId}
                             onChange={(e) => setBrandCategoryId(e.target.value)}
-                            className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg"
+                            className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-lg"
                           >
                             {categories.map(c => (
                               <option key={c.id} value={c.id}>
@@ -1337,7 +1337,7 @@ export const AdminModal: React.FC = () => {
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                             Xuất Xứ / Ghi Chú
                           </label>
                           <div className="flex items-center gap-2">
@@ -1346,11 +1346,11 @@ export const AdminModal: React.FC = () => {
                               value={brandOrigin}
                               onChange={(e) => setBrandOrigin(e.target.value)}
                               placeholder="VD: Chính hãng Tier 1"
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-lg"
                             />
                             <button
                               type="submit"
-                              className="py-2 px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shrink-0 flex items-center gap-1 transition-colors"
+                              className="py-2 px-3.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg shrink-0 flex items-center gap-1 transition-colors"
                             >
                               {editingBrand ? <Save className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
                               <span>{editingBrand ? 'Lưu' : 'Thêm'}</span>
@@ -1363,19 +1363,19 @@ export const AdminModal: React.FC = () => {
                     {/* Filter & Table of Brands (Paginated 5 per page) */}
                     <div>
                       <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                        <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                        <h4 className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">
                           Danh Sách Các Hãng ({displayedBrandsInManager.length})
                         </h4>
 
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-slate-500">Lọc theo loại:</span>
+                          <span className="text-xs text-slate-500 dark:text-slate-400">Lọc theo loại:</span>
                           <select
                             value={filterBrandCat}
                             onChange={(e) => {
                               setFilterBrandCat(e.target.value);
                               setAdminBrandPage(1);
                             }}
-                            className="px-2.5 py-1 text-xs bg-white border border-slate-300 rounded-md font-medium"
+                            className="px-2.5 py-1 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md font-medium"
                           >
                             <option value="all">Tất cả các loại</option>
                             {categories.map(c => (
@@ -1387,9 +1387,9 @@ export const AdminModal: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+                      <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/90">
                         <table className="w-full text-xs text-left">
-                          <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                          <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700/80">
                             <tr>
                               <th className="py-2.5 px-4 font-bold">Tên Hãng</th>
                               <th className="py-2.5 px-3 font-bold">Thuộc Loại Thiết Bị</th>
@@ -1398,7 +1398,7 @@ export const AdminModal: React.FC = () => {
                               <th className="py-2.5 px-4 font-bold text-right">Thao Tác</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-100">
+                          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                             {paginatedAdminBrands.map((b) => {
                               const catObj = categories.find(c => c.id === b.categoryId);
                               const prodCount = products.filter(
@@ -1408,17 +1408,17 @@ export const AdminModal: React.FC = () => {
                               ).length;
 
                               return (
-                                <tr key={b.id} className="hover:bg-slate-50/80">
-                                  <td className="py-2.5 px-4 font-bold text-emerald-800">
+                                <tr key={b.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/70">
+                                  <td className="py-2.5 px-4 font-bold text-sky-800 dark:text-sky-200">
                                     Hãng {b.name}
                                   </td>
-                                  <td className="py-2.5 px-3 text-slate-700 font-medium">
+                                  <td className="py-2.5 px-3 text-slate-700 dark:text-slate-200 font-medium">
                                     {catObj ? catObj.label : b.categoryId}
                                   </td>
-                                  <td className="py-2.5 px-3 text-slate-500">
+                                  <td className="py-2.5 px-3 text-slate-500 dark:text-slate-400">
                                     {b.origin || 'Chính hãng'}
                                   </td>
-                                  <td className="py-2.5 px-3 text-center font-mono font-bold text-slate-800">
+                                  <td className="py-2.5 px-3 text-center font-mono font-bold text-slate-800 dark:text-slate-100">
                                     {prodCount}
                                   </td>
                                   <td className="py-2.5 px-4 text-right">
@@ -1426,7 +1426,7 @@ export const AdminModal: React.FC = () => {
                                       <button
                                         type="button"
                                         onClick={() => startEditBrand(b)}
-                                        className="p-1.5 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-md transition-colors"
+                                        className="p-1.5 text-slate-600 dark:text-slate-300 hover:text-sky-700 dark:hover:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-900/40 rounded-md transition-colors"
                                         title="Sửa hãng"
                                       >
                                         <Edit2 className="w-3.5 h-3.5" />
@@ -1438,7 +1438,7 @@ export const AdminModal: React.FC = () => {
                                             showNotice(`Đã xóa hãng "${b.name}"!`);
                                           });
                                         }}
-                                        className="px-2 py-1 text-xs font-semibold text-rose-600 hover:text-white hover:bg-rose-600 bg-rose-50 rounded-md transition-colors flex items-center gap-1"
+                                        className="px-2 py-1 text-xs font-semibold text-rose-600 hover:text-white hover:bg-rose-600 bg-rose-50 dark:bg-rose-950/40 rounded-md transition-colors flex items-center gap-1"
                                         title="Xóa hãng"
                                       >
                                         <Trash2 className="w-3.5 h-3.5" />
@@ -1454,8 +1454,8 @@ export const AdminModal: React.FC = () => {
                       </div>
 
                       {displayedBrandsInManager.length > ADMIN_BRANDS_PER_PAGE && (
-                        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200">
-                          <span className="text-[11px] text-slate-500">
+                        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700/80">
+                          <span className="text-[11px] text-slate-500 dark:text-slate-400">
                             Trang hãng {safeAdminBrandPage} / {totalAdminBrandPages} ({displayedBrandsInManager.length} hãng)
                           </span>
                           <div className="flex flex-wrap items-center gap-1">
@@ -1463,7 +1463,7 @@ export const AdminModal: React.FC = () => {
                               type="button"
                               disabled={safeAdminBrandPage <= 1}
                               onClick={() => setAdminBrandPage(p => Math.max(1, p - 1))}
-                              className="px-2 py-1 text-[11px] font-bold rounded border border-slate-200 bg-white text-slate-700 disabled:opacity-40 flex items-center gap-0.5"
+                              className="px-2 py-1 text-[11px] font-bold rounded border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 disabled:opacity-40 flex items-center gap-0.5"
                             >
                               <ChevronLeft className="w-3 h-3" />
                               <span>Trang trước</span>
@@ -1483,8 +1483,8 @@ export const AdminModal: React.FC = () => {
                                   onClick={() => setAdminBrandPage(item)}
                                   className={`w-6 h-6 rounded text-[11px] font-bold ${
                                     safeAdminBrandPage === item
-                                      ? 'bg-emerald-600 text-white'
-                                      : 'bg-white text-slate-700 border border-slate-200'
+                                      ? 'bg-sky-600 text-white'
+                                      : 'bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700/80'
                                   }`}
                                 >
                                   {item}
@@ -1495,7 +1495,7 @@ export const AdminModal: React.FC = () => {
                               type="button"
                               disabled={safeAdminBrandPage >= totalAdminBrandPages}
                               onClick={() => setAdminBrandPage(p => Math.min(totalAdminBrandPages, p + 1))}
-                              className="px-2 py-1 text-[11px] font-bold rounded border border-slate-200 bg-white text-slate-700 disabled:opacity-40 flex items-center gap-0.5"
+                              className="px-2 py-1 text-[11px] font-bold rounded border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 disabled:opacity-40 flex items-center gap-0.5"
                             >
                               <span>Trang sau</span>
                               <ChevronRight className="w-3 h-3" />
@@ -1513,14 +1513,14 @@ export const AdminModal: React.FC = () => {
                 <div>
                   {/* If editing or adding new product */}
                   {isAddingNew || editingProduct ? (
-                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mb-6">
-                      <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200">
-                        <h4 className="text-sm font-bold text-slate-900">
+                    <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-xl p-5 mb-6">
+                      <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200 dark:border-slate-700/80">
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-slate-50">
                           {isAddingNew ? 'Thêm Sản Phẩm Mới Vào Kho' : `Chỉnh Sửa Sản Phẩm: ${editingProduct?.name}`}
                         </h4>
                         <button
                           onClick={() => { setEditingProduct(null); setIsAddingNew(false); }}
-                          className="text-xs text-slate-500 hover:text-slate-700"
+                          className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700"
                         >
                           Hủy bỏ
                         </button>
@@ -1529,7 +1529,7 @@ export const AdminModal: React.FC = () => {
                       <form onSubmit={handleSaveProduct} className="space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           <div className="sm:col-span-2">
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Tên Sản Phẩm *
                             </label>
                             <input
@@ -1538,12 +1538,12 @@ export const AdminModal: React.FC = () => {
                               value={formName}
                               onChange={(e) => setFormName(e.target.value)}
                               placeholder="Ví dụ: Biến tần Hybrid SolaX 6kW"
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md focus:border-emerald-600"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md focus:border-sky-600"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Mã SKU *
                             </label>
                             <input
@@ -1551,14 +1551,14 @@ export const AdminModal: React.FC = () => {
                               required
                               value={formSku}
                               onChange={(e) => setFormSku(e.target.value)}
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md font-mono"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md font-mono"
                             />
                           </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Loại Thiết Bị (Danh Mục)
                             </label>
                             <select
@@ -1571,7 +1571,7 @@ export const AdminModal: React.FC = () => {
                                   setFormBrand(matchingBrand.name);
                                 }
                               }}
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                             >
                               {categories.map(c => (
                                 <option key={c.id} value={c.id}>
@@ -1582,7 +1582,7 @@ export const AdminModal: React.FC = () => {
                           </div>
 
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Thương Hiệu / Hãng
                             </label>
                             <input
@@ -1591,7 +1591,7 @@ export const AdminModal: React.FC = () => {
                               value={formBrand}
                               onChange={(e) => setFormBrand(e.target.value)}
                               placeholder="Chọn hoặc gõ tên hãng mới..."
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                             />
                             <datalist id="solar-brands-list">
                               {brandsForFormCategory.map(b => (
@@ -1601,7 +1601,7 @@ export const AdminModal: React.FC = () => {
                           </div>
 
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Số Lượng Tồn Kho
                             </label>
                             <input
@@ -1609,12 +1609,12 @@ export const AdminModal: React.FC = () => {
                               min="0"
                               value={formStock}
                               onChange={(e) => setFormStock(parseInt(e.target.value) || 0)}
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md font-mono font-bold"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md font-mono font-bold"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Đơn Vị Tính
                             </label>
                             <input
@@ -1622,14 +1622,14 @@ export const AdminModal: React.FC = () => {
                               value={formUnit}
                               onChange={(e) => setFormUnit(e.target.value)}
                               placeholder="tấm, bộ, máy..."
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                             />
                           </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Bảo Hành (Năm)
                             </label>
                             <input
@@ -1637,30 +1637,30 @@ export const AdminModal: React.FC = () => {
                               min="1"
                               value={formWarranty}
                               onChange={(e) => setFormWarranty(parseInt(e.target.value) || 1)}
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Xuất Xứ &amp; Giấy Tờ
                             </label>
                             <input
                               type="text"
                               value={formOrigin}
                               onChange={(e) => setFormOrigin(e.target.value)}
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Kiểu Hình Ảnh Minh Họa
                             </label>
                             <select
                               value={formSvgType}
                               onChange={(e) => setFormSvgType(e.target.value as Product['svgType'])}
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                             >
                               <option value="panel">Tấm Pin Solar</option>
                               <option value="inverter">Biến Tần Inverter</option>
@@ -1680,7 +1680,7 @@ export const AdminModal: React.FC = () => {
                         />
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                             Mô Tả Ngắn
                           </label>
                           <input
@@ -1688,33 +1688,33 @@ export const AdminModal: React.FC = () => {
                             value={formShortDesc}
                             onChange={(e) => setFormShortDesc(e.target.value)}
                             placeholder="Tóm tắt công nghệ và tính năng chính..."
-                            className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                            className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                             Mô Tả Đầy Đủ Chi Tiết
                           </label>
                           <textarea
                             rows={3}
                             value={formFullDesc}
                             onChange={(e) => setFormFullDesc(e.target.value)}
-                            className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                            className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                           />
                         </div>
 
                         {/* Multi-line Specs Textarea Editing */}
                         <div className="pt-2">
                           <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
-                            <label className="text-xs font-bold text-slate-800">
+                            <label className="text-xs font-bold text-slate-800 dark:text-slate-100">
                               Thông Số Kỹ Thuật Chi Tiết (Mỗi lần xuống dòng là 1 thông số mới)
                             </label>
-                            <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">
+                            <span className="text-[11px] font-semibold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/40 px-2.5 py-0.5 rounded-md border border-sky-200 dark:border-sky-800/60">
                               Đã nhập: {parseMultilineSpecs(formSpecsText).length} dòng thông số
                             </span>
                           </div>
-                          <p className="text-[11px] text-slate-500 mb-2">
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">
                             Gõ hoặc dán toàn bộ thông số vào ô bên dưới, cứ bấm <strong>Enter (xuống dòng)</strong> là sang thông số mới (Ví dụ: <code>Công suất: 580 Wp</code> hoặc gõ tự do từng dòng).
                           </p>
 
@@ -1725,30 +1725,30 @@ export const AdminModal: React.FC = () => {
                             placeholder={
                               'Công suất cực đại: 580 Wp\nHiệu suất chuyển đổi: 22.5%\nĐiện áp hở mạch (Voc): 51.2 V\nDòng điện ngắn mạch (Isc): 14.2 A\nKích thước: 2278 x 1134 x 30 mm\nKhối lượng: 27.5 kg\nChuẩn bảo vệ: IP68'
                             }
-                            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-emerald-600 font-mono leading-relaxed"
+                            className="w-full px-3.5 py-2.5 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-hidden focus:border-sky-600 font-mono leading-relaxed"
                           />
 
                           {/* Live Preview of Parsed Specs */}
                           {parseMultilineSpecs(formSpecsText).length > 0 && (
-                            <div className="mt-2.5 p-3 rounded-lg bg-white border border-slate-200">
-                              <div className="text-[11px] font-bold text-slate-600 mb-2 uppercase tracking-wider">
+                            <div className="mt-2.5 p-3 rounded-lg bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80">
+                              <div className="text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-2 uppercase tracking-wider">
                                 Xem trước hiển thị thông số ({parseMultilineSpecs(formSpecsText).length} dòng):
                               </div>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-xs max-h-40 overflow-y-auto">
                                 {parseMultilineSpecs(formSpecsText).map((spec, idx) => (
                                   <div
                                     key={idx}
-                                    className="flex items-center justify-between gap-2 py-1 px-2 rounded bg-slate-50 border border-slate-100"
+                                    className="flex items-center justify-between gap-2 py-1 px-2 rounded bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800"
                                   >
                                     {spec.value ? (
                                       <>
-                                        <span className="text-slate-600 truncate">{spec.label}:</span>
-                                        <span className="font-bold text-emerald-800 font-mono shrink-0">
+                                        <span className="text-slate-600 dark:text-slate-300 truncate">{spec.label}:</span>
+                                        <span className="font-bold text-sky-800 dark:text-sky-200 font-mono shrink-0">
                                           {spec.value}
                                         </span>
                                       </>
                                     ) : (
-                                      <span className="font-semibold text-slate-800 truncate">
+                                      <span className="font-semibold text-slate-800 dark:text-slate-100 truncate">
                                         • {spec.label}
                                       </span>
                                     )}
@@ -1759,11 +1759,11 @@ export const AdminModal: React.FC = () => {
                           )}
                         </div>
 
-                        <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-200">
+                        <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-200 dark:border-slate-700/80">
                           <button
                             type="button"
                             onClick={() => { setEditingProduct(null); setIsAddingNew(false); }}
-                            className="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-200 hover:bg-slate-300 rounded-md"
+                            className="px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 rounded-md"
                           >
                             Hủy
                           </button>
@@ -1772,8 +1772,8 @@ export const AdminModal: React.FC = () => {
                             disabled={isUploadingImages || isSavingProduct}
                             className={`px-5 py-2 text-xs font-bold text-white rounded-md flex items-center gap-1.5 transition-colors ${
                               isUploadingImages || isSavingProduct
-                                ? 'bg-emerald-400 cursor-not-allowed'
-                                : 'bg-emerald-600 hover:bg-emerald-700'
+                                ? 'bg-sky-400 cursor-not-allowed'
+                                : 'bg-sky-600 hover:bg-sky-700'
                             }`}
                           >
                             <Save className="w-4 h-4" />
@@ -1791,20 +1791,20 @@ export const AdminModal: React.FC = () => {
                   ) : isManagingPageOneOrder ? (
                     /* Top 10 Page 1 Customizer View */
                     <div className="space-y-5">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-slate-700/80">
                         <div>
-                          <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+                          <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
                             <ListOrdered className="w-5 h-5 text-amber-600 shrink-0" />
                             <span>Tùy Chọn &amp; Sắp Xếp 10 Sản Phẩm Đầu Tiên (Trang 1 Khi Mở Web)</span>
                           </h3>
-                          <p className="text-xs text-slate-500 mt-1">
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                             Chọn tối đa 10 sản phẩm và sắp xếp thứ tự từ #1 đến #10. Mỗi trang hiển thị 9 sản phẩm (vị trí #1–#9 nằm trọn trên Trang 1, #10 đứng đầu Trang 2).
                           </p>
                         </div>
                         <button
                           type="button"
                           onClick={() => setIsManagingPageOneOrder(false)}
-                          className="px-3.5 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg shrink-0 self-start sm:self-auto"
+                          className="px-3.5 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg shrink-0 self-start sm:self-auto"
                         >
                           &larr; Quay lại Kho SP
                         </button>
@@ -1812,7 +1812,7 @@ export const AdminModal: React.FC = () => {
 
                       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                         {/* Left Column: Selected Top 10 Order List */}
-                        <div className="lg:col-span-6 bg-amber-50/50 border border-amber-200 rounded-xl p-4 flex flex-col">
+                        <div className="lg:col-span-6 bg-amber-50/50 border border-amber-200 dark:border-amber-800/60 rounded-xl p-4 flex flex-col">
                           <div className="flex items-center justify-between gap-2 mb-3">
                             <div>
                               <h4 className="text-xs font-bold uppercase tracking-wider text-amber-900">
@@ -1836,10 +1836,10 @@ export const AdminModal: React.FC = () => {
                           {pageOneDraftIds.length === 0 ? (
                             <div className="flex-1 min-h-[260px] flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-amber-300/70 rounded-xl bg-white/60">
                               <ListOrdered className="w-8 h-8 text-amber-400 mb-2" />
-                              <div className="text-xs font-bold text-slate-700">
+                              <div className="text-xs font-bold text-slate-700 dark:text-slate-200">
                                 Chưa chọn sản phẩm nào cho Top 10 Trang 1
                               </div>
-                              <p className="text-[11px] text-slate-500 mt-1 max-w-xs">
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 max-w-xs">
                                 Hãy bấm nút <strong>+ Chọn</strong> ở danh sách Kho bên cạnh để đưa tối đa 10 sản phẩm lên Trang 1. Nếu chọn ít hơn 10, các vị trí còn lại sẽ tự động điền từ kho.
                               </p>
                             </div>
@@ -1871,7 +1871,7 @@ export const AdminModal: React.FC = () => {
                                       setDraggedPageOneId(null);
                                     }}
                                     onDragEnd={() => setDraggedPageOneId(null)}
-                                    className={`p-2.5 rounded-xl border bg-white flex items-center gap-2.5 shadow-2xs transition-colors ${
+                                    className={`p-2.5 rounded-xl border bg-white dark:bg-slate-800/90 flex items-center gap-2.5 shadow-2xs transition-colors ${
                                       draggedPageOneId === prod.id
                                         ? 'border-amber-500 opacity-60'
                                         : 'border-amber-200/80 hover:border-amber-400'
@@ -1905,7 +1905,7 @@ export const AdminModal: React.FC = () => {
                                       ))}
                                     </select>
 
-                                    <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                                    <div className="w-10 h-10 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 overflow-hidden flex items-center justify-center shrink-0">
                                       {thumbUrl ? (
                                         <img
                                           src={thumbUrl}
@@ -1918,11 +1918,11 @@ export const AdminModal: React.FC = () => {
                                     </div>
 
                                     <div className="min-w-0 flex-1">
-                                      <div className="text-xs font-bold text-slate-900 line-clamp-1">
+                                      <div className="text-xs font-bold text-slate-900 dark:text-slate-50 line-clamp-1">
                                         {prod.name}
                                       </div>
-                                      <div className="text-[11px] text-slate-500 truncate">
-                                        Hãng <strong className="text-emerald-700">{prod.brand}</strong> · <span className="font-mono">{prod.sku}</span>
+                                      <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                                        Hãng <strong className="text-sky-700 dark:text-sky-300">{prod.brand}</strong> · <span className="font-mono">{prod.sku}</span>
                                       </div>
                                     </div>
 
@@ -1938,7 +1938,7 @@ export const AdminModal: React.FC = () => {
                                             return copy;
                                           });
                                         }}
-                                        className="p-1.5 rounded-md bg-slate-100 hover:bg-emerald-100 text-slate-700 disabled:opacity-35"
+                                        className="p-1.5 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-sky-100 text-slate-700 dark:text-slate-200 disabled:opacity-35"
                                         title="Đưa lên 1 bậc"
                                       >
                                         <ArrowUp className="w-3.5 h-3.5" />
@@ -1954,7 +1954,7 @@ export const AdminModal: React.FC = () => {
                                             return copy;
                                           });
                                         }}
-                                        className="p-1.5 rounded-md bg-slate-100 hover:bg-emerald-100 text-slate-700 disabled:opacity-35"
+                                        className="p-1.5 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-sky-100 text-slate-700 dark:text-slate-200 disabled:opacity-35"
                                         title="Đưa xuống 1 bậc"
                                       >
                                         <ArrowDown className="w-3.5 h-3.5" />
@@ -1964,7 +1964,7 @@ export const AdminModal: React.FC = () => {
                                         onClick={() => {
                                           setPageOneDraftIds((prev) => prev.filter((id) => id !== prod.id));
                                         }}
-                                        className="p-1.5 rounded-md bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white transition-colors"
+                                        className="p-1.5 rounded-md bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-600 text-rose-600 hover:text-white transition-colors"
                                         title="Bỏ khỏi Top 10"
                                       >
                                         <X className="w-3.5 h-3.5" />
@@ -1978,9 +1978,9 @@ export const AdminModal: React.FC = () => {
                         </div>
 
                         {/* Right Column: Product Picker from Inventory */}
-                        <div className="lg:col-span-6 bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col">
+                        <div className="lg:col-span-6 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-xl p-4 flex flex-col">
                           <div className="mb-3">
-                            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 mb-2">
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-100 mb-2">
                               Chọn Sản Phẩm Từ Kho ({products.length} SP)
                             </h4>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -1991,7 +1991,7 @@ export const AdminModal: React.FC = () => {
                                   value={pageOnePickerSearch}
                                   onChange={(e) => setPageOnePickerSearch(e.target.value)}
                                   placeholder="Tìm tên SP, SKU, hãng..."
-                                  className="w-full pl-8 pr-7 py-2 text-xs bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-emerald-600"
+                                  className="w-full pl-8 pr-7 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-hidden focus:border-sky-600"
                                 />
                                 {pageOnePickerSearch && (
                                   <button
@@ -2007,7 +2007,7 @@ export const AdminModal: React.FC = () => {
                               <select
                                 value={pageOnePickerCategory}
                                 onChange={(e) => setPageOnePickerCategory(e.target.value)}
-                                className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg"
+                                className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-lg"
                               >
                                 <option value="all">Tất cả danh mục</option>
                                 {categories.map((c) => (
@@ -2042,13 +2042,13 @@ export const AdminModal: React.FC = () => {
                                 return (
                                   <div
                                     key={p.id}
-                                    className={`p-2.5 rounded-xl border bg-white flex items-center gap-2.5 transition-colors ${
+                                    className={`p-2.5 rounded-xl border bg-white dark:bg-slate-800/90 flex items-center gap-2.5 transition-colors ${
                                       isSelected
-                                        ? 'border-emerald-400 bg-emerald-50/40'
-                                        : 'border-slate-200 hover:border-emerald-300'
+                                        ? 'border-sky-400 bg-sky-50/40 dark:bg-sky-950/30'
+                                        : 'border-slate-200 dark:border-slate-700/80 hover:border-sky-300'
                                     }`}
                                   >
-                                    <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                                    <div className="w-10 h-10 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 overflow-hidden flex items-center justify-center shrink-0">
                                       {thumbUrl ? (
                                         <img
                                           src={thumbUrl}
@@ -2061,11 +2061,11 @@ export const AdminModal: React.FC = () => {
                                     </div>
 
                                     <div className="min-w-0 flex-1">
-                                      <div className="text-xs font-bold text-slate-900 line-clamp-1">
+                                      <div className="text-xs font-bold text-slate-900 dark:text-slate-50 line-clamp-1">
                                         {p.name}
                                       </div>
-                                      <div className="text-[11px] text-slate-500 truncate">
-                                        <span className="text-emerald-700 font-semibold">{p.brand}</span> · <span className="font-mono">{p.sku}</span>
+                                      <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                                        <span className="text-sky-700 dark:text-sky-300 font-semibold">{p.brand}</span> · <span className="font-mono">{p.sku}</span>
                                       </div>
                                     </div>
 
@@ -2075,7 +2075,7 @@ export const AdminModal: React.FC = () => {
                                         onClick={() =>
                                           setPageOneDraftIds((prev) => prev.filter((id) => id !== p.id))
                                         }
-                                        className="px-2.5 py-1.5 text-[11px] font-bold text-emerald-900 bg-emerald-100 hover:bg-rose-100 hover:text-rose-700 rounded-lg shrink-0 transition-colors"
+                                        className="px-2.5 py-1.5 text-[11px] font-bold text-sky-900 dark:text-sky-200 bg-sky-100 dark:bg-sky-900/50 hover:bg-rose-100 hover:text-rose-700 rounded-lg shrink-0 transition-colors"
                                         title="Nhấn để bỏ khỏi Top 10"
                                       >
                                         Vị trí #{selectedIdx + 1} ×
@@ -2091,7 +2091,7 @@ export const AdminModal: React.FC = () => {
                                               : [...prev, p.id]
                                           );
                                         }}
-                                        className="px-2.5 py-1.5 text-[11px] font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 rounded-lg shrink-0 transition-colors"
+                                        className="px-2.5 py-1.5 text-[11px] font-bold text-white bg-sky-600 hover:bg-sky-700 disabled:bg-slate-200 disabled:text-slate-400 rounded-lg shrink-0 transition-colors"
                                         title={
                                           isFull
                                             ? 'Đã đủ tối đa 10 sản phẩm'
@@ -2109,16 +2109,16 @@ export const AdminModal: React.FC = () => {
                       </div>
 
                       {/* Save Action Bar */}
-                      <div className="pt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
-                        <span className="text-xs text-slate-600">
-                          Đã chọn <strong className="text-emerald-800">{pageOneDraftIds.length}/10</strong> sản phẩm ưu tiên hiển thị trên <strong>Trang 1</strong> khi mở web.
+                      <div className="pt-4 border-t border-slate-200 dark:border-slate-700/80 flex flex-wrap items-center justify-between gap-3">
+                        <span className="text-xs text-slate-600 dark:text-slate-300">
+                          Đã chọn <strong className="text-sky-800 dark:text-sky-200">{pageOneDraftIds.length}/10</strong> sản phẩm ưu tiên hiển thị trên <strong>Trang 1</strong> khi mở web.
                         </span>
 
                         <div className="flex flex-wrap items-center gap-2.5">
                           <button
                             type="button"
                             onClick={() => setIsManagingPageOneOrder(false)}
-                            className="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-200 hover:bg-slate-300 rounded-lg"
+                            className="px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 rounded-lg"
                           >
                             Hủy
                           </button>
@@ -2137,7 +2137,7 @@ export const AdminModal: React.FC = () => {
                                 setIsManagingPageOneOrder(false);
                               }
                             }}
-                            className="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 rounded-lg shadow-xs flex items-center gap-1.5"
+                            className="px-5 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 disabled:opacity-50 rounded-lg shadow-xs flex items-center gap-1.5"
                           >
                             <Save className="w-4 h-4" />
                             <span>
@@ -2154,10 +2154,10 @@ export const AdminModal: React.FC = () => {
                     <div>
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                         <div>
-                          <h3 className="text-sm font-bold text-slate-900">
+                          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50">
                             Danh Sách Thiết Bị &amp; Tồn Kho Thực Tế
                           </h3>
-                          <p className="text-xs text-slate-500">
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
                             Cập nhật nhanh số lượng tồn kho, ghim Top 10 Trang 1 hoặc bấm Sửa để thêm nhiều ảnh:
                           </p>
                         </div>
@@ -2170,7 +2170,7 @@ export const AdminModal: React.FC = () => {
                               value={adminProductSearch}
                               onChange={(e) => setAdminProductSearch(e.target.value)}
                               placeholder="Tìm tên SP, SKU, hãng..."
-                              className="w-full pl-8 pr-7 py-2 text-xs bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-emerald-600"
+                              className="w-full pl-8 pr-7 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-hidden focus:border-sky-600"
                             />
                             {adminProductSearch && (
                               <button
@@ -2203,7 +2203,7 @@ export const AdminModal: React.FC = () => {
                           <button
                             type="button"
                             onClick={handleOpenAddNew}
-                            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-xs flex items-center gap-1.5"
+                            className="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg shadow-xs flex items-center gap-1.5"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Thêm Sản Phẩm Mới</span>
@@ -2211,9 +2211,9 @@ export const AdminModal: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+                      <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/90">
                         <table className="w-full text-xs text-left">
-                          <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                          <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700/80">
                             <tr>
                               <th className="py-3 px-4 font-bold">Mã SKU / Tên Thiết Bị</th>
                               <th className="py-3 px-3 font-bold">Loại Thiết Bị</th>
@@ -2224,7 +2224,7 @@ export const AdminModal: React.FC = () => {
                               <th className="py-3 px-4 font-bold text-right">Thao Tác</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-100">
+                          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                             {paginatedAdminProducts.map((p) => {
                                 const catObj = categories.find(c => c.id === p.category);
                                 const imgCount = Array.isArray(p.images) && p.images.length > 0
@@ -2233,10 +2233,10 @@ export const AdminModal: React.FC = () => {
                                   ? 1
                                   : 0;
                                 return (
-                                  <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
+                                  <tr key={p.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/70 transition-colors">
                                     <td className="py-3 px-4">
                                       <div className="flex items-center gap-1.5 flex-wrap">
-                                        <span className="font-mono text-[11px] font-bold text-emerald-700">
+                                        <span className="font-mono text-[11px] font-bold text-sky-700 dark:text-sky-300">
                                           {p.sku}
                                         </span>
                                         {typeof p.pinOrder === 'number' &&
@@ -2247,33 +2247,33 @@ export const AdminModal: React.FC = () => {
                                             </span>
                                           )}
                                       </div>
-                                      <div className="font-semibold text-slate-900 line-clamp-1 max-w-xs">
+                                      <div className="font-semibold text-slate-900 dark:text-slate-50 line-clamp-1 max-w-xs">
                                         {p.name}
                                       </div>
                                     </td>
 
-                                    <td className="py-3 px-3 text-slate-600">
+                                    <td className="py-3 px-3 text-slate-600 dark:text-slate-300">
                                       {catObj ? catObj.shortLabel : p.category}
                                     </td>
 
-                                    <td className="py-3 px-3 text-emerald-800 font-bold">
+                                    <td className="py-3 px-3 text-sky-800 dark:text-sky-200 font-bold">
                                       {p.brand}
                                     </td>
 
                                     <td className="py-3 px-3 text-center">
-                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-mono">
-                                        <ImageIcon className="w-3 h-3 text-emerald-600" />
+                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[11px] font-mono">
+                                        <ImageIcon className="w-3 h-3 text-sky-600 dark:text-sky-400" />
                                         {imgCount}
                                       </span>
                                     </td>
 
                                     {/* Inline Stock adjustment */}
                                     <td className="py-3 px-4 text-center">
-                                      <div className="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg p-1">
+                                      <div className="inline-flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-lg p-1">
                                         <button
                                           type="button"
                                           onClick={() => updateProductStock(p.id, p.stock - 1)}
-                                          className="w-6 h-6 rounded-md bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold flex items-center justify-center text-xs"
+                                          className="w-6 h-6 rounded-md bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 font-bold flex items-center justify-center text-xs"
                                           title="Giảm 1"
                                         >
                                           -
@@ -2282,13 +2282,13 @@ export const AdminModal: React.FC = () => {
                                           type="number"
                                           value={p.stock}
                                           onChange={(e) => updateProductStock(p.id, parseInt(e.target.value) || 0)}
-                                          className="w-14 text-center font-mono font-bold text-slate-900 text-xs bg-transparent focus:outline-hidden"
+                                          className="w-14 text-center font-mono font-bold text-slate-900 dark:text-slate-50 text-xs bg-transparent focus:outline-hidden"
                                         />
                                         <span className="text-[10px] text-slate-400 pr-1">{p.unit}</span>
                                         <button
                                           type="button"
                                           onClick={() => updateProductStock(p.id, p.stock + 1)}
-                                          className="w-6 h-6 rounded-md bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold flex items-center justify-center text-xs"
+                                          className="w-6 h-6 rounded-md bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 font-bold flex items-center justify-center text-xs"
                                           title="Tăng 1"
                                         >
                                           +
@@ -2298,15 +2298,15 @@ export const AdminModal: React.FC = () => {
 
                                     <td className="py-3 px-3">
                                       {p.stock > 10 ? (
-                                        <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md font-medium text-[11px]">
+                                        <span className="text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/40 px-2 py-0.5 rounded-md font-medium text-[11px]">
                                           Còn hàng
                                         </span>
                                       ) : p.stock > 0 ? (
-                                        <span className="text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md font-medium text-[11px]">
+                                        <span className="text-amber-700 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-md font-medium text-[11px]">
                                           Sắp hết
                                         </span>
                                       ) : (
-                                        <span className="text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md font-medium text-[11px]">
+                                        <span className="text-rose-700 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded-md font-medium text-[11px]">
                                           Hết hàng
                                         </span>
                                       )}
@@ -2325,7 +2325,7 @@ export const AdminModal: React.FC = () => {
                                             p.pinOrder >= 1 &&
                                             p.pinOrder <= 10
                                               ? 'text-amber-900 bg-amber-100 border-amber-300 hover:bg-amber-200'
-                                              : 'text-slate-600 bg-white border-slate-200 hover:bg-amber-50 hover:text-amber-800 hover:border-amber-300'
+                                              : 'text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800/90 border-slate-200 dark:border-slate-700/80 hover:bg-amber-50 hover:text-amber-800 hover:border-amber-300'
                                           }`}
                                           title={
                                             typeof p.pinOrder === 'number'
@@ -2350,7 +2350,7 @@ export const AdminModal: React.FC = () => {
                                         <button
                                           type="button"
                                           onClick={() => handleOpenEdit(p)}
-                                          className="px-2 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 border border-emerald-200 rounded-md transition-colors flex items-center gap-1"
+                                          className="px-2 py-1 text-xs font-semibold text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-900/40 border border-sky-200 dark:border-sky-800/60 rounded-md transition-colors flex items-center gap-1"
                                           title="Chỉnh sửa thông tin & thêm nhiều ảnh"
                                         >
                                           <Edit2 className="w-3.5 h-3.5" />
@@ -2363,7 +2363,7 @@ export const AdminModal: React.FC = () => {
                                               showNotice(`Đã xóa sản phẩm "${p.name}"!`);
                                             });
                                           }}
-                                          className="px-2 py-1 text-xs font-semibold text-rose-600 hover:text-white hover:bg-rose-600 bg-rose-50 rounded-md transition-colors flex items-center gap-1"
+                                          className="px-2 py-1 text-xs font-semibold text-rose-600 hover:text-white hover:bg-rose-600 bg-rose-50 dark:bg-rose-950/40 rounded-md transition-colors flex items-center gap-1"
                                           title="Xóa sản phẩm"
                                         >
                                           <Trash2 className="w-3.5 h-3.5" />
@@ -2379,16 +2379,16 @@ export const AdminModal: React.FC = () => {
                       </div>
 
                       {filteredAdminProducts.length > ADMIN_PRODUCTS_PER_PAGE && (
-                        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-200">
-                          <span className="text-xs text-slate-600">
-                            Trang sản phẩm <strong className="text-emerald-800">{safeAdminProductPage} / {totalAdminProductPages}</strong> (Hiển thị {(safeAdminProductPage - 1) * ADMIN_PRODUCTS_PER_PAGE + 1}–{Math.min(safeAdminProductPage * ADMIN_PRODUCTS_PER_PAGE, filteredAdminProducts.length)} / {filteredAdminProducts.length} sản phẩm)
+                        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 bg-slate-50 dark:bg-slate-800/50 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700/80">
+                          <span className="text-xs text-slate-600 dark:text-slate-300">
+                            Trang sản phẩm <strong className="text-sky-800 dark:text-sky-200">{safeAdminProductPage} / {totalAdminProductPages}</strong> (Hiển thị {(safeAdminProductPage - 1) * ADMIN_PRODUCTS_PER_PAGE + 1}–{Math.min(safeAdminProductPage * ADMIN_PRODUCTS_PER_PAGE, filteredAdminProducts.length)} / {filteredAdminProducts.length} sản phẩm)
                           </span>
                           <div className="flex flex-wrap items-center gap-1.5">
                             <button
                               type="button"
                               disabled={safeAdminProductPage <= 1}
                               onClick={() => setAdminProductPage(p => Math.max(1, p - 1))}
-                              className="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-200 bg-white text-slate-700 disabled:opacity-40 flex items-center gap-1"
+                              className="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 disabled:opacity-40 flex items-center gap-1"
                             >
                               <ChevronLeft className="w-3.5 h-3.5" />
                               <span>Trang trước</span>
@@ -2408,8 +2408,8 @@ export const AdminModal: React.FC = () => {
                                   onClick={() => setAdminProductPage(item)}
                                   className={`w-7 h-7 rounded-lg text-xs font-bold ${
                                     safeAdminProductPage === item
-                                      ? 'bg-emerald-600 text-white'
-                                      : 'bg-white text-slate-700 border border-slate-200'
+                                      ? 'bg-sky-600 text-white'
+                                      : 'bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700/80'
                                   }`}
                                 >
                                   {item}
@@ -2420,7 +2420,7 @@ export const AdminModal: React.FC = () => {
                               type="button"
                               disabled={safeAdminProductPage >= totalAdminProductPages}
                               onClick={() => setAdminProductPage(p => Math.min(totalAdminProductPages, p + 1))}
-                              className="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-200 bg-white text-slate-700 disabled:opacity-40 flex items-center gap-1"
+                              className="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 disabled:opacity-40 flex items-center gap-1"
                             >
                               <span>Trang sau</span>
                               <ChevronRight className="w-3.5 h-3.5" />
@@ -2437,9 +2437,9 @@ export const AdminModal: React.FC = () => {
               {adminActiveTab === 'projects' && (
                 <div>
                   {isAddingProject || editingProject ? (
-                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mb-6">
-                      <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200">
-                        <h4 className="text-sm font-bold text-slate-900">
+                    <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-xl p-5 mb-6">
+                      <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200 dark:border-slate-700/80">
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-slate-50">
                           {isAddingProject
                             ? 'Thêm Dự Án Tiêu Biểu Mới'
                             : `Chỉnh Sửa Dự Án: ${editingProject?.title}`}
@@ -2450,7 +2450,7 @@ export const AdminModal: React.FC = () => {
                             setEditingProject(null);
                             setIsAddingProject(false);
                           }}
-                          className="text-xs text-slate-500 hover:text-slate-800"
+                          className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800"
                         >
                           Hủy bỏ
                         </button>
@@ -2459,7 +2459,7 @@ export const AdminModal: React.FC = () => {
                       <form onSubmit={handleSaveProjectModal} className="space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           <div className="sm:col-span-2">
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Tên Dự Án *
                             </label>
                             <input
@@ -2468,18 +2468,18 @@ export const AdminModal: React.FC = () => {
                               value={projTitle}
                               onChange={(e) => setProjTitle(e.target.value)}
                               placeholder="VD: Hệ Thống Điện Mặt Trời Áp Mái 15kWp – Hóc Môn"
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Phân Loại Dự Án
                             </label>
                             <select
                               value={projCategory}
                               onChange={(e) => setProjCategory(e.target.value as ProjectItem['category'])}
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                             >
                               <option value="residential">Hộ Gia Đình</option>
                               <option value="commercial">Nhà Xưởng &amp; C&amp;I</option>
@@ -2491,7 +2491,7 @@ export const AdminModal: React.FC = () => {
 
                         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Công Suất Lắp Đặt
                             </label>
                             <input
@@ -2499,12 +2499,12 @@ export const AdminModal: React.FC = () => {
                               value={projCapacity}
                               onChange={(e) => setProjCapacity(e.target.value)}
                               placeholder="VD: 15 kWp"
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Địa Điểm
                             </label>
                             <input
@@ -2512,12 +2512,12 @@ export const AdminModal: React.FC = () => {
                               value={projLocation}
                               onChange={(e) => setProjLocation(e.target.value)}
                               placeholder="VD: Hóc Môn, TP.HCM"
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Thời Gian Hoàn Thành
                             </label>
                             <input
@@ -2525,12 +2525,12 @@ export const AdminModal: React.FC = () => {
                               value={projDate}
                               onChange={(e) => setProjDate(e.target.value)}
                               placeholder="VD: Tháng 10/2026"
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Hiệu Quả Sinh Điện / Tiết Kiệm
                             </label>
                             <input
@@ -2538,33 +2538,33 @@ export const AdminModal: React.FC = () => {
                               value={projSaving}
                               onChange={(e) => setProjSaving(e.target.value)}
                               placeholder="VD: Tiết kiệm ~6 triệu/tháng"
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                             />
                           </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Mô Tả Chi Tiết Dự Án
                             </label>
                             <textarea
                               rows={3}
                               value={projDesc}
                               onChange={(e) => setProjDesc(e.target.value)}
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Thiết Bị Chính Sử Dụng (Mỗi thiết bị 1 dòng)
                             </label>
                             <textarea
                               rows={3}
                               value={projEquipmentText}
                               onChange={(e) => setProjEquipmentText(e.target.value)}
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                             />
                           </div>
                         </div>
@@ -2577,14 +2577,14 @@ export const AdminModal: React.FC = () => {
                           helperText="Bạn có thể chọn nhiều ảnh công trình từ máy tính / điện thoại hoặc dán nhiều đường dẫn link ảnh."
                         />
 
-                        <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-200">
+                        <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-200 dark:border-slate-700/80">
                           <button
                             type="button"
                             onClick={() => {
                               setEditingProject(null);
                               setIsAddingProject(false);
                             }}
-                            className="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-200 hover:bg-slate-300 rounded-md"
+                            className="px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 rounded-md"
                           >
                             Hủy
                           </button>
@@ -2593,8 +2593,8 @@ export const AdminModal: React.FC = () => {
                             disabled={isUploadingImages}
                             className={`px-5 py-2 text-xs font-bold text-white rounded-md flex items-center gap-1.5 ${
                               isUploadingImages
-                                ? 'bg-emerald-400 cursor-not-allowed'
-                                : 'bg-emerald-600 hover:bg-emerald-700'
+                                ? 'bg-sky-400 cursor-not-allowed'
+                                : 'bg-sky-600 hover:bg-sky-700'
                             }`}
                           >
                             <Save className="w-4 h-4" />
@@ -2607,10 +2607,10 @@ export const AdminModal: React.FC = () => {
                     <div>
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                         <div>
-                          <h3 className="text-sm font-bold text-slate-900">
+                          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50">
                             Danh Sách Dự Án Tiêu Biểu Đã Thực Hiện ({projects.length})
                           </h3>
-                          <p className="text-xs text-slate-500">
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
                             Thêm mới, chỉnh sửa nội dung, tải lên nhiều hình ảnh thực tế (bằng file hoặc link) hoặc xóa dự án:
                           </p>
                         </div>
@@ -2618,7 +2618,7 @@ export const AdminModal: React.FC = () => {
                         <button
                           type="button"
                           onClick={handleOpenAddProjectModal}
-                          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-xs flex items-center gap-1.5"
+                          className="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg shadow-xs flex items-center gap-1.5"
                         >
                           <Plus className="w-4 h-4" />
                           <span>Thêm Dự Án Mới</span>
@@ -2635,26 +2635,26 @@ export const AdminModal: React.FC = () => {
                           return (
                             <div
                               key={proj.id}
-                              className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-emerald-400 transition-colors"
+                              className="p-4 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/90 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-sky-400 transition-colors"
                             >
                               <div className="flex items-start gap-3.5">
                                 {((proj.images && proj.images[0]) || proj.imageUrl) ? (
                                   <img
                                     src={(proj.images && proj.images[0]) || proj.imageUrl}
                                     alt={proj.title}
-                                    className="w-20 h-14 rounded-lg object-cover border border-slate-200 shrink-0"
+                                    className="w-20 h-14 rounded-lg object-cover border border-slate-200 dark:border-slate-700/80 shrink-0"
                                   />
                                 ) : (
-                                  <div className="w-20 h-14 rounded-lg bg-emerald-900 text-emerald-200 flex items-center justify-center text-[10px] font-bold shrink-0">
+                                  <div className="w-20 h-14 rounded-lg bg-[#1b2e4a] text-sky-200 flex items-center justify-center text-[10px] font-bold shrink-0">
                                     Solar
                                   </div>
                                 )}
                                 <div>
-                                  <div className="text-xs font-bold text-slate-900">
+                                  <div className="text-xs font-bold text-slate-900 dark:text-slate-50">
                                     {proj.title}
                                   </div>
-                                  <div className="text-[11px] text-slate-500 mt-0.5 flex flex-wrap items-center gap-2">
-                                    <span className="font-semibold text-emerald-700">
+                                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 flex flex-wrap items-center gap-2">
+                                    <span className="font-semibold text-sky-700 dark:text-sky-300">
                                       Công suất: {proj.capacity}
                                     </span>
                                     <span>·</span>
@@ -2662,7 +2662,7 @@ export const AdminModal: React.FC = () => {
                                     <span>·</span>
                                     <span>{proj.completionDate}</span>
                                     <span>·</span>
-                                    <span className="inline-flex items-center gap-1 text-emerald-800 font-semibold">
+                                    <span className="inline-flex items-center gap-1 text-sky-800 dark:text-sky-200 font-semibold">
                                       <ImageIcon className="w-3 h-3" />
                                       {imgCount} ảnh
                                     </span>
@@ -2674,7 +2674,7 @@ export const AdminModal: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => handleOpenEditProjectModal(proj)}
-                                  className="px-3 py-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-md transition-colors flex items-center gap-1"
+                                  className="px-3 py-1.5 text-xs font-semibold text-sky-800 dark:text-sky-200 bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 border border-sky-200 dark:border-sky-800/60 rounded-md transition-colors flex items-center gap-1"
                                 >
                                   <Edit2 className="w-3.5 h-3.5" />
                                   <span>Sửa / Thêm Ảnh</span>
@@ -2686,7 +2686,7 @@ export const AdminModal: React.FC = () => {
                                       showNotice(`Đã xóa dự án "${proj.title}"!`);
                                     });
                                   }}
-                                  className="px-3 py-1.5 text-xs font-semibold text-rose-600 hover:text-white hover:bg-rose-600 bg-rose-50 rounded-md transition-colors flex items-center gap-1"
+                                  className="px-3 py-1.5 text-xs font-semibold text-rose-600 hover:text-white hover:bg-rose-600 bg-rose-50 dark:bg-rose-950/40 rounded-md transition-colors flex items-center gap-1"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                   <span>Xóa</span>
@@ -2705,9 +2705,9 @@ export const AdminModal: React.FC = () => {
               {adminActiveTab === 'blog' && (
                 <div>
                   {(editingBlog || isAddingBlog) ? (
-                    <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
-                      <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
-                        <h3 className="text-sm font-bold text-slate-900">
+                    <div className="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-xl border border-slate-200 dark:border-slate-700/80">
+                      <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:border-slate-700/80">
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50">
                           {editingBlog
                             ? `Chỉnh Sửa Bài Viết: ${editingBlog.title}`
                             : 'Thêm Bài Viết Blog Mới'}
@@ -2718,7 +2718,7 @@ export const AdminModal: React.FC = () => {
                             setEditingBlog(null);
                             setIsAddingBlog(false);
                           }}
-                          className="text-xs font-semibold text-slate-500 hover:text-slate-800"
+                          className="text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-800"
                         >
                           &larr; Quay lại danh sách bài viết
                         </button>
@@ -2727,7 +2727,7 @@ export const AdminModal: React.FC = () => {
                       <form onSubmit={handleSaveBlogModal} className="space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           <div className="sm:col-span-2">
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Tiêu Đề Bài Viết *
                             </label>
                             <input
@@ -2736,12 +2736,12 @@ export const AdminModal: React.FC = () => {
                               value={blogTitle}
                               onChange={(e) => setBlogTitle(e.target.value)}
                               placeholder="VD: Kinh nghiệm chọn lắp điện mặt trời Hybrid..."
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Chuyên Mục *
                             </label>
                             <input
@@ -2750,26 +2750,26 @@ export const AdminModal: React.FC = () => {
                               value={blogCategory}
                               onChange={(e) => setBlogCategory(e.target.value)}
                               placeholder="VD: Kinh Nghiệm Điện Mặt Trời"
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                             />
                           </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Tác Giả
                             </label>
                             <input
                               type="text"
                               value={blogAuthor}
                               onChange={(e) => setBlogAuthor(e.target.value)}
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Ngày Đăng
                             </label>
                             <input
@@ -2777,12 +2777,12 @@ export const AdminModal: React.FC = () => {
                               value={blogPublishedAt}
                               onChange={(e) => setBlogPublishedAt(e.target.value)}
                               placeholder="VD: 03/11/2026"
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                               Thời Gian Đọc
                             </label>
                             <input
@@ -2790,25 +2790,25 @@ export const AdminModal: React.FC = () => {
                               value={blogReadTime}
                               onChange={(e) => setBlogReadTime(e.target.value)}
                               placeholder="VD: 5 phút đọc"
-                              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                             />
                           </div>
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                             Tóm Tắt Ngắn (Hiển thị trên thẻ trượt ngang)
                           </label>
                           <textarea
                             rows={2}
                             value={blogSummary}
                             onChange={(e) => setBlogSummary(e.target.value)}
-                            className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                            className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                             Nội Dung Chi Tiết Bài Viết *
                           </label>
                           <textarea
@@ -2816,19 +2816,19 @@ export const AdminModal: React.FC = () => {
                             required
                             value={blogContent}
                             onChange={(e) => setBlogContent(e.target.value)}
-                            className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                            className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
                             Từ Khóa (Cách nhau bởi dấu phẩy)
                           </label>
                           <input
                             type="text"
                             value={blogTagsText}
                             onChange={(e) => setBlogTagsText(e.target.value)}
-                            className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                            className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                           />
                         </div>
 
@@ -2840,14 +2840,14 @@ export const AdminModal: React.FC = () => {
                           helperText="Bạn có thể tải ảnh từ máy tính / điện thoại hoặc dán đường dẫn link ảnh minh họa cho bài viết."
                         />
 
-                        <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-200">
+                        <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-200 dark:border-slate-700/80">
                           <button
                             type="button"
                             onClick={() => {
                               setEditingBlog(null);
                               setIsAddingBlog(false);
                             }}
-                            className="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-200 hover:bg-slate-300 rounded-md"
+                            className="px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 rounded-md"
                           >
                             Hủy
                           </button>
@@ -2856,8 +2856,8 @@ export const AdminModal: React.FC = () => {
                             disabled={isUploadingImages}
                             className={`px-5 py-2 text-xs font-bold text-white rounded-md flex items-center gap-1.5 ${
                               isUploadingImages
-                                ? 'bg-emerald-400 cursor-not-allowed'
-                                : 'bg-emerald-600 hover:bg-emerald-700'
+                                ? 'bg-sky-400 cursor-not-allowed'
+                                : 'bg-sky-600 hover:bg-sky-700'
                             }`}
                           >
                             <Save className="w-4 h-4" />
@@ -2870,10 +2870,10 @@ export const AdminModal: React.FC = () => {
                     <div>
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                         <div>
-                          <h3 className="text-sm font-bold text-slate-900">
+                          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50">
                             Danh Sách Bài Viết Blog ({blogPosts.length})
                           </h3>
-                          <p className="text-xs text-slate-500">
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
                             Thêm bài viết mới, chỉnh sửa nội dung, cập nhật hình ảnh hoặc xóa bài viết trên thanh trượt Blog:
                           </p>
                         </div>
@@ -2881,7 +2881,7 @@ export const AdminModal: React.FC = () => {
                         <button
                           type="button"
                           onClick={handleOpenAddBlogModal}
-                          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-xs flex items-center gap-1.5"
+                          className="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg shadow-xs flex items-center gap-1.5"
                         >
                           <Plus className="w-4 h-4" />
                           <span>Thêm Bài Viết Mới</span>
@@ -2898,26 +2898,26 @@ export const AdminModal: React.FC = () => {
                           return (
                             <div
                               key={post.id}
-                              className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-emerald-400 transition-colors"
+                              className="p-4 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/90 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-sky-400 transition-colors"
                             >
                               <div className="flex items-start gap-3.5">
                                 {((post.images && post.images[0]) || post.imageUrl) ? (
                                   <img
                                     src={(post.images && post.images[0]) || post.imageUrl}
                                     alt={post.title}
-                                    className="w-20 h-14 rounded-lg object-cover border border-slate-200 shrink-0"
+                                    className="w-20 h-14 rounded-lg object-cover border border-slate-200 dark:border-slate-700/80 shrink-0"
                                   />
                                 ) : (
-                                  <div className="w-20 h-14 rounded-lg bg-emerald-950 text-emerald-200 flex items-center justify-center text-[10px] font-bold shrink-0">
+                                  <div className="w-20 h-14 rounded-lg bg-[#0c4a6e] text-sky-100 flex items-center justify-center text-[10px] font-bold shrink-0">
                                     Blog Solar
                                   </div>
                                 )}
                                 <div>
-                                  <div className="text-xs font-bold text-slate-900">
+                                  <div className="text-xs font-bold text-slate-900 dark:text-slate-50">
                                     {post.title}
                                   </div>
-                                  <div className="text-[11px] text-slate-500 mt-0.5 flex flex-wrap items-center gap-2">
-                                    <span className="font-semibold text-emerald-700">
+                                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 flex flex-wrap items-center gap-2">
+                                    <span className="font-semibold text-sky-700 dark:text-sky-300">
                                       {post.category}
                                     </span>
                                     <span>·</span>
@@ -2925,7 +2925,7 @@ export const AdminModal: React.FC = () => {
                                     <span>·</span>
                                     <span>{post.readTime}</span>
                                     <span>·</span>
-                                    <span className="inline-flex items-center gap-1 text-emerald-800 font-semibold">
+                                    <span className="inline-flex items-center gap-1 text-sky-800 dark:text-sky-200 font-semibold">
                                       <ImageIcon className="w-3 h-3" />
                                       {imgCount} ảnh
                                     </span>
@@ -2937,7 +2937,7 @@ export const AdminModal: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => handleOpenEditBlogModal(post)}
-                                  className="px-3 py-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-md transition-colors flex items-center gap-1"
+                                  className="px-3 py-1.5 text-xs font-semibold text-sky-800 dark:text-sky-200 bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 border border-sky-200 dark:border-sky-800/60 rounded-md transition-colors flex items-center gap-1"
                                 >
                                   <Edit2 className="w-3.5 h-3.5" />
                                   <span>Sửa Bài</span>
@@ -2949,7 +2949,7 @@ export const AdminModal: React.FC = () => {
                                       showNotice(`Đã xóa bài viết "${post.title}"!`);
                                     });
                                   }}
-                                  className="px-3 py-1.5 text-xs font-semibold text-rose-600 hover:text-white hover:bg-rose-600 bg-rose-50 rounded-md transition-colors flex items-center gap-1"
+                                  className="px-3 py-1.5 text-xs font-semibold text-rose-600 hover:text-white hover:bg-rose-600 bg-rose-50 dark:bg-rose-950/40 rounded-md transition-colors flex items-center gap-1"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                   <span>Xóa</span>
@@ -2968,16 +2968,16 @@ export const AdminModal: React.FC = () => {
               {adminActiveTab === 'inquiries' && (
                 <div>
                   <div className="mb-4">
-                    <h3 className="text-sm font-bold text-slate-900">
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50">
                       Yêu Cầu Báo Giá &amp; Khảo Sát Từ Khách Hàng
                     </h3>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       Danh sách khách hàng để lại thông tin trên website:
                     </p>
                   </div>
 
                   {inquiries.length === 0 ? (
-                    <div className="p-8 text-center text-slate-500 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+                    <div className="p-8 text-center text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/80 text-xs">
                       Chưa có yêu cầu báo giá mới nào.
                     </div>
                   ) : (
@@ -2985,15 +2985,15 @@ export const AdminModal: React.FC = () => {
                       {inquiries.map((inq) => (
                         <div
                           key={inq.id}
-                          className="p-4 rounded-xl border border-slate-200 bg-white shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                          className="p-4 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                         >
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="font-bold text-slate-900 text-xs">{inq.customerName}</span>
+                              <span className="font-bold text-slate-900 dark:text-slate-50 text-xs">{inq.customerName}</span>
                               <span className="text-slate-300">·</span>
                               <a
                                 href={`tel:${inq.phone}`}
-                                className="font-mono font-bold text-emerald-700 text-xs hover:underline"
+                                className="font-mono font-bold text-sky-700 dark:text-sky-300 text-xs hover:underline"
                               >
                                 {inq.phone}
                               </a>
@@ -3002,19 +3002,19 @@ export const AdminModal: React.FC = () => {
                             </div>
 
                             {inq.address && (
-                              <div className="text-xs text-slate-600 mt-1">
+                              <div className="text-xs text-slate-600 dark:text-slate-300 mt-1">
                                 <strong>Khu vực:</strong> {inq.address}
                               </div>
                             )}
 
                             {inq.productInterest && (
-                              <div className="text-xs text-emerald-800 font-medium mt-0.5">
+                              <div className="text-xs text-sky-800 dark:text-sky-200 font-medium mt-0.5">
                                 <strong>Quan tâm:</strong> {inq.productInterest}
                               </div>
                             )}
 
                             {inq.note && (
-                              <div className="text-xs text-slate-500 mt-1 bg-slate-50 p-2 rounded-md border border-slate-100">
+                              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-md border border-slate-100 dark:border-slate-800">
                                 &ldquo;{inq.note}&rdquo;
                               </div>
                             )}
@@ -3025,14 +3025,14 @@ export const AdminModal: React.FC = () => {
                               href={`https://zalo.me/${inq.phone}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="px-3 py-1.5 bg-emerald-600 text-white rounded-md text-xs font-semibold hover:bg-emerald-700 transition-colors"
+                              className="px-3 py-1.5 bg-sky-600 text-white rounded-md text-xs font-semibold hover:bg-sky-700 transition-colors"
                             >
                               Nhắn Zalo
                             </a>
                             <select
                               value={inq.status}
                               onChange={(e) => updateInquiryStatus(inq.id, e.target.value as any)}
-                              className="text-xs px-2.5 py-1.5 border border-slate-300 rounded-md bg-slate-50 font-medium"
+                              className="text-xs px-2.5 py-1.5 border border-slate-300 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-800/50 font-medium"
                             >
                               <option value="new">Mới nhận</option>
                               <option value="contacted">Đã liên hệ</option>
@@ -3050,16 +3050,16 @@ export const AdminModal: React.FC = () => {
               {adminActiveTab === 'company' && (
                 <div className="max-w-2xl">
                   <div className="mb-4">
-                    <h3 className="text-sm font-bold text-slate-900">
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50">
                       Cập Nhật Thông Tin Công Ty &amp; Kênh Liên Hệ
                     </h3>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       Nội dung này được hiển thị công khai ở phần giới thiệu, liên hệ và footer:
                     </p>
                   </div>
 
                   {compSaved && (
-                    <div className="mb-4 p-3 bg-emerald-100 text-emerald-800 rounded-lg text-xs font-semibold flex items-center gap-2">
+                    <div className="mb-4 p-3 bg-sky-100 dark:bg-sky-900/50 text-sky-800 dark:text-sky-200 rounded-lg text-xs font-semibold flex items-center gap-2">
                       <Check className="w-4 h-4" />
                       <span>Đã lưu thông tin công ty thành công!</span>
                     </div>
@@ -3067,120 +3067,120 @@ export const AdminModal: React.FC = () => {
 
                   <form onSubmit={handleSaveCompany} className="space-y-4">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
                         Tên Pháp Nhân Công Ty (Bất Biến Theo Giấy Phép)
                       </label>
                       <input
                         type="text"
                         disabled
                         value={companyInfo.legalName}
-                        className="w-full px-3 py-2 text-xs bg-slate-100 border border-slate-300 rounded-md text-slate-600 cursor-not-allowed"
+                        className="w-full px-3 py-2 text-xs bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-md text-slate-600 dark:text-slate-300 cursor-not-allowed"
                       />
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
                           Mã Số Thuế
                         </label>
                         <input
                           type="text"
                           disabled
                           value={companyInfo.taxCode}
-                          className="w-full px-3 py-2 text-xs bg-slate-100 border border-slate-300 rounded-md text-slate-600 font-mono"
+                          className="w-full px-3 py-2 text-xs bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-md text-slate-600 dark:text-slate-300 font-mono"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
                           Người Đại Diện Pháp Luật
                         </label>
                         <input
                           type="text"
                           disabled
                           value={companyInfo.representative}
-                          className="w-full px-3 py-2 text-xs bg-slate-100 border border-slate-300 rounded-md text-slate-600 font-bold"
+                          className="w-full px-3 py-2 text-xs bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-md text-slate-600 dark:text-slate-300 font-bold"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
                           Số Điện Thoại / Zalo Hotline
                         </label>
                         <input
                           type="text"
                           value={compHotline}
                           onChange={(e) => setCompHotline(e.target.value)}
-                          className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md font-mono font-bold text-emerald-800"
+                          className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md font-mono font-bold text-sky-800 dark:text-sky-200"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
                           Email Liên Hệ
                         </label>
                         <input
                           type="email"
                           value={compEmail}
                           onChange={(e) => setCompEmail(e.target.value)}
-                          className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                          className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
                           Tình Trạng Doanh Nghiệp
                         </label>
                         <input
                           type="text"
                           value={compStatus}
                           onChange={(e) => setCompStatus(e.target.value)}
-                          className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                          className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
                         Địa Chỉ Văn Phòng Hoạt Động
                       </label>
                       <input
                         type="text"
                         value={compAddress}
                         onChange={(e) => setCompAddress(e.target.value)}
-                        className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md"
+                        className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
                         Địa Chỉ Kho Tổng (Hiển Thị Kèm Tọa Độ)
                       </label>
                       <input
                         type="text"
                         value={compWarehouseAddress}
                         onChange={(e) => setCompWarehouseAddress(e.target.value)}
-                        className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md font-medium"
+                        className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md font-medium"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
                         Link Bản Đồ Google Maps Kho Tổng
                       </label>
                       <input
                         type="url"
                         value={compWarehouseMapUrl}
                         onChange={(e) => setCompWarehouseMapUrl(e.target.value)}
-                        className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-md font-mono text-emerald-700"
+                        className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-md font-mono text-sky-700 dark:text-sky-300"
                       />
                     </div>
 
                     <button
                       type="submit"
-                      className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg transition-colors shadow-xs"
+                      className="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-lg transition-colors shadow-xs"
                     >
                       Lưu Thay Đổi Thông Tin
                     </button>
@@ -3192,13 +3192,13 @@ export const AdminModal: React.FC = () => {
               {adminActiveTab === 'backup' && (
                 <div className="max-w-4xl space-y-6">
                   {/* Header */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-700/80">
                     <div>
-                      <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                        <Database className="w-5 h-5 text-emerald-600" />
+                      <h3 className="text-base font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
+                        <Database className="w-5 h-5 text-sky-600 dark:text-sky-400" />
                         <span>Sao Lưu &amp; Khôi Phục Dữ Liệu Hệ Thống Chuẩn</span>
                       </h3>
-                      <p className="text-xs text-slate-500 mt-0.5">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                         Quản lý toàn bộ cơ sở dữ liệu (Loại thiết bị, Hãng sản xuất, Sản phẩm, Dự án tiêu biểu, Thông tin công ty &amp; Yêu cầu báo giá) và đồng bộ trực tiếp lên đám mây cho tất cả các máy.
                       </p>
                     </div>
@@ -3213,7 +3213,7 @@ export const AdminModal: React.FC = () => {
                           showNotice('Có lỗi khi đồng bộ đám mây, vui lòng thử lại!');
                         }
                       }}
-                      className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-sm transition-colors shrink-0"
+                      className="px-4 py-2.5 bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-sm transition-colors shrink-0"
                     >
                       <RefreshCw className={`w-4 h-4 ${isSyncingCloud ? 'animate-spin' : ''}`} />
                       <span>
@@ -3223,22 +3223,22 @@ export const AdminModal: React.FC = () => {
                   </div>
 
                   {/* SECTION 1: LIVE SYSTEM DATA SUMMARY & VERCEL BLOB CONNECTION */}
-                  <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 text-white border border-slate-800 shadow-sm space-y-4">
+                  <div className="p-4 sm:p-5 rounded-2xl bg-[#0b2a47] text-white border border-sky-800/70 shadow-sm space-y-4">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                      <span className="text-xs font-bold uppercase tracking-wider text-sky-300">
                         1. Trạng Thái Đồng Bộ (Preview &harr; GitHub &harr; Vercel Blob: ducvinhsolar)
                       </span>
                       <div className="flex flex-wrap items-center gap-2">
                         <span
                           className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-md border ${
                             blobConnected
-                              ? 'text-emerald-300 bg-emerald-950/80 border-emerald-600/60'
+                              ? 'text-sky-200 bg-[#0c4a6e]/85 border-sky-500/60'
                               : 'text-amber-300 bg-amber-950/70 border-amber-600/60'
                           }`}
                         >
                           <span
                             className={`w-2 h-2 rounded-full ${
-                              blobConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
+                              blobConnected ? 'bg-sky-400 animate-pulse' : 'bg-amber-400'
                             }`}
                           />
                           {blobConnected
@@ -3248,7 +3248,7 @@ export const AdminModal: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setShowTokenBox((prev) => !prev)}
-                          className="text-[11px] font-bold px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 transition-colors"
+                          className="text-[11px] font-bold px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 transition-colors"
                         >
                           {showTokenBox ? 'Ẩn cài đặt Token' : 'Kết nối Token Vercel Blob'}
                         </button>
@@ -3261,8 +3261,8 @@ export const AdminModal: React.FC = () => {
                     </p>
 
                     {showTokenBox && (
-                      <div className="p-3.5 rounded-xl bg-slate-800/90 border border-emerald-500/40 space-y-2.5">
-                        <label className="block text-xs font-bold text-emerald-300">
+                      <div className="p-3.5 rounded-xl bg-slate-800/90 border border-sky-500/40 space-y-2.5">
+                        <label className="block text-xs font-bold text-sky-300">
                           Nhập mã DUCVINHSOLAR_READ_WRITE_TOKEN từ Vercel Dashboard (Storage &rarr; ducvinhsolar):
                         </label>
                         <div className="flex flex-col sm:flex-row gap-2">
@@ -3271,7 +3271,7 @@ export const AdminModal: React.FC = () => {
                             value={blobTokenInput}
                             onChange={(e) => setBlobTokenInput(e.target.value)}
                             placeholder="vercel_blob_rw_..."
-                            className="flex-1 px-3 py-2 text-xs font-mono bg-slate-950 text-white border border-slate-700 rounded-lg focus:outline-hidden focus:border-emerald-400"
+                            className="flex-1 px-3 py-2 text-xs font-mono bg-slate-950 text-white border border-slate-700 rounded-lg focus:outline-hidden focus:border-sky-400"
                           />
                           <button
                             type="button"
@@ -3284,7 +3284,7 @@ export const AdminModal: React.FC = () => {
                                 setShowTokenBox(false);
                               }
                             }}
-                            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-extrabold text-xs rounded-lg transition-colors shrink-0"
+                            className="px-4 py-2 bg-sky-500 hover:bg-sky-400 disabled:opacity-50 text-slate-950 font-extrabold text-xs rounded-lg transition-colors shrink-0"
                           >
                             {isSyncingCloud ? 'Đang Kết Nối & Đồng Bộ...' : 'Lưu Token & Đồng Bộ Ngay'}
                           </button>
@@ -3302,7 +3302,7 @@ export const AdminModal: React.FC = () => {
                         <div className="text-[11px] text-slate-300 mt-0.5">Hãng sản xuất</div>
                       </div>
                       <div className="p-3 rounded-xl bg-slate-800/90 border border-slate-700/70">
-                        <div className="text-xl font-extrabold text-emerald-400">{products.length}</div>
+                        <div className="text-xl font-extrabold text-sky-400">{products.length}</div>
                         <div className="text-[11px] text-slate-300 mt-0.5">Sản phẩm</div>
                       </div>
                       <div className="p-3 rounded-xl bg-slate-800/90 border border-slate-700/70">
@@ -3317,16 +3317,16 @@ export const AdminModal: React.FC = () => {
                   </div>
 
                   {/* SECTION 2: EXPORT BACKUP */}
-                  <div className="p-5 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-4">
+                  <div className="p-5 rounded-2xl bg-sky-50/70 dark:bg-sky-950/35 border border-sky-200 dark:border-sky-800/60 space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div>
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-sky-700 dark:text-sky-300">
                           2. Sao Lưu Dữ Liệu Ra File (Backup)
                         </span>
-                        <h4 className="text-sm font-bold text-slate-900 mt-0.5">
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-slate-50 mt-0.5">
                           Xuất toàn bộ dữ liệu hệ thống thành tệp chuẩn (.JSON)
                         </h4>
-                        <p className="text-xs text-slate-600 mt-1">
+                        <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">
                           Bản sao lưu bao gồm đầy đủ: {categories.length} loại thiết bị, {brands.length} hãng sản xuất, {products.length} sản phẩm (kèm toàn bộ hình ảnh &amp; thông số kỹ thuật), {projects.length} dự án tiêu biểu và thông tin công ty.
                         </p>
                       </div>
@@ -3334,7 +3334,7 @@ export const AdminModal: React.FC = () => {
                         <button
                           type="button"
                           onClick={handleExport}
-                          className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-sm transition-colors"
+                          className="px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-sm transition-colors"
                         >
                           <Download className="w-4 h-4" />
                           <span>Tải File Sao Lưu (.JSON)</span>
@@ -3342,9 +3342,9 @@ export const AdminModal: React.FC = () => {
                         <button
                           type="button"
                           onClick={handleCopyBackupJson}
-                          className="px-3.5 py-2.5 bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors"
+                          className="px-3.5 py-2.5 bg-white dark:bg-slate-800/90 hover:bg-sky-100 text-sky-800 dark:text-sky-200 border border-sky-300 dark:border-sky-700/70 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors"
                         >
-                          <Check className={`w-4 h-4 ${copiedBackup ? 'text-emerald-600' : 'text-slate-400'}`} />
+                          <Check className={`w-4 h-4 ${copiedBackup ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400'}`} />
                           <span>{copiedBackup ? 'Đã Sao Chép Mã!' : 'Sao Chép Mã JSON'}</span>
                         </button>
                       </div>
@@ -3352,16 +3352,16 @@ export const AdminModal: React.FC = () => {
                   </div>
 
                   {/* SECTION 3: IMPORT & RESTORE WITH PREVIEW */}
-                  <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
+                  <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div>
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                           3. Khôi Phục Dữ Liệu Từ Bản Sao Lưu (Restore)
                         </span>
-                        <h4 className="text-sm font-bold text-slate-900 mt-0.5">
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-slate-50 mt-0.5">
                           Nhập dữ liệu từ tệp .JSON hoặc dán mã JSON đã lưu
                         </h4>
-                        <p className="text-xs text-slate-500 mt-1">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                           Hệ thống sẽ kiểm tra tính hợp lệ, hiển thị bảng xem trước số lượng mục và tự động đồng bộ lên đám mây cho tất cả các máy cùng cập nhật.
                         </p>
                       </div>
@@ -3380,7 +3380,7 @@ export const AdminModal: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setShowPasteJson((prev) => !prev)}
-                          className="px-3.5 py-2.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-xs rounded-xl transition-colors"
+                          className="px-3.5 py-2.5 bg-white dark:bg-slate-800/90 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 font-bold text-xs rounded-xl transition-colors"
                         >
                           {showPasteJson ? 'Đóng Khung Dán Mã' : 'Dán Mã JSON'}
                         </button>
@@ -3389,8 +3389,8 @@ export const AdminModal: React.FC = () => {
 
                     {/* Optional Paste JSON Box */}
                     {showPasteJson && (
-                      <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-3">
-                        <label className="block text-xs font-bold text-slate-700">
+                      <div className="p-4 rounded-xl bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 space-y-3">
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">
                           Dán nội dung mã JSON sao lưu vào ô bên dưới:
                         </label>
                         <textarea
@@ -3398,7 +3398,7 @@ export const AdminModal: React.FC = () => {
                           value={pastedJsonText}
                           onChange={(e) => setPastedJsonText(e.target.value)}
                           placeholder='{"version": "3.0", "categories": [...], "brands": [...], "products": [...]}'
-                          className="w-full px-3 py-2 text-xs font-mono bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600"
+                          className="w-full px-3 py-2 text-xs font-mono bg-slate-50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:border-sky-600"
                         />
                         <div className="flex justify-end gap-2">
                           <button
@@ -3407,7 +3407,7 @@ export const AdminModal: React.FC = () => {
                               setShowPasteJson(false);
                               setPastedJsonText('');
                             }}
-                            className="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900"
+                            className="px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
                           >
                             Hủy
                           </button>
@@ -3420,7 +3420,7 @@ export const AdminModal: React.FC = () => {
                               }
                               parseAndPreviewBackup(pastedJsonText.trim(), 'Mã JSON dán trực tiếp');
                             }}
-                            className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg transition-colors"
+                            className="px-4 py-1.5 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-lg transition-colors"
                           >
                             Kiểm Tra Nội Dung JSON
                           </button>
@@ -3430,18 +3430,18 @@ export const AdminModal: React.FC = () => {
 
                     {/* BACKUP PREVIEW & RESTORE CONFIRMATION PANEL */}
                     {backupPreview && (
-                      <div className="p-4 sm:p-5 rounded-xl bg-white border-2 border-emerald-500 shadow-md space-y-4 animate-in fade-in duration-150">
-                        <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
+                      <div className="p-4 sm:p-5 rounded-xl bg-white dark:bg-slate-800/90 border-2 border-sky-500 shadow-md space-y-4 animate-in fade-in duration-150">
+                        <div className="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
                           <div>
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-800">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-sky-100 dark:bg-sky-900/50 text-sky-800 dark:text-sky-200">
                               <Check className="w-3.5 h-3.5" />
                               Tệp sao lưu hợp lệ — Sẵn sàng khôi phục
                             </span>
-                            <h5 className="text-sm font-bold text-slate-900 mt-1.5">
+                            <h5 className="text-sm font-bold text-slate-900 dark:text-slate-50 mt-1.5">
                               Nguồn: {backupPreview.fileName}
                             </h5>
                             {backupPreview.exportedAt && (
-                              <p className="text-[11px] text-slate-500 mt-0.5">
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                                 Thời gian tạo bản sao lưu:{' '}
                                 {new Date(backupPreview.exportedAt).toLocaleString('vi-VN')}
                               </p>
@@ -3458,41 +3458,41 @@ export const AdminModal: React.FC = () => {
 
                         {/* Counts found in backup */}
                         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                          <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                            <div className="text-base font-extrabold text-slate-900">
+                          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 text-center">
+                            <div className="text-base font-extrabold text-slate-900 dark:text-slate-50">
                               {backupPreview.categoriesCount}
                             </div>
-                            <div className="text-[11px] text-slate-500">Loại thiết bị</div>
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400">Loại thiết bị</div>
                           </div>
-                          <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                            <div className="text-base font-extrabold text-slate-900">
+                          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 text-center">
+                            <div className="text-base font-extrabold text-slate-900 dark:text-slate-50">
                               {backupPreview.brandsCount}
                             </div>
-                            <div className="text-[11px] text-slate-500">Hãng sản xuất</div>
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400">Hãng sản xuất</div>
                           </div>
-                          <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                            <div className="text-base font-extrabold text-emerald-600">
+                          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 text-center">
+                            <div className="text-base font-extrabold text-sky-600 dark:text-sky-400">
                               {backupPreview.productsCount}
                             </div>
-                            <div className="text-[11px] text-slate-500">Sản phẩm</div>
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400">Sản phẩm</div>
                           </div>
-                          <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                            <div className="text-base font-extrabold text-sky-600">
+                          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 text-center">
+                            <div className="text-base font-extrabold text-sky-600 dark:text-sky-400">
                               {backupPreview.projectsCount}
                             </div>
-                            <div className="text-[11px] text-slate-500">Dự án tiêu biểu</div>
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400">Dự án tiêu biểu</div>
                           </div>
-                          <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-center col-span-2 sm:col-span-1">
+                          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 text-center col-span-2 sm:col-span-1">
                             <div className="text-base font-extrabold text-purple-600">
                               {backupPreview.inquiriesCount}
                             </div>
-                            <div className="text-[11px] text-slate-500">Yêu cầu báo giá</div>
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400">Yêu cầu báo giá</div>
                           </div>
                         </div>
 
                         {/* Restore Mode Selector */}
                         <div className="space-y-2">
-                          <label className="block text-xs font-bold text-slate-800">
+                          <label className="block text-xs font-bold text-slate-800 dark:text-slate-100">
                             Chọn phương thức khôi phục dữ liệu:
                           </label>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -3501,14 +3501,14 @@ export const AdminModal: React.FC = () => {
                               onClick={() => setRestoreMode('replace')}
                               className={`p-3 rounded-xl border text-left transition-all ${
                                 restoreMode === 'replace'
-                                  ? 'border-emerald-600 bg-emerald-50/70 ring-1 ring-emerald-600'
-                                  : 'border-slate-200 hover:border-slate-300 bg-white'
+                                  ? 'border-sky-600 bg-sky-50/70 dark:bg-sky-950/35 ring-1 ring-sky-600'
+                                  : 'border-slate-200 dark:border-slate-700/80 hover:border-slate-300 bg-white dark:bg-slate-800/90'
                               }`}
                             >
-                              <div className="text-xs font-bold text-slate-900">
+                              <div className="text-xs font-bold text-slate-900 dark:text-slate-50">
                                 Khôi phục chuẩn (Ghi đè toàn bộ)
                               </div>
-                              <div className="text-[11px] text-slate-500 mt-0.5">
+                              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                                 Đặt hệ thống giống 100% với tệp sao lưu này và đồng bộ cho mọi máy.
                               </div>
                             </button>
@@ -3517,14 +3517,14 @@ export const AdminModal: React.FC = () => {
                               onClick={() => setRestoreMode('merge')}
                               className={`p-3 rounded-xl border text-left transition-all ${
                                 restoreMode === 'merge'
-                                  ? 'border-emerald-600 bg-emerald-50/70 ring-1 ring-emerald-600'
-                                  : 'border-slate-200 hover:border-slate-300 bg-white'
+                                  ? 'border-sky-600 bg-sky-50/70 dark:bg-sky-950/35 ring-1 ring-sky-600'
+                                  : 'border-slate-200 dark:border-slate-700/80 hover:border-slate-300 bg-white dark:bg-slate-800/90'
                               }`}
                             >
-                              <div className="text-xs font-bold text-slate-900">
+                              <div className="text-xs font-bold text-slate-900 dark:text-slate-50">
                                 Gộp bổ sung (Giữ dữ liệu cũ + Thêm mới)
                               </div>
-                              <div className="text-[11px] text-slate-500 mt-0.5">
+                              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                                 Giữ nguyên các mục đang có và gộp thêm sản phẩm, hãng, dự án từ tệp.
                               </div>
                             </button>
@@ -3535,7 +3535,7 @@ export const AdminModal: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => setBackupPreview(null)}
-                            className="px-4 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+                            className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors"
                           >
                             Hủy Bỏ
                           </button>
@@ -3543,7 +3543,7 @@ export const AdminModal: React.FC = () => {
                             type="button"
                             disabled={isSyncingCloud}
                             onClick={handleConfirmRestore}
-                            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-sm transition-colors"
+                            className="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-sm transition-colors"
                           >
                             <RefreshCw className={`w-4 h-4 ${isSyncingCloud ? 'animate-spin' : ''}`} />
                             <span>
@@ -3558,7 +3558,7 @@ export const AdminModal: React.FC = () => {
                   </div>
 
                   {/* SECTION 4: FACTORY RESET */}
-                  <div className="p-5 rounded-2xl bg-rose-50/80 border border-rose-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="p-5 rounded-2xl bg-rose-50/80 border border-rose-200 dark:border-rose-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <span className="text-[11px] font-bold uppercase tracking-wider text-rose-700">
                         4. Đặt Lại Dữ Liệu Mặc Định Ban Đầu
@@ -3592,13 +3592,13 @@ export const AdminModal: React.FC = () => {
         )}
 
         {/* Modal Bottom Footer */}
-        <div className="px-6 py-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
+        <div className="px-6 py-3 border-t border-slate-200 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
           <span>
             Đức Vinh Solar Management v2.0 · MST: {companyInfo.taxCode}
           </span>
           <button
             onClick={() => setIsAdminModalOpen(false)}
-            className="px-3.5 py-1 text-xs font-medium text-slate-600 hover:text-slate-900"
+            className="px-3.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
           >
             Đóng
           </button>

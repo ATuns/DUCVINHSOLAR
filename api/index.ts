@@ -703,6 +703,30 @@ export default async function apiHandler(req: any, res: any) {
         }
       }
 
+      const projects = Array.isArray(state.projects) ? state.projects : [];
+      for (const proj of projects) {
+        if (!proj) continue;
+        const projSlug = toSitemapSlug(proj.title || '') || toSitemapSlug(proj.id || '');
+        if (!projSlug) continue;
+        const projUrl = `${siteOrigin}/du-an-tieu-bieu/${projSlug}`;
+        if (!seenLocs.has(projUrl)) {
+          seenLocs.add(projUrl);
+          entries.push({ loc: projUrl, priority: '0.80', changefreq: 'weekly' });
+        }
+      }
+
+      const blogPosts = Array.isArray(state.blogPosts) ? state.blogPosts : [];
+      for (const post of blogPosts) {
+        if (!post) continue;
+        const postSlug = toSitemapSlug(post.title || '') || toSitemapSlug(post.id || '');
+        if (!postSlug) continue;
+        const postUrl = `${siteOrigin}/blog-bai-viet/${postSlug}`;
+        if (!seenLocs.has(postUrl)) {
+          seenLocs.add(postUrl);
+          entries.push({ loc: postUrl, priority: '0.80', changefreq: 'weekly' });
+        }
+      }
+
       const xmlLines = [
         '<?xml version="1.0" encoding="UTF-8"?>',
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',

@@ -15,6 +15,19 @@
     <link rel="apple-touch-icon" href="/assets/aistudio/image_e09e7ab6.png" />
     <link rel="canonical" href="https://www.solarducvinh.com" />
     <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
+    <meta name="theme-color" content="#f9fcff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#071526" media="(prefers-color-scheme: dark)" />
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('dvs_theme');
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var isDark = saved ? saved === 'dark' : prefersDark;
+          document.documentElement.classList.toggle('dark', isDark);
+          document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+        } catch (e) {}
+      })();
+    </script>
 
     <!-- Open Graph / Facebook / Zalo Share -->
     <meta property="og:type" content="website" />
@@ -124,7 +137,7 @@
     }
     </script>
   </head>
-  <body class="bg-slate-50 text-slate-800 antialiased selection:bg-emerald-500 selection:text-white">
+  <body class="bg-[#f9fcff] dark:bg-[#071526] text-slate-800 dark:text-sky-50 antialiased selection:bg-sky-500 selection:text-white transition-colors duration-300">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
