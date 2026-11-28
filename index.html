@@ -15,16 +15,15 @@
     <link rel="apple-touch-icon" href="/assets/aistudio/image_e09e7ab6.png" />
     <link rel="canonical" href="https://www.solarducvinh.com" />
     <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
-    <meta name="theme-color" content="#f9fcff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#071526" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light only" />
+    <meta name="supported-color-schemes" content="light" />
+    <meta name="theme-color" content="#FFFFFF" />
     <script>
       (function () {
         try {
-          var saved = localStorage.getItem('dvs_theme');
-          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-          var isDark = saved ? saved === 'dark' : prefersDark;
-          document.documentElement.classList.toggle('dark', isDark);
-          document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+          document.documentElement.classList.remove('dark');
+          document.documentElement.style.colorScheme = 'light';
+          localStorage.setItem('dvs_theme', 'light');
         } catch (e) {}
       })();
     </script>

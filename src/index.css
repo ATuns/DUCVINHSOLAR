@@ -24,7 +24,7 @@
 }
 
 :root {
-  color-scheme: light;
+  color-scheme: light only;
   --surface-canvas: #FFFFFF;
   --surface-glass: #FFFFFF;
   --surface-glass-hover: #FEFBF3;
@@ -45,19 +45,22 @@
 @layer base {
   html {
     font-family: var(--font-sans);
+    color-scheme: light only !important;
+    forced-color-adjust: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    background-color: #FFFFFF;
-    color: #363636;
+    background-color: #FFFFFF !important;
+    color: #363636 !important;
   }
 
   body, button, input, select, textarea, code, pre, kbd, samp {
     font-family: var(--font-sans);
+    color-scheme: light only;
   }
 
   body {
-    background-color: #FFFFFF;
+    background-color: #FFFFFF !important;
     color: #363636;
     overflow-x: clip;
     max-width: 100%;
